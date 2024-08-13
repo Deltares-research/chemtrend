@@ -1,7 +1,12 @@
 import databases
 import sqlalchemy
+import configparser as confpars
 
-DATABASE_URL = "postgresql://USER:PASSWORD@c-oet10550:5432/waterkwaliteit"
+confpars = confpars.RawConfigParser()
+configFilePath = r"config.txt"
+confpars.read_file(open(configFilePath))
+
+DATABASE_URL = confpars.get("database", "DATABASE_URL")
 
 
 async def setup_connection(database):
