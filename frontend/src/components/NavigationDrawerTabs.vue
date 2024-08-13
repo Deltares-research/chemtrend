@@ -10,7 +10,10 @@
     <v-card-text>
       <v-tabs-window v-model="tab">
         <v-tabs-window-item value="substances">
-          Substances
+          <v-select
+            label="Select substance"
+            :items="substanceList"
+          ></v-select>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="layers">
@@ -36,7 +39,8 @@ export default {
 
   data () {
     return {
-      tab: null
+      tab: null,
+      substanceList: ['Substance A', 'Substance B', 'Substance C', 'Substance D', 'Substance E', 'Substance F']
     }
   }
 }
