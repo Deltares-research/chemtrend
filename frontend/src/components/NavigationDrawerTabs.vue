@@ -23,7 +23,7 @@
               <v-row>
                 <v-autocomplete
                   label="Select substance"
-                  :items="substanceList"
+                  :items="substances"
                   class="autocomplete-list"
                 ></v-autocomplete>
               </v-row>
@@ -32,7 +32,7 @@
                   <v-expansion-panel>
                     <v-expansion-panel-title>All substances</v-expansion-panel-title>
                     <v-expansion-panel-text>
-                      <v-list :items="substanceList"></v-list>
+                      <v-list :items="substances"></v-list>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
@@ -58,14 +58,24 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'NavigationDrawerTabs',
 
   data () {
     return {
-      tab: null,
-      substanceList: ['Substance A', 'Substance B', 'Substance C', 'Substance D', 'Substance E', 'Substance F']
+      tab: null
     }
+  },
+  methods: {
+    ...mapActions(['setSubstances'])
+  },
+  computed: {
+    ...mapGetters(['substances'])
+  },
+  created () {
+    this.setSubstances(this.substances)
   }
 }
 </script>
