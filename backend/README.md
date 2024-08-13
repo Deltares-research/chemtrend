@@ -8,5 +8,5 @@ bash
 ```
 cd app
 poetry install
-fastapi dev main.py
+fastapi dev ./chemtrend/main.py
 ```
