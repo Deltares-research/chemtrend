@@ -21,7 +21,7 @@ import { MapboxMap, MapboxNavigationControl } from '@studiometa/vue-mapbox-gl'
 export default {
   data () {
     return {
-      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN
+      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN,
     }
   },
   components: {
