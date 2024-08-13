@@ -29,7 +29,30 @@ export default {
     MapboxNavigationControl
   },
   mounted () {
-    console.log(process.env.VUE_APP_MAPBOX_TOKEN)
+    this.map = this.$refs.mapboxmap.map
+    this.map.on('load', this.initializeData)
+  },
+  methods: {
+    initializeData () {
+      this.addLocations()
+    },
+    addLocations() {
+      this.map.addLayer({
+        id: 'locations',
+        type: 'circle',
+        source: {
+          data: {
+            type: 'geojson',
+            data: `${process.env.VUE_APP_SERVER_URL}/locations_geojson/`
+          }
+        }
+        paint: {
+          'circle-color': '#4F5759',
+          'circle-stroke-color': '#4F5759',
+          'circle-radius': 2
+        },
+      })
+    }
   }
 }
 
