@@ -1,6 +1,7 @@
 <template>
   <v-app>
-    <navigation-bar />
+    <navigation-bar @toggle-drawer="drawer = !drawer"  />
+    <v-navigation-drawer  v-model="drawer" app />
     <v-main>
       <map-component />
     </v-main>
@@ -16,6 +17,11 @@ export default {
   components: {
     NavigationBar,
     MapComponent
+  },
+  data () {
+    return {
+      drawer: false
+    }
   }
 }
 </script>
