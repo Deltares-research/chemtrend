@@ -6,7 +6,7 @@ Either via compose or run locally. First you need the Postgres container up and 
 
 bash
 ```
-cd app
+cd backend
 poetry install
 fastapi dev ./chemtrend/main.py
 ```
