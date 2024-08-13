@@ -4,8 +4,10 @@
         ref="mapboxmap"
         class="map"
         :access-token="mapboxToken"
-        map-style="mapbox://styles/mapbox/standard"
+        map-style="mapbox://styles/mapbox/light-v11"
         :preserveDrawingBuffer="true"
+        :center="[4.7, 52.2]"
+        :zoom="7"
       >
       <MapboxNavigationControl :visualizePitch="true" />
     </mapbox-map>
