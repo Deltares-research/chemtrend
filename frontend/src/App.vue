@@ -16,7 +16,7 @@
 import NavigationBar from '@/components/NavigationBar'
 import MapComponent from '@/components/MapComponent.vue'
 import NavigationDrawerTabs from '@/components/NavigationDrawerTabs.vue'
-import { mapMutations, mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'App',
@@ -31,12 +31,12 @@ export default {
       tab: null
     }
   },
-  mounted() {
+  mounted () {
     // Load all data when website is mounted
     this.loadLocations()
   },
   methods: {
-    ...mapActions([loadLocations]),
+    ...mapActions(['loadLocations']),
     toggleDrawer () {
       this.drawer = !this.drawer
     }
