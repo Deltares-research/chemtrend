@@ -6,6 +6,8 @@
         :access-token="mapboxToken"
         map-style="mapbox://styles/mapbox/standard"
         :preserveDrawingBuffer="true"
+        :center="mapCenter"
+        :zoom="mapZoom"
       >
       <MapboxNavigationControl :visualizePitch="true" />
     </mapbox-map>
@@ -19,7 +21,9 @@ import { MapboxMap, MapboxNavigationControl } from '@studiometa/vue-mapbox-gl'
 export default {
   data () {
     return {
-      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN
+      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN,
+      mapCenter: [5.2913, 52.1326],
+      mapZoom: 7
     }
   },
   components: {
