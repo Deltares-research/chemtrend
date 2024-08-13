@@ -1,12 +1,13 @@
 <template>
   <v-app>
-    <navigation-bar @toggle-drawer="toggleDrawer" />
     <v-main>
+    <navigation-bar @toggle-drawer="toggleDrawer" />
       <v-navigation-drawer v-model="drawer" persistent width="361">
         <navigation-drawer-tabs />
       </v-navigation-drawer>
-      <div class="map-container">
-        <map-component />
+      <div class="d-flex flex-column mb-6 content">
+        <map-component class="flex-grow-1"/>
+        <router-view></router-view>
       </div>
     </v-main>
   </v-app>
@@ -45,11 +46,8 @@ export default {
 </script>
 
 <style>
-.map-container {
-  position: fixed;
-  top: 64px;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.content {
+  max-height: 100vh;
+  height: 100%;
 }
 </style>

@@ -85,6 +85,7 @@ export default {
   methods: {
     initializeData () {
       this.addLocations()
+      this.interactionMap()
     },
     addLocations () {
       this.map.addLayer({
@@ -101,6 +102,17 @@ export default {
           'circle-stroke-width': 1,
           'circle-radius': 5
         }
+      })
+    },
+    interactionMap () {
+      this.map.on('click', e => {
+        // TODO: do we want to ease to a polygon or specific zoom level?
+        this.map.easeTo({
+          center: e.lngLat,
+          zoom: 12,
+          duration: 800
+        })
+        this.$router.push('/trends')
       })
     }
   }
