@@ -18,55 +18,55 @@
 // import mapboxgl from 'mapbox-gl'
 import { MapboxMap, MapboxNavigationControl } from '@studiometa/vue-mapbox-gl'
 
-const testLocations = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        coordinates: [
-          5.145777368152608,
-          52.05497715243345
-        ],
-        type: 'Point'
-      }
-    },
-    {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        coordinates: [
-          5.210791458255784,
-          51.922306228142446
-        ],
-        type: 'Point'
-      }
-    },
-    {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        coordinates: [
-          5.055267556439617,
-          52.00478114570629
-        ],
-        type: 'Point'
-      }
-    },
-    {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        coordinates: [
-          5.343369174823067,
-          52.010273981845444
-        ],
-        type: 'Point'
-      }
-    }
-  ]
-}
+// const testLocations = {
+//   type: 'FeatureCollection',
+//   features: [
+//     {
+//       type: 'Feature',
+//       properties: {},
+//       geometry: {
+//         coordinates: [
+//           5.145777368152608,
+//           52.05497715243345
+//         ],
+//         type: 'Point'
+//       }
+//     },
+//     {
+//       type: 'Feature',
+//       properties: {},
+//       geometry: {
+//         coordinates: [
+//           5.210791458255784,
+//           51.922306228142446
+//         ],
+//         type: 'Point'
+//       }
+//     },
+//     {
+//       type: 'Feature',
+//       properties: {},
+//       geometry: {
+//         coordinates: [
+//           5.055267556439617,
+//           52.00478114570629
+//         ],
+//         type: 'Point'
+//       }
+//     },
+//     {
+//       type: 'Feature',
+//       properties: {},
+//       geometry: {
+//         coordinates: [
+//           5.343369174823067,
+//           52.010273981845444
+//         ],
+//         type: 'Point'
+//       }
+//     }
+//   ]
+// }
 
 export default {
   data () {
@@ -93,8 +93,8 @@ export default {
         type: 'circle',
         source: {
           type: 'geojson',
-          // data: `${process.env.VUE_APP_SERVER_URL}/locations_geojson/`
-          data: testLocations
+          data: `${process.env.VUE_APP_SERVER_URL}/locations/`
+          // data: testLocations
         },
         paint: {
           'circle-color': 'red',
