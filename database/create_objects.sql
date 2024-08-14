@@ -23,4 +23,7 @@ select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_As
 -- grant access to all users
 GRANT ALL ON all tables in schema chemtrend TO vries_cy;
 GRANT ALL ON all tables in schema chemtrend TO schoonve;
+GRANT ALL ON all tables in schema chemtrend TO loos_sb;
+GRANT ALL ON all tables in schema chemtrend TO rodrigue;
+GRANT ALL ON all tables in schema chemtrend TO ouwerkerk;
 
