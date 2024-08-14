@@ -7,3 +7,8 @@ class Substance(BaseModel):
     substance_code: str
     substance_description: str
     cas: str
+
+
+# class Location(BaseModel):
+#     location_code: str
+#     geom: Json
