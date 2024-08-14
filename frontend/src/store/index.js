@@ -2,28 +2,32 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    locations: []
+    substances: [{
+      substance_id: '',
+      substance_description: ''
+    }]
   },
   getters: {
-    locations (state) {
-      return state.locations
+    substances (state) {
+      return state.substances
     }
   },
   mutations: {
-    setLocations (state, locations) {
-      state.locations = locations
+    SET_SUBSTANCES (state, data) {
+      state.substances = data
     }
   },
   actions: {
-    loadLocations (store) {
-      // const url = `${process.env.VUE_APP_SERVER_URL}/locations/`
-      // fetch(url)
-      //   .then(res => {
-      //     return res.json()
-      //   })
-      //   .then(response => {
-      //     store.commit('setLocations', response)
-      //   })
+    loadSubstances (store) {
+      const url = `${process.env.VUE_APP_SERVER_URL}/substances/`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          console.log(response)
+          store.commit('SET_SUBSTANCES', response)
+        })
     }
   },
   modules: {
