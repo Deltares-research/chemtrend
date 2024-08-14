@@ -2,7 +2,10 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    substances: ['Substance A', 'Substance B', 'Substance C', 'Substance D', 'Substance E', 'Substance F']
+    substances: [{
+      substance_id: '',
+      substance_description: ''
+    }]
   },
   getters: {
     substances (state) {
@@ -15,19 +18,17 @@ export default createStore({
     }
   },
   actions: {
-    setSubstances ({ commit }, substances) {
-      commit('SET_SUBSTANCES', substances)
+    loadSubstances (store) {
+      const url = `${process.env.VUE_APP_SERVER_URL}/substances/`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          console.log(response)
+          store.commit('SET_SUBSTANCES', response)
+        })
     }
-    // loadSubstances (store) {
-    // const url = `${process.env.VUE_APP_SERVER_URL}/substances/`
-    // fetch(url)
-    //   .then(res => {
-    //     return res.json()
-    //   })
-    //   .then(response => {
-    //     store.commit('setSubstances', response)
-    //   })
-    // }
   },
   modules: {
   }

@@ -18,27 +18,7 @@
     <v-card-text>
       <v-tabs-window v-model="tab">
         <v-tabs-window-item value="substances" class="tab-content">
-          <div class="content-wrapper">
-            <v-col>
-              <v-row>
-                <v-autocomplete
-                  label="Select substance"
-                  :items="substances"
-                  class="autocomplete-list"
-                ></v-autocomplete>
-              </v-row>
-              <v-row>
-                <v-expansion-panels flat>
-                  <v-expansion-panel>
-                    <v-expansion-panel-title>All substances</v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <v-list :items="substances"></v-list>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </v-row>
-            </v-col>
-          </div>
+          <substance-tab />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="layers">
@@ -58,7 +38,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import SubstanceTab from '@/components/tabs/SubstanceTab.vue'
 
 export default {
   name: 'NavigationDrawerTabs',
@@ -68,14 +48,8 @@ export default {
       tab: null
     }
   },
-  methods: {
-    ...mapActions(['setSubstances'])
-  },
-  computed: {
-    ...mapGetters(['substances'])
-  },
-  created () {
-    this.setSubstances(this.substances)
+  components: {
+    SubstanceTab
   }
 }
 </script>
