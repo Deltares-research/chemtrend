@@ -1,0 +1,2 @@
+[database]
+DATABASE_URL = postgresql://USER:PASSWORD@c-oet10550:5432/waterkwaliteit
