@@ -9,7 +9,7 @@
           item-value="substance_id"
           item-title="substance_description"
           :return-object="true"
-          @update:model-value="setSubstance"
+          v-model="substance"
         ></v-autocomplete>
         </v-row>
         <v-row>
@@ -28,18 +28,25 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import _ from 'lodash'
 
 export default {
   name: 'SubstanceTab',
   methods: {
-    ...mapActions(['loadSubstances', 'loadFilteredLocations']),
-    setSubstance (substance) {
-      this.$route.query = { substance: substance.substance_id }
-      this.$router.push(this.$route)
-    }
+    ...mapActions(['loadSubstances', 'loadFilteredLocations'])
   },
   computed: {
-    ...mapGetters(['substances'])
+    ...mapGetters(['substances']),
+    substance: {
+      get () {
+        const subId = _.get(this.$route, 'query.substance')
+        return this.substances.find(substance => substance.substance_id === subId)
+      },
+      set (substance) {
+        this.$route.query = { substance: substance.substance_id }
+        this.$router.push(this.$route)
+      }
+    }
   },
   created () {
     this.loadSubstances()

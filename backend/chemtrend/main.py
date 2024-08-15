@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from chemtrend.models import Substance
 from chemtrend.database import metadata, database
-from chemtrend.mockup_data import test_subset_locations
+from chemtrend.mockup_data import test_subset_locations, test_waterbodies
 
 app = FastAPI()
 app.add_middleware(
@@ -63,14 +63,32 @@ async def get_locations_for_substance(substance_id: int):
     # TODO: Wouter do your magic :)
     return test_subset_locations
 
+@app.get("/waterbodies/", tags=["Waterbodies"])
+async def get_all_waterbodies():
+    # TODO: Magic again
+    return test_waterbodies
+
+
 
 # @app.get("/waterbodies/", tags=["Waterbodies"])
-# async def list_waterbodies_geojson():
-#     query = waterbodies.select()
-#     await database.connect()
-#     # TODO: should be fixed in the DB? (fetchall gives an array with: [{geojson: <THE PART I NEED>}])
-#     result = await database.fetch_one(query)
-#     return result.geojson
+# async def list_drinkwater_segments_geojson(
+#     longitude: Optional[float] = None, latitude: Optional[float] = None
+# ):
+#     # TODO: for now I used shapely to check if a coordinate falls 
+#     # inside one of the polygons.
+#     print(longitude, latitude)
+#     features = gpd.GeoDataFrame.from_features(test_selected_areas)
+#     # features = gpd.read_file(str(test_selected_areas), driver="GEOJSON")
+#     print(features)
+#     df = pd.DataFrame({'longitude': [latitude], 'latitude': [longitude]})
+#     point = gpd.GeoDataFrame(
+#         df, geometry=gpd.points_from_xy(df.longitude, df.latitude)
+#     )
+#     result = gpd.sjoin(point, features, op='within')
+#     print(result)
+#     return result
+
+
 
 
 
