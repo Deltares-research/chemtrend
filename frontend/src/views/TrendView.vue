@@ -4,6 +4,10 @@
   </div>
 </template>
 
+<script>
+
+</script>
+
 <style>
 .trend-view {
   height: 50vh;

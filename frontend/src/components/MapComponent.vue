@@ -5,86 +5,80 @@
         class='map'
         :access-token='mapboxToken'
         map-style='mapbox://styles/mapbox/light-v11'
-        :preserveDrawingBuffer='true'
         :center='[4.7, 52.2]'
         :zoom='7'
       >
       <MapboxNavigationControl :visualizePitch='true' />
+      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup">
+        <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
+      </MapboxPopup>
     </mapbox-map>
     </div>
 </template>
 
 <script>
 // import mapboxgl from 'mapbox-gl'
-import { MapboxMap, MapboxNavigationControl } from '@studiometa/vue-mapbox-gl'
+import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
+import DataTable from '@/components/DataTable.vue'
 
-// const testLocations = {
-//   type: 'FeatureCollection',
-//   features: [
-//     {
-//       type: 'Feature',
-//       properties: {},
-//       geometry: {
-//         coordinates: [
-//           5.145777368152608,
-//           52.05497715243345
-//         ],
-//         type: 'Point'
-//       }
-//     },
-//     {
-//       type: 'Feature',
-//       properties: {},
-//       geometry: {
-//         coordinates: [
-//           5.210791458255784,
-//           51.922306228142446
-//         ],
-//         type: 'Point'
-//       }
-//     },
-//     {
-//       type: 'Feature',
-//       properties: {},
-//       geometry: {
-//         coordinates: [
-//           5.055267556439617,
-//           52.00478114570629
-//         ],
-//         type: 'Point'
-//       }
-//     },
-//     {
-//       type: 'Feature',
-//       properties: {},
-//       geometry: {
-//         coordinates: [
-//           5.343369174823067,
-//           52.010273981845444
-//         ],
-//         type: 'Point'
-//       }
-//     }
-//   ]
-// }
+const initialData = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: []
+      }
+    }
+  ]
+}
 
 export default {
   data () {
     return {
-      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN
+      mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN,
+      popupLngLat: { lng: 0, lat: 0 },
+      popupHeaders: [
+        {
+          text: 'Properties',
+          align: 'left',
+          sortable: false,
+          value: 'name',
+          class: 'primary'
+        },
+        {
+          style: 'font-color: blue',
+          align: 'left',
+          sortable: false,
+          value: 'value',
+          class: 'primary'
+        }
+      ],
+      popupItems: []
     }
   },
   components: {
     MapboxMap,
-    MapboxNavigationControl
+    MapboxNavigationControl,
+    MapboxPopup,
+    DataTable
+  },
+  watch: {
+    '$route.query.substance' (val, oldVal) {
+      console.log(val, oldVal)
+      this.updateFilteredLocations()
+    }
   },
   mounted () {
     this.map = this.$refs.mapboxmap.map
     this.map.on('load', this.initializeData)
+    console.log(this.$router, this.$route)
   },
   methods: {
     initializeData () {
       this.addLocations()
+      this.addFilteredLocations()
       this.interactionMap()
     },
     addLocations () {
@@ -94,15 +88,80 @@ export default {
         source: {
           type: 'geojson',
           data: `${process.env.VUE_APP_SERVER_URL}/locations/`
-          // data: testLocations
         },
         paint: {
-          'circle-color': 'red',
+          'circle-color': 'hsl(240, 3%, 94%)',
           'circle-stroke-color': '#4F5759',
           'circle-stroke-width': 1,
           'circle-radius': 5
         }
       })
+
+      this.map.on('mouseenter', 'locations', (e) => {
+        // Change the cursor style as a UI indicator.
+        this.map.getCanvas().style.cursor = 'pointer'
+
+        const properties = e.features[0].properties
+        const tableItems = []
+        Object.entries(properties).forEach(val => {
+          tableItems.push({
+            value: val[1],
+            name: val[0]
+          })
+        })
+        this.popupItems = tableItems
+
+        this.popupLngLat = e.lngLat
+      })
+
+      this.map.on('mouseleave', 'locations', () => {
+        this.popupItems = []
+        this.map.getCanvas().style.cursor = ''
+      })
+    },
+
+    addFilteredLocations () {
+      this.map.addLayer({
+        id: 'filtered-locations',
+        type: 'circle',
+        source: {
+          type: 'geojson',
+          data: initialData
+        },
+        paint: {
+          'circle-color': [
+            'case',
+            [
+              '<',
+              ['get', 'trend'],
+              0
+            ],
+            'hsl(0, 89%, 50%)',
+            [
+              '>',
+              ['get', 'trend'],
+              0
+            ],
+            'hsl(116, 88%, 59%)',
+            [
+              '==',
+              ['get', 'trend'],
+              0
+            ],
+            'black',
+            'black'
+          ],
+          'circle-stroke-color': '#4F5759',
+          'circle-stroke-width': 1,
+          'circle-radius': 5
+        }
+      })
+    },
+
+    updateFilteredLocations () {
+      console.log(this.$route.query.substance)
+      this.map.getSource('filtered-locations')
+        .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
     },
     interactionMap () {
       this.map.on('click', e => {
@@ -112,7 +171,8 @@ export default {
           zoom: 12,
           duration: 800
         })
-        this.$router.push('/trends')
+        this.$route.path = '/trends'
+        this.$router.push(this.$route)
       })
     }
   }

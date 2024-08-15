@@ -9,6 +9,7 @@
           item-value="substance_id"
           item-title="substance_description"
           :return-object="true"
+          @update:model-value="setSubstance"
         ></v-autocomplete>
         </v-row>
         <v-row>
@@ -31,7 +32,11 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'SubstanceTab',
   methods: {
-    ...mapActions(['loadSubstances'])
+    ...mapActions(['loadSubstances', 'loadFilteredLocations']),
+    setSubstance (substance) {
+      this.$route.query = { substance: substance.substance_id }
+      this.$router.push(this.$route)
+    }
   },
   computed: {
     ...mapGetters(['substances'])
