@@ -37,6 +37,44 @@ from (
 group by location_code, parameter_code, color, geom
 ;
 
+-- TO DO: function o.b.v. deze view maken: chemtrend.trend(location_id, substance_id)
+drop view if exists chemtrend.trend;
+create or replace view chemtrend.trend as
+select *
+from (
+    select 'meting' as category
+    , tr.parameter_code || ' ' || meetpunt_code as title
+    , 'Trendresultaat: ' || skendall_trend || ' (p=' || (p_value_skendall) || ')' as subtitle_1
+    , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
+    , 'datum' as x_label
+    , parameter_code || ' [' || eenheid_code || ' ' || hoedanigheidcode || ']' as y_label
+    , '1=meting, 2=Lowess, 3=Theil-Sen' as legend
+    , datum x_value -- NB dit is een datum, niet het aantal dagen
+    , lowline_x x_days -- dagen sinds 1980?
+    , case meting when 'Boven detectielimiet' then true else false end as point_filled
+    , waarde as y_value_1
+    , lowline_y as y_value_2
+    , theilsen_intercept y_value_3
+    , 'MKN' as h1_label
+    , norm_n as h1_value
+    , 'MAC' as h2_label
+    , norm_p as h2_value
+    , 'black' as y_color_1
+    , 'orange' as y_color_2
+    , case skendall_trend
+        when 'trend opwaarts' then 'red'
+        when 'geen trend' then 'grey'
+        when 'trend neerwaarts' then 'green'
+    end as y_color_3
+    , 'solid' as y_type_1
+    , 'dashed' as y_type_2
+    , 'curved' as y_type_3
+    -- select *
+    from voorbeelddata.trend tr
+    where meetpunt_code='NL02_0037' and parameter_code='Cr'
+) x
+;
+
 -- grant access to all users
 GRANT ALL ON all tables in schema chemtrend TO vries_cy;
 GRANT ALL ON all tables in schema chemtrend TO schoonve;
