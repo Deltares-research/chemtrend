@@ -6,6 +6,11 @@ const routes = [
     path: '/trends',
     name: 'trends',
     component: TrendView
+  },
+  // TODO: restructure the routing, create a default home view
+  {
+    path: '/',
+    redirect: { name: 'trends' }
   }
 ]
 
