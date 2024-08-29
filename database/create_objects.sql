@@ -1,4 +1,4 @@
--- drop schema if exists chemtrend cascade;
+drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
 -- substances
@@ -48,37 +48,51 @@ from (
     , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
     , parameter_code || ' [' || eenheid_code || ' ' || hoedanigheidcode || ']' as y_label
-    , '1=meting, 2=Lowess, 3=Theil-Sen' as legend
     , datum x_value -- NB dit is een datum, niet het aantal dagen
     , lowline_x x_days -- dagen sinds 1980?
     , case meting when 'Boven detectielimiet' then true else false end as point_filled
-    , waarde as y_value_1
-    , lowline_y as y_value_2
-    , theilsen_intercept y_value_3
+    , waarde as y_value_meting
+    , lowline_y as y_value_lowess
+    , theilsen_intercept y_value_theil_sen
     , 'MKN' as h1_label
     , norm_n as h1_value
     , 'MAC' as h2_label
     , norm_p as h2_value
-    , 'black' as y_color_1
-    , 'orange' as y_color_2
-    , case skendall_trend
-        when 'trend opwaarts' then 'red'
-        when 'geen trend' then 'grey'
-        when 'trend neerwaarts' then 'green'
-    end as y_color_3
-    , 'solid' as y_type_1
-    , 'dashed' as y_type_2
-    , 'curved' as y_type_3
     -- select *
     from voorbeelddata.trend tr
-    where meetpunt_code='NL02_0037' and parameter_code='Cr'
+--     where meetpunt_code='NL02_0037' and parameter_code='Cr'
 ) x
 ;
 
--- grant access to all users
-GRANT ALL ON all tables in schema chemtrend TO vries_cy;
-GRANT ALL ON all tables in schema chemtrend TO schoonve;
-GRANT ALL ON all tables in schema chemtrend TO loos_sb;
-GRANT ALL ON all tables in schema chemtrend TO rodrigue;
-GRANT ALL ON all tables in schema chemtrend TO ouwerkerk;
+-- function to return closest location on given lon/lat (x,y)
+drop function if exists chemtrend.location(x decimal, y decimal);
+create or replace function chemtrend.location(x decimal, y decimal)
+--     returns varchar as
+	returns table(location_code text, geom geometry) as
+$ff$
+declare q text;
+declare srid_xy int = 4326;
+declare srid_rd int = 28992;
+begin
+select ($$
+    select loc.location_code, loc.geom
+    from (
+        select location_code, geom
+        , st_transform(geom,28992) geom_rd
+        , st_transform(geom,%4$s) <-> st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s) as distance
+        from chemtrend.location
+    ) loc
+    where distance<1000
+    order by distance
+    limit 1
+    $$) into q;
+q := format(q, x, y, srid_xy, srid_rd);
+return query execute q;
+end
+$ff$ language plpgsql;
 
+drop function if exists chemtrend.trend(x decimal, y decimal);
+
+-- grant access
+GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
+alter schema chemtrend owner to waterkwaliteit_readonly;

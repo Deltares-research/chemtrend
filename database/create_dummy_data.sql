@@ -15,8 +15,5 @@ update voorbeelddata.trend set geom=st_transform(st_setsrid(st_point(x_rd, y_rd)
 
 
 -- grant access
-GRANT ALL ON all tables in schema voorbeelddata TO vries_cy;
-GRANT ALL ON all tables in schema voorbeelddata TO schoonve;
-GRANT ALL ON all tables in schema voorbeelddata TO loos_sb;
-GRANT ALL ON all tables in schema voorbeelddata TO rodrigue;
-GRANT ALL ON all tables in schema voorbeelddata TO ouwerkerk;
+GRANT ALL ON all tables in schema voorbeelddata TO waterkwaliteit_readonly;
+alter schema voorbeelddata owner to waterkwaliteit_readonly;
