@@ -22,10 +22,10 @@ select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_As
 
 -- view with locations and its trend color per parameter
 create or replace view chemtrend.location_substance as
-select location_code, parameter_code, color, geom
+select location_code, substance_code, color, geom
 from (
     select meetpunt_code as location_code
-    , parameter_code
+    , parameter_code as substance_code
     , geom
     , case skendall_trend
         when 'trend opwaarts' then 'red'
@@ -34,15 +34,17 @@ from (
     end as color
     from voorbeelddata.trend tr
 ) x
-group by location_code, parameter_code, color, geom
+group by location_code, substance_code, color, geom
 ;
 
--- TO DO: function o.b.v. deze view maken: chemtrend.trend(location_id, substance_id)
+-- view with trend data (to plot the measurements and trends)
 drop view if exists chemtrend.trend;
 create or replace view chemtrend.trend as
 select *
 from (
-    select 'meting' as category
+    select meetpunt_code as location_code
+    , parameter_code as substance_code
+    , 'meting' as category
     , tr.parameter_code || ' ' || meetpunt_code as title
     , 'Trendresultaat: ' || skendall_trend || ' (p=' || (p_value_skendall) || ')' as subtitle_1
     , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
@@ -91,7 +93,25 @@ return query execute q;
 end
 $ff$ language plpgsql;
 
-drop function if exists chemtrend.trend(x decimal, y decimal);
+-- function that returns trend data based on a given location
+drop function if exists chemtrend.trend(x decimal, y decimal, substance varchar);
+create or replace function chemtrend.trend(x decimal, y decimal, substance_code varchar)
+	returns setof chemtrend.trend as  --set of chemtrend.trend?
+$ff$
+declare q text;
+declare sc text = substance_code;
+begin
+select ($$
+    select *
+    from chemtrend.trend
+    where location_code = (select location_code from chemtrend.location(%1$s,%2$s))
+    and substance_code = '%3$s'
+    $$) into q;
+q := format(q, x, y, sc);
+return query execute q;
+end
+$ff$ language plpgsql;
+-- example: select * from chemtrend.trend(5.019, 52.325,'Cr');
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
