@@ -15,17 +15,21 @@ drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
 select distinct meetpunt_code as location_code, geom from voorbeelddata.trend;
 
+-- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
 create or replace view chemtrend.location_geojson as
 -- select distinct meetpunt_code as location_code, st_asgeojson(geom) as geom from voorbeelddata.trend;
-select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location)::json)) as geojson from chemtrend.location;
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location)::json)) as geojson
+from chemtrend.location;
 
 -- view with locations and its trend color per parameter
+drop view if exists chemtrend.location_substance cascade;
 create or replace view chemtrend.location_substance as
-select location_code, substance_code, color, geom
+select location_code, substance_id, substance_code, color, geom
 from (
     select meetpunt_code as location_code
-    , parameter_code as substance_code
+    , s.substance_id
+    , s.substance_code
     , geom
     , case skendall_trend
         when 'trend opwaarts' then 'red'
@@ -33,9 +37,33 @@ from (
         when 'trend neerwaarts' then 'green'
     end as color
     from voorbeelddata.trend tr
+    join chemtrend.substance s on s.substance_code=tr.parameter_code
 ) x
-group by location_code, substance_code, color, geom
+group by location_code, substance_id, substance_code, color, geom
 ;
+
+-- functions that returns locations per substance
+drop function if exists chemtrend.location_substance_geojson(substance_id int);
+create or replace function chemtrend.location_substance_geojson( substance_id int)
+    returns table (geojson json) as
+$ff$
+declare q text;
+declare scid int = substance_id;
+begin
+select ($$
+    select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location_substance)::json)) as geojson
+    from chemtrend.location_substance
+    where substance_id = %1$s
+    $$) into q;
+q := format(q, scid);
+return query execute q;
+end
+$ff$ language plpgsql;
+
+-- select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location_substance)::json)) as geojson
+-- from chemtrend.location_substance;
+
+
 
 -- view with trend data (to plot the measurements and trends)
 drop view if exists chemtrend.trend;
