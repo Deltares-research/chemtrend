@@ -79,7 +79,7 @@ export default {
     ...mapGetters(['panelIsCollapsed'])
   },
   methods: {
-    ...mapActions(['addTrend', 'clearTrends', 'togglePanelCollapse']),
+    ...mapActions(['addTrend', 'togglePanelCollapse']),
 
     initializeData () {
       this.addLocations()
@@ -225,7 +225,8 @@ export default {
         if (this.panelIsCollapsed) {
           this.togglePanelCollapse()
         }
-        this.clearTrends()
+        // TODO: implement clearTrends
+        // this.clearTrends()
         // TODO: do we want to ease to a polygon or specific zoom level?
         this.map.easeTo({
           center: e.lngLat,

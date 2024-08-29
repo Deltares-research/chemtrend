@@ -29,12 +29,12 @@ export default {
 
 <style scoped>
 .collapsed {
-  max-height: 0px; /* Adjust the height as necessary */
+  max-height: 0px;
   overflow: hidden;
 }
 
 .expanded {
-  min-height: 600px; /* Set to the desired expanded height */
+  min-height: 600px;
   transition: max-height 0.3s ease;
 }
 
@@ -42,7 +42,6 @@ v-card {
   transition: max-height 0.3s ease;
 }
 
-/* Ensure the actions align to the right */
 .v-card-actions {
   display: flex;
   justify-content: flex-end;
