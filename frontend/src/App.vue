@@ -3,11 +3,11 @@
     <v-main>
       <navigation-bar @toggle-drawer="toggleDrawer" />
         <div class="d-flex flex-column mb-6 content">
-          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="361">
+          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="361" style="z-index: 1;">
             <navigation-drawer-tabs />
           </v-navigation-drawer>
-          <map-component class="flex-grow-1"/>
-          <router-view></router-view>
+          <map-component class="flex-grow-1" style="z-index: 0;"/>
+          <router-view style="z-index: 2;"></router-view>
       </div>
     </v-main>
   </v-app>
