@@ -1,7 +1,6 @@
 <template>
   <div class="trend-view">
-    <!-- TODO: need some flex here -->
-    <div v-for="trend in trends" :key="trend.name">
+    <div v-for="trend in trends" :key="trend.name" class="trend-wrapper">
       <v-card :title="trend.name" class="trend">
         <v-chart class="chart" :option="trend.option" autoresize />
       </v-card>
@@ -12,13 +11,15 @@
 <script>
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { ScatterChart } from 'echarts/charts'
+import { LineChart } from 'echarts/charts'
+import { GridComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { mapGetters } from 'vuex'
 
 use([
   CanvasRenderer,
-  ScatterChart
+  LineChart,
+  GridComponent
 ])
 
 export default {
@@ -37,7 +38,17 @@ export default {
 
 <style>
 .trend-view {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   height: 50vh;
+}
+
+.trend-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
 }
 
 .trend {

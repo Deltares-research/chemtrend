@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
@@ -75,8 +75,12 @@ export default {
     this.map = this.$refs.mapboxmap.map
     this.map.on('load', this.initializeData)
   },
+  computed: {
+    ...mapGetters(['panelIsCollapsed'])
+  },
   methods: {
-    ...mapActions(['addTrend', 'clearTrends']),
+    ...mapActions(['addTrend', 'clearTrends', 'togglePanelCollapse']),
+
     initializeData () {
       this.addLocations()
       this.addWaterbodies()
@@ -218,6 +222,9 @@ export default {
     },
     interactionMap () {
       this.map.on('click', e => {
+        if (this.panelIsCollapsed) {
+          this.togglePanelCollapse()
+        }
         this.clearTrends()
         // TODO: do we want to ease to a polygon or specific zoom level?
         this.map.easeTo({
