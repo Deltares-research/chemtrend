@@ -71,7 +71,7 @@ create or replace view chemtrend.trend as
 select *
 from (
     select meetpunt_code as location_code
-    , parameter_code as substance_code
+    , s.substance_id, s.substance_code
     , 'meting' as category
     , tr.parameter_code || ' ' || meetpunt_code as title
     , 'Trendresultaat: ' || skendall_trend || ' (p=' || (p_value_skendall) || ')' as subtitle_1
@@ -90,6 +90,7 @@ from (
     , norm_p as h2_value
     -- select *
     from voorbeelddata.trend tr
+    join chemtrend.substance s  on substance_code=tr.parameter_code
 --     where meetpunt_code='NL02_0037' and parameter_code='Cr'
 ) x
 ;
@@ -122,24 +123,24 @@ end
 $ff$ language plpgsql;
 
 -- function that returns trend data based on a given location
-drop function if exists chemtrend.trend(x decimal, y decimal, substance varchar);
-create or replace function chemtrend.trend(x decimal, y decimal, substance_code varchar)
+drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
+create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
 	returns setof chemtrend.trend as  --set of chemtrend.trend?
 $ff$
 declare q text;
-declare sc text = substance_code;
+declare sid text = substance_id;
 begin
 select ($$
     select *
     from chemtrend.trend
     where location_code = (select location_code from chemtrend.location(%1$s,%2$s))
-    and substance_code = '%3$s'
+    and substance_id = '%3$s'
     $$) into q;
-q := format(q, x, y, sc);
+q := format(q, x, y, sid);
 return query execute q;
 end
 $ff$ language plpgsql;
--- example: select * from chemtrend.trend(5.019, 52.325,'Cr');
+-- example: select * from chemtrend.trend(5.019, 52.325,517);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
