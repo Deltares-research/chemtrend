@@ -6,7 +6,8 @@ export default createStore({
       substance_id: '',
       substance_description: ''
     }],
-    trends: []
+    trends: [],
+    panelIsCollapsed: true
   },
   getters: {
     substances (state) {
@@ -14,7 +15,8 @@ export default createStore({
     },
     trends (state) {
       return state.trends
-    }
+    },
+    panelIsCollapsed: state => state.panelIsCollapsed
   },
   mutations: {
     SET_SUBSTANCES (state, data) {
@@ -26,6 +28,9 @@ export default createStore({
     ADD_TREND (state, trend) {
       console.log('hoi', state)
       state.trends.push(trend)
+    },
+    TOGGLE_PANEL_COLLAPSE (state) {
+      state.panelIsCollapsed = !state.panelIsCollapsed
     }
   },
   actions: {
@@ -53,40 +58,60 @@ export default createStore({
       store.commit('ADD_TREND', {
         name: name,
         option: {
-          xAxis: {},
-          yAxis: {},
+          xAxis: {
+            type: 'category',
+            data: ['2000', '2001', '2002', '2003', '2004', '2005', '2006']
+          },
+          yAxis: {
+            type: 'value'
+          },
           series: [
             {
-              symbolSize: 20,
+              name: 'Measurements',
+              type: 'line',
               data: [
-                [10.0, 8.04],
-                [8.07, 6.95],
-                [13.0, 7.58],
-                [9.05, 8.81],
-                [11.0, 8.33],
-                [14.0, 7.66],
-                [13.4, 6.81],
-                [10.0, 6.33],
-                [14.0, 8.96],
-                [12.5, 6.82],
-                [9.15, 7.2],
-                [11.5, 7.2],
-                [3.03, 4.23],
-                [12.2, 7.83],
-                [2.02, 4.47],
-                [1.05, 3.33],
-                [4.05, 4.96],
-                [6.03, 7.24],
-                [12.0, 6.26],
-                [12.0, 8.84],
-                [7.08, 5.82],
-                [5.02, 5.68]
+                10.0, 8, 8.07, 6.95, 13.0, 7.58, 9.05
               ],
-              type: 'scatter'
+              lineStyle: {
+                color: '#000000'
+              },
+              symbol: 'circle',
+              symbolSize: 10,
+              itemStyle: {
+                color: '#f8766d',
+                borderColor: '#000000',
+                borderWidth: 1
+              }
+            },
+            {
+              name: 'Trend',
+              type: 'line',
+              data: [
+                8.5, 8.2, 8.25, 9, 8.75, 8, 8.5
+              ],
+              lineStyle: {
+                color: '#0000ff'
+              },
+              showSymbol: false
+            },
+            {
+              name: 'Something',
+              type: 'line',
+              data: [
+                8.4, 8.3, 8.5, 8.8, 8.9, 8, 8.65
+              ],
+              lineStyle: {
+                color: '#FFA500',
+                type: 'dashed'
+              },
+              showSymbol: false
             }
           ]
         }
       })
+    },
+    togglePanelCollapse ({ commit }) {
+      commit('TOGGLE_PANEL_COLLAPSE')
     }
   },
   modules: {
