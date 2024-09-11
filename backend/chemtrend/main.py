@@ -18,9 +18,11 @@ app.add_middleware(
 substances = metadata.tables["chemtrend.substance"]
 locations = metadata.tables["chemtrend.location_geojson"]
 
+# asyncio.run(setup_connection())
 
 @app.get("/substances/", response_model=List[Substance], tags=["Substances"])
 async def list_substances():
+    """List all substances"""
     query = substances.select()
     await database.connect()
     return await database.fetch_all(query)
@@ -29,6 +31,7 @@ async def list_substances():
 @app.get("/locations/", tags=["Locations"])
 # @cached(ttl=settings.CACHE_TTL)
 async def list_locations_all():
+    """List all locations"""
     query = locations.select()
     await database.connect()
     result = await database.fetch_one(query)
@@ -55,6 +58,7 @@ async def get_trend_data(x: float, y: float, substance_id: int):
 
 @app.get("/waterbodies/", tags=["Waterbodies"])
 async def get_all_waterbodies():
+    """List all waterbodies"""
     # TODO: Magic again
     return test_waterbodies
 
