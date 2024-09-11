@@ -1,6 +1,43 @@
 drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
+-- provinces
+create or replace view chemtrend.provinces(province_id, province_code, province_description, geometry) as
+SELECT pr."FID"           AS province_id,
+       pr."Code"         AS province_code,
+       pr."Provincien" AS province_description,
+       pr.geometry as geometry
+FROM public.provincies pr 
+
+-- waterboards
+create or replace view chemtrend.waterboard(waterboard_id, waterboard_code, waterboard_description, geometry) as
+SELECT wb.waterbeheerder_id          AS waterboard_id,
+       wb.waterbeheerder_code         AS waterboard_code,
+       wb.waterbeheerder_omschrijving AS waterboard_description,
+       wb.geometry as geometry
+FROM public.waterbeheerder wb 
+
+-- sub catchments
+create or replace view chemtrend.catchment(catchment_id, catchment_code, catchment_description_short, catchment_description_long, geometry) as
+SELECT dsg."OBJECTID"          AS catchment_id,
+       dsg."GAFIDENT"         AS catchment_code,
+       dsg."GAFNAAM" AS catchment_description_short,
+	   dsg."NAAM" AS catchment_description_long,
+       dsg.geometry as geometry
+FROM public.deelstroomgebieden dsg 
+
+-- KRW-waterbodies
+create or replace view chemtrend.KRWwaterbody(KRWwaterbody_id, KRWwaterbody_code, KRWwaterbody_description, KRWwaterbody_namespace, catchment_code, KRWwaterbody_status, KRWwaterbody_type_code, geometry) as
+SELECT wl.db_id_extern          AS "KRWwaterbody_id",
+       wl.waterlichaam_code         AS "KRWwaterbody_code",
+       wl.waterlichaam_omschrijving AS "KRWwaterbody_description",
+	   wl."namespace" AS "KRWwaterbody_namespace",
+	   wl.stroomgebied_code AS catchment_code,
+	   wl.waterlichaam_status AS "KRWwaterbody_status",
+	   wl."waterlichaam_KRWtype_code" AS "KRWwaterbody_type_code",
+       wl.geometry as geometry
+FROM public."KRW_waterlichaam" wl 
+
 -- substances
 create or replace view chemtrend.substance(substance_id, substance_code, substance_description, cas) as
 SELECT p.parameter_id           AS substance_id,
@@ -78,8 +115,8 @@ from (
     , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
     , parameter_code || ' [' || eenheid_code || ' ' || hoedanigheidcode || ']' as y_label
-    , datum x_value -- NB dit is een datum, niet het aantal dagen
-    , lowline_x x_days -- dagen sinds 1980?
+    , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
+    , lowline_x x_days -- dagen sinds 1980? nee sinds 1970-01-01
     , case meting when 'Boven detectielimiet' then true else false end as point_filled
     , waarde as y_value_meting
     , lowline_y as y_value_lowess
