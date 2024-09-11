@@ -52,8 +52,8 @@ async def get_trend_data(x: float, y: float, substance_id: int):
     """Retrieve all trend data for a given location (lon, lat) and substance_id"""
     query = f"select * from chemtrend.trend({x},{y},{substance_id});"
     await database.connect()
-    result = await database.fetch_all(query)
-    return result
+    result = await database.fetch_one(query)
+    return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
 @app.get("/waterbodies/", tags=["Waterbodies"])

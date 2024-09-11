@@ -73,7 +73,7 @@ from (
     select meetpunt_code as location_code
     , s.substance_id, s.substance_code
     , 'meting' as category
-    , tr.parameter_code || ' ' || meetpunt_code as title
+    , s.substance_description || ' ' || meetpunt_code as title
     , 'Trendresultaat: ' || skendall_trend || ' (p=' || (p_value_skendall) || ')' as subtitle_1
     , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
@@ -95,7 +95,8 @@ from (
 ) x
 ;
 
--- function to return closest location on given lon/lat (x,y)
+
+-- function to return closest location on given lon/lat (x,y) within 1 km
 drop function if exists chemtrend.location(x decimal, y decimal);
 create or replace function chemtrend.location(x decimal, y decimal)
 --     returns varchar as
@@ -125,16 +126,37 @@ $ff$ language plpgsql;
 -- function that returns trend data based on a given location
 drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
 create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
-	returns setof chemtrend.trend as  --set of chemtrend.trend?
+-- 	returns setof chemtrend.trend as  --set of chemtrend.trend?
+    returns table (geojson json) as
 $ff$
 declare q text;
 declare sid text = substance_id;
 begin
 select ($$
+    with tr_detail as (
+        select *
+        from chemtrend.trend
+        where location_code = (select location_code from chemtrend.location(%1$s,%2$s))
+        and substance_id = '%3$s'
+    )
+    , tr_graph as (
+        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+            , json_agg(json_build_object('x_value', x_value
+            , 'y_value_meting', y_value_meting
+            , 'y_value_lowess', y_value_lowess
+            , 'y_value_theil_sen', y_value_theil_sen
+            ) order by x_value
+        ) as timeseries
+        from tr_detail trd
+        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+    )
+    , tr_final as (
+        select json_agg(trg.*) as graph
+        from tr_graph trg
+    )
+    -- select '{graph:'||right(left(graph, -1),-1)||'}'
     select *
-    from chemtrend.trend
-    where location_code = (select location_code from chemtrend.location(%1$s,%2$s))
-    and substance_id = '%3$s'
+    from tr_final
     $$) into q;
 q := format(q, x, y, sid);
 return query execute q;
