@@ -115,8 +115,8 @@ from (
     , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
     , parameter_code || ' [' || eenheid_code || ' ' || hoedanigheidcode || ']' as y_label
-    , datum x_value -- NB dit is een datum, niet het aantal dagen
-    , lowline_x x_days -- dagen sinds 1980?
+    , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
+    , lowline_x x_days -- dagen sinds 1980? nee sinds 1970-01-01
     , case meting when 'Boven detectielimiet' then true else false end as point_filled
     , waarde as y_value_meting
     , lowline_y as y_value_lowess
