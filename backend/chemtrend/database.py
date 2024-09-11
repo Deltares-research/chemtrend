@@ -1,6 +1,8 @@
 import databases
 import sqlalchemy
 import configparser as confpars
+from geoalchemy2 import Geometry
+# import asyncio
 
 confpars = confpars.RawConfigParser()
 configFilePath = r"config.txt"
@@ -15,6 +17,7 @@ async def setup_connection(database):
 
 database = databases.Database(DATABASE_URL)
 engine = sqlalchemy.create_engine(DATABASE_URL)
+# asyncio.run(setup_connection(database))
 setup_connection(database)
 
 metadata = sqlalchemy.MetaData()
