@@ -33,7 +33,7 @@ import _ from 'lodash'
 export default {
   name: 'SubstanceTab',
   methods: {
-    ...mapActions(['loadSubstances', 'loadFilteredLocations'])
+    ...mapActions(['loadSubstances', 'loadFilteredLocations', 'setSelectedSubstanceId'])
   },
   computed: {
     ...mapGetters(['substances']),
@@ -43,8 +43,10 @@ export default {
         return this.substances.find(substance => substance.substance_id === subId)
       },
       set (substance) {
+        console.log('substance', substance)
         this.$route.query = { substance: substance.substance_id }
         this.$router.push(this.$route)
+        this.setSelectedSubstanceId(substance.substance_id)
       }
     }
   },

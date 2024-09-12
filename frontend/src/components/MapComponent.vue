@@ -76,7 +76,7 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed'])
+    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId'])
   },
   methods: {
     ...mapActions(['addTrend', 'togglePanelCollapse']),
@@ -248,10 +248,11 @@ export default {
               features: features
             })
           features.forEach(feature => {
-            console.log(feature)
-            console.log('feature coords', feature._geometry.coordinates)
-            // TODO: retrieve a correct ID from feature
-            this.addTrend('fakeId', shape)
+            const x = feature._geometry.coordinates[0]
+            const y = feature._geometry.coordinates[1]
+            const substanceId = this.selectedSubstanceId
+
+            this.addTrend({ x, y, substanceId }, shape)
           })
         })
       })

@@ -2,11 +2,8 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    substances: [{
-      substance_id: '',
-      substance_description: '',
-      selectedCoordinates: [],
-    }],
+    substances: [],
+    selectedSubstanceId: null,
     trends: [],
     panelIsCollapsed: true
   },
@@ -14,20 +11,27 @@ export default createStore({
     substances (state) {
       return state.substances
     },
+    selectedSubstanceId (state) {
+      return state.selectedSubstanceId
+    },
     trends (state) {
       return state.trends
     },
     panelIsCollapsed: state => state.panelIsCollapsed
+
   },
   mutations: {
     SET_SUBSTANCES (state, data) {
       state.substances = data
     },
+    SET_SELECTED_SUBSTANCE_ID (state, id) {
+      console.log('mutation', id)
+      state.selectedSubstanceId = id
+    },
     CLEAR_TRENDS (state) {
       state.trends = []
     },
     ADD_TREND (state, trend) {
-      console.log('hoi', state)
       state.trends.push(trend)
     },
     TOGGLE_PANEL_COLLAPSE (state) {
@@ -35,7 +39,7 @@ export default createStore({
     },
     SET_SELECTED_COORDINATES (state, coords) {
       state.selectedCoordinates = coords
-    },
+    }
   },
   actions: {
     loadSubstances (store) {
@@ -48,9 +52,11 @@ export default createStore({
           store.commit('SET_SUBSTANCES', response)
         })
     },
-    addTrend (store, { x, y, featureId }, name) {
-      // TODO: Make an endpoint for this
-      const url = `${process.env.VUE_APP_SERVER_URL}/trend/${x}/${y}/${featureId}`
+    setSelectedSubstanceId ({ commit }, id) {
+      commit('SET_SELECTED_SUBSTANCE_ID', id)
+    },
+    addTrend (store, { x, y, substanceId }, name) {
+      const url = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
       fetch(url)
         .then(res => {
           return res.json()
