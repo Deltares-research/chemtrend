@@ -2,12 +2,16 @@ drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
 -- provinces
-create or replace view chemtrend.provinces(province_id, province_code, province_description, geometry) as
+create or replace view chemtrend.province(province_id, province_code, province_description, geometry) as
 SELECT pr."FID"           AS province_id,
        pr."Code"         AS province_code,
        pr."Provincien" AS province_description,
        pr.geometry as geometry
-FROM public.provincies pr 
+FROM public.provincies pr;
+
+create or replace view chemtrend.province_geojson as
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(province)::json)) as geojson
+from chemtrend.province;
 
 -- waterboards
 create or replace view chemtrend.waterboard(waterboard_id, waterboard_code, waterboard_description, geometry) as
@@ -15,7 +19,12 @@ SELECT wb.waterbeheerder_id          AS waterboard_id,
        wb.waterbeheerder_code         AS waterboard_code,
        wb.waterbeheerder_omschrijving AS waterboard_description,
        wb.geometry as geometry
-FROM public.waterbeheerder wb 
+FROM public.waterbeheerder wb;
+
+create or replace view chemtrend.waterboard_geojson as
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(waterboard)::json)) as geojson
+from chemtrend.waterboard;
+
 
 -- sub catchments
 create or replace view chemtrend.catchment(catchment_id, catchment_code, catchment_description_short, catchment_description_long, geometry) as
@@ -24,19 +33,28 @@ SELECT dsg."OBJECTID"          AS catchment_id,
        dsg."GAFNAAM" AS catchment_description_short,
 	   dsg."NAAM" AS catchment_description_long,
        dsg.geometry as geometry
-FROM public.deelstroomgebieden dsg 
+FROM public.deelstroomgebieden dsg;
+
+create or replace view chemtrend.catchment_geojson as
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(catchment)::json)) as geojson
+from chemtrend.catchment;
+
 
 -- KRW-waterbodies
-create or replace view chemtrend.KRWwaterbody(KRWwaterbody_id, KRWwaterbody_code, KRWwaterbody_description, KRWwaterbody_namespace, catchment_code, KRWwaterbody_status, KRWwaterbody_type_code, geometry) as
-SELECT wl.db_id_extern          AS "KRWwaterbody_id",
-       wl.waterlichaam_code         AS "KRWwaterbody_code",
-       wl.waterlichaam_omschrijving AS "KRWwaterbody_description",
-	   wl."namespace" AS "KRWwaterbody_namespace",
+create or replace view chemtrend.waterbody(KRWwaterbody_id, KRWwaterbody_code, KRWwaterbody_description, KRWwaterbody_namespace, catchment_code, KRWwaterbody_status, KRWwaterbody_type_code, geometry) as
+SELECT wl.db_id_extern          AS "waterbody_id",
+       wl.waterlichaam_code         AS "waterbody_code",
+       wl.waterlichaam_omschrijving AS "waterbody_description",
+	   wl."namespace" AS "waterbody_namespace",
 	   wl.stroomgebied_code AS catchment_code,
-	   wl.waterlichaam_status AS "KRWwaterbody_status",
-	   wl."waterlichaam_KRWtype_code" AS "KRWwaterbody_type_code",
+	   wl.waterlichaam_status AS "waterbody_status",
+	   wl."waterlichaam_KRWtype_code" AS "waterbody_type_code",
        wl.geometry as geometry
-FROM public."KRW_waterlichaam" wl 
+FROM public."KRW_waterlichaam" wl;
+
+create or replace view chemtrend.waterbody_geojson as
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(waterbody)::json)) as geojson
+from chemtrend.waterbody;
 
 -- substances
 create or replace view chemtrend.substance(substance_id, substance_code, substance_description, cas) as
