@@ -249,6 +249,7 @@ export default {
             })
           features.forEach(feature => {
             console.log(feature)
+            console.log('feature coords', feature._geometry.coordinates)
             // TODO: retrieve a correct ID from feature
             this.addTrend('fakeId', shape)
           })

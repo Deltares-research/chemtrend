@@ -4,7 +4,8 @@ export default createStore({
   state: {
     substances: [{
       substance_id: '',
-      substance_description: ''
+      substance_description: '',
+      selectedCoordinates: [],
     }],
     trends: [],
     panelIsCollapsed: true
@@ -31,7 +32,10 @@ export default createStore({
     },
     TOGGLE_PANEL_COLLAPSE (state) {
       state.panelIsCollapsed = !state.panelIsCollapsed
-    }
+    },
+    SET_SELECTED_COORDINATES (state, coords) {
+      state.selectedCoordinates = coords
+    },
   },
   actions: {
     loadSubstances (store) {
@@ -44,16 +48,16 @@ export default createStore({
           store.commit('SET_SUBSTANCES', response)
         })
     },
-    addTrend (store, featureId, name) {
+    addTrend (store, { x, y, featureId }, name) {
       // TODO: Make an endpoint for this
-      // const url = `${process.env.VUE_APP_SERVER_URL}/trend/${featureId}`
-      // fetch(url)
-      //   .then(res => {
-      //     return res.json()
-      //   })
-      //   .then(response => {
-      //     store.commit('ADD_TREND', response)
-      //   })
+      const url = `${process.env.VUE_APP_SERVER_URL}/trend/${x}/${y}/${featureId}`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          store.commit('ADD_TREND', response)
+        })
       // TODO: VERY DUMMY THIS DATA
       store.commit('ADD_TREND', {
         name: name,
