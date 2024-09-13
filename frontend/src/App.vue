@@ -2,13 +2,13 @@
   <v-app>
     <v-main>
       <navigation-bar @toggle-drawer="toggleDrawer" />
-        <div class="d-flex flex-column content">
-          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="361">
-            <navigation-drawer-tabs />
-          </v-navigation-drawer>
-          <map-component class="flex-grow-1" />
-          <bottom-panel />
-      </div>
+      <div class="d-flex flex-column content">
+        <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
+          <navigation-drawer-tabs />
+        </v-navigation-drawer>
+        <map-component class="flex-grow-1" />
+        <bottom-panel />
+    </div>
     </v-main>
   </v-app>
 </template>

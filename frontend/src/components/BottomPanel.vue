@@ -34,7 +34,7 @@ export default {
 }
 
 .expanded {
-  min-height: 600px;
+  min-height: 60vh;
   transition: max-height 0.3s ease;
 }
 

@@ -76,7 +76,7 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed'])
+    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId'])
   },
   methods: {
     ...mapActions(['addTrend', 'togglePanelCollapse']),
@@ -105,7 +105,8 @@ export default {
           data: `${process.env.VUE_APP_SERVER_URL}/locations/`
         },
         paint: {
-          'circle-color': 'rgba(239, 239, 240, 1)',
+          // 'circle-color': 'rgba(239, 239, 240, 1)',
+          'circle-color': 'black',
           'circle-stroke-color': '#4F5759',
           'circle-stroke-width': 1,
           'circle-radius': 5
@@ -157,28 +158,30 @@ export default {
           data: initialData
         },
         paint: {
-          'circle-color': [
-            'case',
-            [
-              '<',
-              ['get', 'trend'],
-              0
-            ],
-            'hsl(0, 89%, 50%)',
-            [
-              '>',
-              ['get', 'trend'],
-              0
-            ],
-            'hsl(116, 88%, 59%)',
-            [
-              '==',
-              ['get', 'trend'],
-              0
-            ],
-            'black',
-            'black'
-          ],
+          'circle-color': '#57b146',
+          // TODO: colour based on trend value, based on code below
+          // [
+          //   'case',
+          //   [
+          //     '<',
+          //     ['get', 'trend'],
+          //     0
+          //   ],
+          //   'hsl(0, 89%, 50%)',
+          //   [
+          //     '>',
+          //     ['get', 'trend'],
+          //     0
+          //   ],
+          //   'hsl(116, 88%, 59%)',
+          //   [
+          //     '==',
+          //     ['get', 'trend'],
+          //     0
+          //   ],
+          //   'black',
+          //   'black'
+          // ],
           'circle-stroke-color': '#4F5759',
           'circle-stroke-width': 1,
           'circle-radius': 5
@@ -225,6 +228,11 @@ export default {
         if (this.panelIsCollapsed) {
           this.togglePanelCollapse()
         }
+        const newQuery = {
+          ...this.$route.query, // Keep all existing query parameters, including 'substance'
+          latitude: e.lngLat.lat,
+          longitude: e.lngLat.lng
+        }
         // TODO: implement clearTrends
         // this.clearTrends()
         // TODO: do we want to ease to a polygon or specific zoom level?
@@ -233,10 +241,11 @@ export default {
           zoom: 12,
           duration: 800
         })
-        this.$route.path = '/trends'
-        this.$route.query.latitude = e.lngLat.lat
-        this.$route.query.longitude = e.lngLat.lng
-        this.$router.push(this.$route)
+
+        this.$router.push({
+          path: '/trends',
+          query: newQuery
+        })
 
         const shapes = ['waterbodies', 'locations']
 
@@ -248,9 +257,11 @@ export default {
               features: features
             })
           features.forEach(feature => {
-            console.log(feature)
-            // TODO: retrieve a correct ID from feature
-            this.addTrend('fakeId', shape)
+            const x = feature._geometry.coordinates[0]
+            const y = feature._geometry.coordinates[1]
+            const substanceId = this.selectedSubstanceId
+
+            this.addTrend({ x, y, substanceId }, shape)
           })
         })
       })

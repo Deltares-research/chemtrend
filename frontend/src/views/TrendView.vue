@@ -12,14 +12,16 @@
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
-import { GridComponent } from 'echarts/components'
+import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { mapGetters } from 'vuex'
 
 use([
   CanvasRenderer,
   LineChart,
-  GridComponent
+  GridComponent,
+  TitleComponent,
+  TooltipComponent
 ])
 
 export default {
@@ -40,8 +42,8 @@ export default {
 .trend-view {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+  justify-content: right;
+  align-items: right;
   height: 50vh;
 }
 
@@ -52,7 +54,7 @@ export default {
 }
 
 .trend {
-  height: 400px;
-  width: 450px;
+  height: 45vh;
+  width: 70vw;
 }
 </style>
