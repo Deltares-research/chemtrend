@@ -17,6 +17,10 @@ app.add_middleware(
 
 substances = metadata.tables["chemtrend.substance"]
 locations = metadata.tables["chemtrend.location_geojson"]
+waterbodies = metadata.tables["chemtrend.waterbody_geojson"]
+waterboards = metadata.tables["chemtrend.waterboard_geojson"]
+provinces = metadata.tables["chemtrend.province_geojson"]
+catchments = metadata.tables["chemtrend.catchment_geojson"]
 
 # asyncio.run(setup_connection())
 
@@ -59,30 +63,34 @@ async def get_trend_data(x: float, y: float, substance_id: int):
 @app.get("/waterbodies/", tags=["Waterbodies"])
 async def get_all_waterbodies():
     """List all waterbodies"""
-    # TODO: Magic again
-    return test_waterbodies
+    query = waterbodies.select()
+    await database.connect()
+    result = await database.fetch_one(query)
+    return result.geojson
 
 
-# @app.get("/waterbodies/", tags=["Waterbodies"])
-# async def list_drinkwater_segments_geojson(
-#     longitude: Optional[float] = None, latitude: Optional[float] = None
-# ):
-#     # TODO: for now I used shapely to check if a coordinate falls
-#     # inside one of the polygons.
-#     print(longitude, latitude)
-#     features = gpd.GeoDataFrame.from_features(test_selected_areas)
-#     # features = gpd.read_file(str(test_selected_areas), driver="GEOJSON")
-#     print(features)
-#     df = pd.DataFrame({'longitude': [latitude], 'latitude': [longitude]})
-#     point = gpd.GeoDataFrame(
-#         df, geometry=gpd.points_from_xy(df.longitude, df.latitude)
-#     )
-#     result = gpd.sjoin(point, features, op='within')
-#     print(result)
-#     return result
+@app.get("/waterboards/", tags=["waterboards"])
+async def list_waterboards_all():
+    """List all waterboards"""
+    query = waterboards.select()
+    await database.connect()
+    result = await database.fetch_one(query)
+    return result.geojson
 
 
-# trend (for given location (lon/lat))
-# note: the trends could be for both measurement locations and regions (like waterbodies)
-# regions
-# waterbodies (already in public, make available via 'chemtrend'
+@app.get("/provinces/", tags=["provinces"])
+async def list_provinces_all():
+    """List all provinces"""
+    query = provinces.select()
+    await database.connect()
+    result = await database.fetch_one(query)
+    return result.geojson
+
+
+@app.get("/catchments/", tags=["catchment"])
+async def list_catchment_all():
+    """List all catchment (=stroomgebied)"""
+    query = catchments.select()
+    await database.connect()
+    result = await database.fetch_one(query)
+    return result.geojson
