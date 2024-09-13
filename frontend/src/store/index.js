@@ -97,6 +97,14 @@ export default createStore({
                 tooltip: {
                   show: true
                 },
+                legend: {
+                  show: true,
+                  bottom: 5,
+                  lineStyle: {
+                    symbol: 'none'
+                  },
+                  itemWidth: 70
+                },
                 xAxis: {
                   type: 'category',
                   data: xAxisData
@@ -128,6 +136,8 @@ export default createStore({
                     lineStyle: {
                       color: '#0000ff'
                     },
+                    symbol: 'none',
+                    symbolSize: 0,
                     showSymbol: false
                   },
                   {
@@ -138,7 +148,12 @@ export default createStore({
                       color: '#FFA500',
                       type: 'dashed'
                     },
-                    showSymbol: false
+                    symbol: 'none',
+                    symbolSize: 0,
+                    showSymbol: false,
+                    itemStyle: {
+                      color: '#FFA500'
+                    }
                   }
                 ]
               }

@@ -12,7 +12,7 @@
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
-import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { GridComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { mapGetters } from 'vuex'
 
@@ -21,7 +21,8 @@ use([
   LineChart,
   GridComponent,
   TitleComponent,
-  TooltipComponent
+  TooltipComponent,
+  LegendComponent
 ])
 
 export default {
