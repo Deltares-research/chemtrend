@@ -12,7 +12,7 @@
           v-model="substance"
         ></v-autocomplete>
         </v-row>
-        <v-row>
+        <!-- <v-row>
         <v-expansion-panels flat>
           <v-expansion-panel>
           <v-expansion-panel-title>All substances</v-expansion-panel-title>
@@ -21,7 +21,7 @@
           </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-      </v-row>
+      </v-row> -->
     </v-col>
   </div>
 </template>
@@ -39,13 +39,16 @@ export default {
     ...mapGetters(['substances']),
     substance: {
       get () {
-        const subId = _.get(this.$route, 'query.substance')
-        return this.substances.find(substance => substance.substance_id === subId)
+        const subId = parseInt(_.get(this.$route, 'query.substance'), 10) // Ensure it's an integer
+        return this.substances.find(substance => substance.substance_id === subId) || null
       },
       set (substance) {
         console.log('substance', substance)
-        this.$route.query = { substance: substance.substance_id }
-        this.$router.push(this.$route)
+        const newQuery = {
+          ...this.$route.query,
+          substance: substance.substance_id
+        }
+        this.$router.push({ query: newQuery })
         this.setSelectedSubstanceId(substance.substance_id)
       }
     }
