@@ -57,68 +57,102 @@ export default createStore({
     },
     addTrend (store, { x, y, substanceId }, name) {
       const url = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
+
       fetch(url)
-        .then(res => {
-          return res.json()
-        })
+        .then(res => res.json())
         .then(response => {
-          store.commit('ADD_TREND', response)
-        })
-      // TODO: VERY DUMMY THIS DATA
-      store.commit('ADD_TREND', {
-        name: name,
-        option: {
-          xAxis: {
-            type: 'category',
-            data: ['2000', '2001', '2002', '2003', '2004', '2005', '2006']
-          },
-          yAxis: {
-            type: 'value'
-          },
-          series: [
-            {
-              name: 'Measurements',
-              type: 'line',
-              data: [
-                10.0, 8, 8.07, 6.95, 13.0, 7.58, 9.05
-              ],
-              lineStyle: {
-                color: '#000000'
-              },
-              symbol: 'circle',
-              symbolSize: 10,
-              itemStyle: {
-                color: '#f8766d',
-                borderColor: '#000000',
-                borderWidth: 1
+          if (Array.isArray(response) && response.length > 0 && response[0].timeseries) {
+            const title = response[0].title
+            const subtitle1 = response[0].subtitle_1
+            const subtitle2 = response[0].subtitle_2
+
+            const timeseries = response[0].timeseries
+
+            const xAxisData = timeseries.map(item => item.x_value)
+            const yValueLowess = timeseries.map(item => item.y_value_lowess)
+            const yValueMeting = timeseries.map(item => item.y_value_meting)
+            const yValueTheilSen = timeseries.map(item => item.y_value_theil_sen)
+
+            const trend = {
+              name: name,
+              option: {
+                title: {
+                  text: title,
+                  subtext: subtitle1 + '\n' + subtitle2,
+                  left: 'center',
+                  top: 10,
+                  textStyle: {
+                    fontSize: 25
+                  },
+                  subtextStyle: {
+                    fontSize: 15
+                  }
+                },
+                grid: {
+                  top: 100,
+                  bottom: 50,
+                  right: 50,
+                  left: 50
+                },
+                tooltip: {
+                  show: true
+                },
+                xAxis: {
+                  type: 'category',
+                  data: xAxisData
+                },
+                yAxis: {
+                  type: 'value'
+                },
+                series: [
+                  {
+                    name: 'Meting',
+                    type: 'line',
+                    data: yValueMeting,
+                    lineStyle: {
+                      color: '#000000'
+                    },
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    showAllSymbol: true,
+                    itemStyle: {
+                      color: '#f8766d',
+                      borderColor: '#000000',
+                      borderWidth: 1
+                    }
+                  },
+                  {
+                    name: 'Lowess',
+                    type: 'line',
+                    data: yValueLowess,
+                    lineStyle: {
+                      color: '#0000ff'
+                    },
+                    showSymbol: false
+                  },
+                  {
+                    name: 'Theil Sen',
+                    type: 'line',
+                    data: yValueTheilSen,
+                    lineStyle: {
+                      color: '#FFA500',
+                      type: 'dashed'
+                    },
+                    showSymbol: false
+                  }
+                ]
               }
-            },
-            {
-              name: 'Trend',
-              type: 'line',
-              data: [
-                8.5, 8.2, 8.25, 9, 8.75, 8, 8.5
-              ],
-              lineStyle: {
-                color: '#0000ff'
-              },
-              showSymbol: false
-            },
-            {
-              name: 'Something',
-              type: 'line',
-              data: [
-                8.4, 8.3, 8.5, 8.8, 8.9, 8, 8.65
-              ],
-              lineStyle: {
-                color: '#FFA500',
-                type: 'dashed'
-              },
-              showSymbol: false
             }
-          ]
-        }
-      })
+
+            store.commit('CLEAR_TRENDS')
+            store.commit('ADD_TREND', trend)
+          } else {
+            console.error('Invalid response structure:', response)
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching trend data:', error)
+        })
     },
     togglePanelCollapse ({ commit }) {
       commit('TOGGLE_PANEL_COLLAPSE')
