@@ -24,7 +24,7 @@
 
         <v-tabs-window-item value="information" class="tab-content">
           <information-tab />
-          
+
         </v-tabs-window-item>
       </v-tabs-window>
     </v-card-text>
