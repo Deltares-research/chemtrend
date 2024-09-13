@@ -29,8 +29,8 @@
           Trends
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="information">
-          Information
+        <v-tabs-window-item value="information" class="tab-content">
+          <information-tab />
         </v-tabs-window-item>
       </v-tabs-window>
     </v-card-text>
@@ -39,6 +39,7 @@
 
 <script>
 import SubstanceTab from '@/components/tabs/SubstanceTab.vue'
+import InformationTab from '@/components/tabs/InformationTab.vue'
 
 export default {
   name: 'NavigationDrawerTabs',
@@ -49,7 +50,8 @@ export default {
     }
   },
   components: {
-    SubstanceTab
+    SubstanceTab,
+    InformationTab
   }
 }
 </script>
