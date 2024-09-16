@@ -21,7 +21,7 @@
               </p>
               <h3 class="mt-4 font-italic">Herkomst data</h3>
               <p>
-                Voor het vullen van de CHEMtrend database is gebruik gemaakt van de meetdata voor van chemische stoffen zoals beschikbaar uit de LEW en beschikbaar gemaakt via het waterkwaliteitsportaal. Dit betreft data voor MNLSO-meetlocaties in de regionale wateren. Aanvullend is voor de Rijkswateren meetdata uit DONAR (externe link) toegevoegd. De CHEMtrend database wordt jaarlijks bijgewerkt met recente monitoringsdata uit genoemde onderliggende databases.
+                Voor het vullen van de CHEMtrend database is gebruik gemaakt van de meetdata voor van chemische stoffen zoals beschikbaar uit de LEW en beschikbaar gemaakt via het waterkwaliteitsportaal. Dit betreft data voor MNLSO-meetlocaties in de regionale wateren. Aanvullend is voor de Rijkswateren meetdata toegevoegd dat ook op te vragen via <a href="https://waterinfo.rws.nl" target="_blank">waterinfo.rws.nl</a>. De CHEMtrend database wordt jaarlijks bijgewerkt met recente monitoringsdata uit genoemde onderliggende databases.
               </p>
               <h3 class="mt-4 font-italic">Trendbepaling</h3>
               <p>
@@ -42,7 +42,7 @@
               <p class="mt-3">
                 Meer informatie over de gepresenteerde data en trendberekening is terug te vinden in de volgende rapportage:               </p>
               <ul>
-                <li>Trends in waterkwaliteit (externe link) </li>
+                <li>Trends in waterkwaliteit (<a :href="pdfLink" target="_blank">hier downloaden</a>) </li>
               </ul>
               <h3 class="mt-4 font-italic">Gebruik</h3>
               <p>
@@ -50,8 +50,8 @@
               </p>
               <h3 class="mt-4 font-italic">Nuttige links naar andere webviewers</h3>
               <ul>
-                <li><a href="https://krw-nutrend.netlify.app">krw-nutrend.netlify.app</a>: Voor nutriënten (stikstof, fosfor en DIN) wordt voor verschillende toetsjaren de toestand, trends, concentraties, en afstand tot de norm(doelgat) getoond voor de KRW-waterlichamen in Nederland.</li>
-                <li><a href="https://www.bestrijdingsmiddelenatlas.nl">www.bestrijdingsmiddelenatlas.nl</a>: Voor een uitgebreide lijst van bestrijdingsmiddelen is in diverse kaartlagen de mate van overschrijding per stof, landgebruik en jaar weergegeven.</li>
+                <li><a href="https://krw-nutrend.netlify.app" target="_blank">krw-nutrend.netlify.app</a>: Voor nutriënten (stikstof, fosfor en DIN) wordt voor verschillende toetsjaren de toestand, trends, concentraties, en afstand tot de norm(doelgat) getoond voor de KRW-waterlichamen in Nederland.</li>
+                <li><a href="https://www.bestrijdingsmiddelenatlas.nl" target="_blank">www.bestrijdingsmiddelenatlas.nl</a>: Voor een uitgebreide lijst van bestrijdingsmiddelen is in diverse kaartlagen de mate van overschrijding per stof, landgebruik en jaar weergegeven.</li>
               </ul>
             </v-card-text>
           </v-card>
@@ -62,10 +62,14 @@
 </template>
 
 <script>
+
+import pdfFile from '@/assets/Trends_in_waterkwaliteit_eindconceptrapport_20240703_forDemoCHEMtrendWebApplication.pdf'
+
 export default {
   data () {
     return {
-      dialog: false
+      dialog: false,
+      pdfLink: pdfFile
     }
   }
 }

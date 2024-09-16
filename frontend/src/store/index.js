@@ -66,6 +66,13 @@ export default createStore({
             const subtitle1 = response[0].subtitle_1
             const subtitle2 = response[0].subtitle_2
 
+            const h1Value = response[0].h1_value
+            const h1Label = response[0].h1_label
+            const h2Value = response[0].h2_value
+            const h2Label = response[0].h2_label
+
+            console.log(h1Value, h1Label, h2Value, h2Label)
+
             const timeseries = response[0].timeseries
 
             const xAxisData = timeseries.map(item => item.x_value)
@@ -127,6 +134,54 @@ export default createStore({
                       color: '#f8766d',
                       borderColor: '#000000',
                       borderWidth: 1
+                    },
+                    markLine: {
+                      data: [
+                        {
+                          yAxis: h1Value,
+                          name: h1Label,
+                          lineStyle: {
+                            color: 'red',
+                            type: 'solid'
+                          },
+                          label: {
+                            show: true,
+                            position: 'insideStartBottom',
+                            formatter: function (params) {
+                              return params.data.name
+                            },
+                            emphasis: {
+                              disabled: true
+                            },
+                            lineStyle: {
+                              color: '#373737'
+                            },
+                            symbol: ['none', 'none']
+                          }
+                        },
+                        {
+                          yAxis: h2Value,
+                          name: h2Label,
+                          lineStyle: {
+                            color: 'blue',
+                            type: 'solid'
+                          },
+                          label: {
+                            show: true,
+                            position: 'insideStartBottom',
+                            formatter: function (params) {
+                              return params.data.name
+                            },
+                            emphasis: {
+                              disabled: true
+                            },
+                            lineStyle: {
+                              color: '#373737'
+                            },
+                            symbol: ['none', 'none']
+                          }
+                        }
+                      ]
                     }
                   },
                   {

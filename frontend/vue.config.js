@@ -12,6 +12,17 @@ module.exports = defineConfig({
     ]
   },
 
+  chainWebpack: config => {
+    config.module
+      .rule('pdf')
+      .test(/\.pdf$/)
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: '[name].[hash:8].[ext]'
+      });
+  },
+
   pluginOptions: {
     vuetify: {
       // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vuetify-loader
