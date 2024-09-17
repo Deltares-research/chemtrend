@@ -139,49 +139,33 @@ export default createStore({
                       data: [
                         {
                           yAxis: h1Value,
-                          name: h1Label,
-                          lineStyle: {
-                            color: 'red',
-                            type: 'solid'
-                          },
-                          label: {
-                            show: true,
-                            position: 'insideStartBottom',
-                            formatter: function (params) {
-                              return params.data.name
-                            },
-                            emphasis: {
-                              disabled: true
-                            },
-                            lineStyle: {
-                              color: '#373737'
-                            },
-                            symbol: ['none', 'none']
-                          }
+                          name: h1Label
                         },
                         {
                           yAxis: h2Value,
-                          name: h2Label,
-                          lineStyle: {
-                            color: 'blue',
-                            type: 'solid'
-                          },
-                          label: {
-                            show: true,
-                            position: 'insideStartBottom',
-                            formatter: function (params) {
-                              return params.data.name
-                            },
-                            emphasis: {
-                              disabled: true
-                            },
-                            lineStyle: {
-                              color: '#373737'
-                            },
-                            symbol: ['none', 'none']
-                          }
+                          name: h2Label
                         }
-                      ]
+                      ],
+                      label: {
+                        show: true,
+                        position: 'insideStart',
+                        formatter: function (params) {
+                          return params.data.name
+                        }
+                      },
+                      emphasis: {
+                        disabled: true
+                      },
+                      lineStyle: {
+                        color: '#373737'
+                      },
+                      symbol: ['none', 'none'],
+                      tooltip: {
+                        show: true,
+                        formatter: function (params) {
+                          return params.data.name + '  ' + params.data.yAxis
+                        }
+                      }
                     }
                   },
                   {
