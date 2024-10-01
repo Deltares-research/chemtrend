@@ -63,6 +63,7 @@ SELECT p.parameter_id           AS substance_id,
        p.parameter_omschrijving AS substance_description,
        p."CAS" as cas
 FROM public.parameter p join (select distinct parameter_code from voorbeelddata.trend) t on t.parameter_code=p.parameter_code
+where p."CAS" <> 'NVT'
 ;
 
 -- locations: FOR NOW: BASED ON EXAMPLE DATA
