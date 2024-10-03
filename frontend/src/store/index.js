@@ -139,20 +139,27 @@ export default createStore({
                       data: [
                         {
                           yAxis: h1Value,
-                          name: h1Label
+                          name: h1Label,
+                          label: {
+                            show: true,
+                            position: 'insideStart',
+                            formatter: function (params) {
+                              return params.data.name
+                            }
+                          }
                         },
                         {
                           yAxis: h2Value,
-                          name: h2Label
+                          name: h2Label,
+                          label: {
+                            show: true,
+                            position: 'insideEnd',
+                            formatter: function (params) {
+                              return params.data.name
+                            }
+                          }
                         }
                       ],
-                      label: {
-                        show: true,
-                        position: 'insideStart',
-                        formatter: function (params) {
-                          return params.data.name
-                        }
-                      },
                       emphasis: {
                         disabled: true
                       },
