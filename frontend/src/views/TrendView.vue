@@ -1,30 +1,44 @@
 <template>
   <div class="trend-view">
     <div v-for="(trend, index) in trends" :key="trend.name" class="trend-wrapper">
-      <v-card v-if="expandedTrends[index]">
+      <v-card v-show="expandedTrends[index]" flat>
         <v-card class="expansible-card">
-          <v-btn @click="toggleExpand(index, 0)">
-          {{ expandedTrends[index][0] ? 'Collapse' : 'Expand' }}
-        </v-btn>
-        <v-expand-transition>
-          <div v-if="expandedTrends[index][0]">
-            <v-card :title="trend.name" class="trend">
-              <v-chart class="chart" :option="trend.option" autoresize />
-            </v-card>
-          </div>
-        </v-expand-transition>
+          <v-row align="center" no-gutters>
+            <v-col cols="auto">
+              <v-btn @click="toggleExpand(index, 0)" icon flat>
+                <v-icon>{{ expandedTrends[index][0] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col>
+              <span class="card-title">{{ trend.option.title.text }}</span>
+            </v-col>
+          </v-row>
+          <v-expand-transition>
+            <div v-show="expandedTrends[index][0]">
+              <v-card :title="trend.name" class="trend">
+                <v-chart class="chart" :option="trend.option" autoresize />
+              </v-card>
+            </div>
+          </v-expand-transition>
         </v-card>
         <v-card class="expansible-card">
-          <v-btn @click="toggleExpand(index, 1)">
-          {{ expandedTrends[index][1] ? 'Collapse' : 'Expand' }}
-        </v-btn>
-        <v-expand-transition>
-          <div v-if="expandedTrends[index][1]">
-            <v-card :title="trend.name" class="trend">
-              <v-chart class="chart" :option="trend.option" autoresize />
-            </v-card>
-          </div>
-        </v-expand-transition>
+          <v-row align="center" no-gutters>
+            <v-col cols="auto">
+              <v-btn @click="toggleExpand(index, 1)" icon flat>
+                <v-icon>{{ expandedTrends[index][1] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col>
+              <span class="card-title">{{ trend.option.title.text }}</span>
+            </v-col>
+          </v-row>
+          <v-expand-transition>
+            <div v-show="expandedTrends[index][1]">
+              <v-card :title="trend.name" class="trend">
+                <v-chart class="chart" :option="trend.option" autoresize />
+              </v-card>
+            </div>
+          </v-expand-transition>
         </v-card>
       </v-card>
     </div>
@@ -102,6 +116,12 @@ export default {
 
 .expansible-card {
   width: 70vw;
+  margin-bottom: 10px;
 }
 
+.card-title {
+  font-size: 22px;
+  font-weight: 500;
+  padding: 18px;
+}
 </style>
