@@ -12,6 +12,11 @@
           v-model="substance"
         ></v-autocomplete>
         </v-row>
+        <v-row>
+          <v-radio-group v-model="region">
+            <v-radio v-for="region in regions" :key="region" :label="region" :value="region"></v-radio>
+          </v-radio-group>
+        </v-row>
         <!-- <v-row>
         <v-expansion-panels flat>
           <v-expansion-panel>
@@ -33,10 +38,10 @@ import _ from 'lodash'
 export default {
   name: 'SubstanceTab',
   methods: {
-    ...mapActions(['loadSubstances', 'loadFilteredLocations', 'setSelectedSubstanceId'])
+    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations', 'setSelectedSubstanceId'])
   },
   computed: {
-    ...mapGetters(['substances']),
+    ...mapGetters(['substances', 'regions']),
     substance: {
       get () {
         const subId = parseInt(_.get(this.$route, 'query.substance'), 10) // Ensure it's an integer
@@ -51,10 +56,24 @@ export default {
         this.$router.push({ query: newQuery })
         this.setSelectedSubstanceId(substance.substance_id)
       }
+    },
+    region: {
+      get () {
+        return _.get(this.$route, 'query.region', null) // Ensure it's an integer
+      },
+      set (region) {
+        console.log('region', region)
+        const newQuery = {
+          ...this.$route.query,
+          region: region
+        }
+        this.$router.push({ query: newQuery })
+      }
     }
   },
   created () {
     this.loadSubstances()
+    this.loadRegions()
   }
 }
 </script>

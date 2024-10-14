@@ -20,6 +20,13 @@ locations = metadata.tables["chemtrend.location_geojson"]
 waterbodies = metadata.tables["chemtrend.waterbody_geojson"]
 waterboards = metadata.tables["chemtrend.waterboard_geojson"]
 provinces = metadata.tables["chemtrend.province_geojson"]
+
+regions = {
+    "Waterboard": waterboards,
+    "Waterbodies": waterbodies,
+    "Province": provinces
+}
+
 catchments = metadata.tables["chemtrend.catchment_geojson"]
 
 # asyncio.run(setup_connection())
@@ -60,28 +67,16 @@ async def get_trend_data(x: float, y: float, substance_id: int):
     return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
-@app.get("/waterbodies/", tags=["Waterbodies"])
-async def get_all_waterbodies():
+@app.get("/regions/", tags=["Regions"])
+async def get_all_regions():
+    """List all available regions"""
+    return list(regions.keys())
+
+@app.get("/regions/{region_name}", tags=["Regions"])
+async def get_all_waterbodies(region_name):
     """List all waterbodies"""
-    query = waterbodies.select()
-    await database.connect()
-    result = await database.fetch_one(query)
-    return result.geojson
-
-
-@app.get("/waterboards/", tags=["waterboards"])
-async def list_waterboards_all():
-    """List all waterboards"""
-    query = waterboards.select()
-    await database.connect()
-    result = await database.fetch_one(query)
-    return result.geojson
-
-
-@app.get("/provinces/", tags=["provinces"])
-async def list_provinces_all():
-    """List all provinces"""
-    query = provinces.select()
+    region = regions[region_name]
+    query = region.select()
     await database.connect()
     result = await database.fetch_one(query)
     return result.geojson
