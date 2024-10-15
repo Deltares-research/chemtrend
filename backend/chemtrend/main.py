@@ -17,9 +17,21 @@ app.add_middleware(
 
 substances = metadata.tables["chemtrend.substance"]
 locations = metadata.tables["chemtrend.location_geojson"]
-waterbodies = metadata.tables["chemtrend.waterbody_geojson"]
-waterboards = metadata.tables["chemtrend.waterboard_geojson"]
-provinces = metadata.tables["chemtrend.province_geojson"]
+
+regions = [{
+        "name": "Waterschap",
+        "color": "#32a852"
+    }, {
+        "name": "Waterlichaam",
+        "color": "#3632a8"
+    }, {
+        "name": "Provincie",
+        "color": "#a84832"
+    }, {
+        "name": "Stroomgebied",
+        "color": "#a89932"
+    }]
+
 catchments = metadata.tables["chemtrend.catchment_geojson"]
 
 # asyncio.run(setup_connection())
@@ -60,28 +72,15 @@ async def get_trend_data(x: float, y: float, substance_id: int):
     return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
-@app.get("/waterbodies/", tags=["Waterbodies"])
-async def get_all_waterbodies():
-    """List all waterbodies"""
-    query = waterbodies.select()
-    await database.connect()
-    result = await database.fetch_one(query)
-    return result.geojson
+@app.get("/list_regions/", tags=["Regions"])
+async def get_all_regions():
+    """List all available regions"""
+    return regions
 
-
-@app.get("/waterboards/", tags=["waterboards"])
-async def list_waterboards_all():
-    """List all waterboards"""
-    query = waterboards.select()
-    await database.connect()
-    result = await database.fetch_one(query)
-    return result.geojson
-
-
-@app.get("/provinces/", tags=["provinces"])
-async def list_provinces_all():
-    """List all provinces"""
-    query = provinces.select()
+@app.get("/regions/", tags=["Regions"])
+async def get_all_waterbodies(x: float, y: float):
+    """Get regions from coordinates"""
+    query = f"select * from chemtrend.region_geojson({x},{y});"
     await database.connect()
     result = await database.fetch_one(query)
     return result.geojson

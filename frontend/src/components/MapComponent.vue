@@ -57,7 +57,8 @@ export default {
         }
       ],
       popupItems: [],
-      map: null
+      map: null,
+      mapLocation: null
     }
   },
   components: {
@@ -69,6 +70,9 @@ export default {
   watch: {
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
+    },
+    '$route.query.region' (val, oldVal) {
+      this.updateRegion()
     }
   },
   mounted () {
@@ -76,29 +80,24 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId'])
+    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId', 'regions'])
   },
   methods: {
     ...mapActions(['addTrend', 'togglePanelCollapse']),
 
     initializeData () {
       this.addLocations()
-      this.addWaterbodies()
       this.addFilteredLocations()
+      this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
       this.updateFilteredLocations()
-      const lat = _.get(this.$route, 'query.latitude')
-      const lng = _.get(this.$route, 'query.longitude')
-      if (lat && lng) {
-        this.map.fire('click', {
-          lngLat: { lat: lat, lng: lng }, originalEvent: { target: this.map }
-        })
-      }
+      this.initializeMapWithLatLon()
     },
     addLocations () {
+      const name = 'locations'
       this.map.addLayer({
-        id: 'locations',
+        id: name,
         type: 'circle',
         source: {
           type: 'geojson',
@@ -111,9 +110,11 @@ export default {
           'circle-stroke-width': 1,
           'circle-radius': 5
         }
+      }).on('load', () => {
+        this.checkSelection(name)
       })
 
-      this.map.on('mouseenter', 'locations', (e) => {
+      this.map.on('mouseenter', name, (e) => {
         // Change the cursor style as a UI indicator.
         this.map.getCanvas().style.cursor = 'pointer'
 
@@ -130,23 +131,34 @@ export default {
         this.popupLngLat = e.lngLat
       })
 
-      this.map.on('mouseleave', 'locations', () => {
+      this.map.on('mouseleave', name, () => {
         this.popupItems = []
         this.map.getCanvas().style.cursor = ''
       })
     },
 
-    addWaterbodies () {
+    addRegions () {
+      const name = 'regions'
+      const paintColor = ['case']
+      this.regions.forEach(region => {
+        paintColor.push(['==', 'region_id', region.name])
+        paintColor.push(region.color)
+      })
+      paintColor.push('#000000')
+      console.log(paintColor)
       this.map.addLayer({
-        id: 'waterbodies',
-        type: 'fill',
+        id: `selected-${name}`,
+        type: 'line',
         source: {
           type: 'geojson',
-          data: `${process.env.VUE_APP_SERVER_URL}/waterbodies/`
+          data: initialData
         },
         paint: {
-          'fill-color': 'rgba(239, 239, 240, 0)'
+          'line-color': paintColor,
+          'line-width': 3
         }
+      }).on('load', () => {
+        this.checkSelection(name)
       })
     },
     addFilteredLocations () {
@@ -203,18 +215,6 @@ export default {
           'circle-radius': 4
         }
       })
-      this.map.addLayer({
-        id: 'selected-waterbodies',
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: initialData
-        },
-        paint: {
-          'line-color': 'hsl(188, 59%, 50%)',
-          'line-width': 3
-        }
-      })
     },
 
     updateFilteredLocations () {
@@ -223,8 +223,31 @@ export default {
           .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
       }
     },
+    updateRegion (lat, lng) {
+      console.log(`updateregion, ${lat}, ${lng}`)
+      const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
+      if (this.map.getSource('selected-regions')) {
+        this.map.getSource('selected-regions')
+          .setData(url)
+      }
+    },
+    initializeMapWithLatLon () {
+      const lat = _.get(this.$route, 'query.latitude')
+      const lng = _.get(this.$route, 'query.longitude')
+      if (lat && lng) {
+        this.map.fire('click', {
+          lngLat: { lat: lat, lng: lng }, originalEvent: { target: this.map }
+        })
+      }
+    },
     interactionMap () {
       this.map.on('click', e => {
+        this.mapLocation = e
+        this.map.easeTo({
+          center: e.lngLat,
+          zoom: 11,
+          duration: 800
+        })
         if (this.panelIsCollapsed) {
           this.togglePanelCollapse()
         }
@@ -236,34 +259,28 @@ export default {
         // TODO: implement clearTrends
         // this.clearTrends()
         // TODO: do we want to ease to a polygon or specific zoom level?
-        this.map.easeTo({
-          center: e.lngLat,
-          zoom: 12,
-          duration: 800
-        })
 
         this.$router.push({
           path: '/trends',
           query: newQuery
         })
-
-        const shapes = ['waterbodies', 'locations']
-
-        shapes.forEach(shape => {
-          const features = this.map.queryRenderedFeatures(e.point, { layers: [shape] })
-          this.map.getSource(`selected-${shape}`)
-            .setData({
-              type: 'FeatureCollection',
-              features: features
-            })
-          features.forEach(feature => {
-            const x = feature._geometry.coordinates[0]
-            const y = feature._geometry.coordinates[1]
-            const substanceId = this.selectedSubstanceId
-
-            this.addTrend({ x, y, substanceId }, shape)
-          })
+        this.checkSelection('locations')
+        this.updateRegion(e.lngLat.lat, e.lngLat.lng)
+      })
+    },
+    checkSelection (shape) {
+      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
+      this.map.getSource(`selected-${shape}`)
+        .setData({
+          type: 'FeatureCollection',
+          features: features
         })
+      features.forEach(feature => {
+        const x = feature._geometry.coordinates[0]
+        const y = feature._geometry.coordinates[1]
+        const substanceId = this.selectedSubstanceId
+
+        this.addTrend({ x, y, substanceId })
       })
     }
   }

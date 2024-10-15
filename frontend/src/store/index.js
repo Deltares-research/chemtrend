@@ -5,6 +5,7 @@ export default createStore({
     substances: [],
     selectedSubstanceId: null,
     trends: [],
+    regions: [],
     panelIsCollapsed: true
   },
   getters: {
@@ -17,12 +18,18 @@ export default createStore({
     trends (state) {
       return state.trends
     },
+    regions (state) {
+      return state.regions
+    },
     panelIsCollapsed: state => state.panelIsCollapsed
 
   },
   mutations: {
     SET_SUBSTANCES (state, data) {
       state.substances = data
+    },
+    SET_REGIONS (state, regions) {
+      state.regions = regions
     },
     SET_SELECTED_SUBSTANCE_ID (state, id) {
       console.log('mutation', id)
@@ -50,6 +57,16 @@ export default createStore({
         })
         .then(response => {
           store.commit('SET_SUBSTANCES', response)
+        })
+    },
+    loadRegions (store) {
+      const url = `${process.env.VUE_APP_SERVER_URL}/list_regions/`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          store.commit('SET_REGIONS', response)
         })
     },
     setSelectedSubstanceId ({ commit }, id) {
