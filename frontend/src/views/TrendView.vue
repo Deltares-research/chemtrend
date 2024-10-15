@@ -11,13 +11,13 @@
               </v-btn>
             </v-col>
             <v-col>
-              <span class="card-title">{{ trends[0].option?.title?.text }}</span>
+              <span class="card-title">{{ getChartOptions(trends[0]).title.text }}</span>
             </v-col>
           </v-row>
           <v-expand-transition>
             <div v-show="expandedTrends[0][0]">
               <v-card class="trend">
-                <v-chart class="chart" :option="trends[0]?.option" autoresize />
+                <v-chart class="chart" :option="getChartOptions(trends[0])" autoresize />
               </v-card>
             </div>
           </v-expand-transition>
@@ -33,13 +33,13 @@
               </v-btn>
             </v-col>
             <v-col>
-              <span class="card-title">{{ trends[1].option?.title?.text }}</span>
+              <span class="card-title">{{ getChartOptions(trends[1]).title.text }}</span>
             </v-col>
           </v-row>
           <v-expand-transition>
             <div v-show="expandedTrends[1][1]">
               <v-card class="trend">
-                <v-chart class="chart" :option="trends[1]?.option" autoresize />
+                <v-chart class="chart" :option="getChartOptions(trends[1])" autoresize />
               </v-card>
             </div>
           </v-expand-transition>
@@ -79,20 +79,141 @@ export default {
       expandedTrends: [[true, true], [true, true]]
     }
   },
-  watch: {
-    trends: {
-      handler (newTrends) {
-        if (newTrends.length >= 2) {
-          this.expandedTrends = newTrends.map(() => [true, true])
-        }
-      },
-      immediate: true // Run the watcher immediately on first render
-    }
-  },
   methods: {
     toggleExpand (trendIndex, cardIndex) {
       if (this.expandedTrends[trendIndex]) {
         this.expandedTrends[trendIndex][cardIndex] = !this.expandedTrends[trendIndex][cardIndex]
+      }
+    },
+    getChartOptions (trend) {
+      if (!trend || !trend.trendData) return {}
+
+      const trendData = trend.trendData
+      const timeseries = trendData.timeseries
+
+      const xAxisData = timeseries.map(item => item.x_value)
+      const yValueLowess = timeseries.map(item => item.y_value_lowess)
+      const yValueMeting = timeseries.map(item => item.y_value_meting)
+      const yValueTheilSen = timeseries.map(item => item.y_value_theil_sen)
+
+      return {
+        title: {
+          text: trendData.title,
+          subtext: `${trendData.subtitle_1}\n${trendData.subtitle_2}`,
+          left: 'center',
+          top: 10,
+          textStyle: {
+            fontSize: 25
+          },
+          subtextStyle: {
+            fontSize: 15
+          }
+        },
+        grid: {
+          top: 100,
+          bottom: 50,
+          right: 50,
+          left: 50
+        },
+        tooltip: {
+          show: true
+        },
+        legend: {
+          show: true,
+          bottom: 5,
+          lineStyle: {
+            symbol: 'none'
+          },
+          itemWidth: 70
+        },
+        xAxis: {
+          type: 'category',
+          data: xAxisData
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: 'Meting',
+            type: 'line',
+            data: yValueMeting,
+            lineStyle: {
+              color: '#000000'
+            },
+            symbol: 'circle',
+            symbolSize: 8,
+            showAllSymbol: true,
+            itemStyle: {
+              color: '#f8766d',
+              borderColor: '#000000',
+              borderWidth: 1
+            },
+            markLine: {
+              data: [
+                {
+                  yAxis: trendData.h1_value,
+                  name: trendData.h1_label,
+                  label: {
+                    show: true,
+                    position: 'insideStart',
+                    formatter: function (params) {
+                      return params.data.name
+                    }
+                  }
+                },
+                {
+                  yAxis: trendData.h2_value,
+                  name: trendData.h2_label,
+                  label: {
+                    show: true,
+                    position: 'insideEnd',
+                    formatter: function (params) {
+                      return params.data.name
+                    }
+                  }
+                }
+              ],
+              emphasis: {
+                disabled: true
+              },
+              lineStyle: {
+                color: '#373737'
+              },
+              symbol: ['none', 'none'],
+              tooltip: {
+                show: true,
+                formatter: function (params) {
+                  return `${params.data.name}  ${params.data.yAxis}`
+                }
+              }
+            }
+          },
+          {
+            name: 'Lowess',
+            type: 'line',
+            data: yValueLowess,
+            lineStyle: {
+              color: '#0000ff'
+            },
+            symbol: 'none',
+            showSymbol: false
+          },
+          {
+            name: 'Theil Sen',
+            type: 'line',
+            data: yValueTheilSen,
+            lineStyle: {
+              color: '#FFA500',
+              type: 'dashed'
+            },
+            symbol: 'none',
+            showSymbol: false,
+            itemStyle: {
+              color: '#FFA500'
+            }
+          }
+        ]
       }
     }
   }
