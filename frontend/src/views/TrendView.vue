@@ -1,51 +1,21 @@
 <template>
-  <div class="trend-view">
-    <div class="trend-wrapper">
-
-      <v-card v-if="trends[0]" flat>
-        <v-card class="expansible-card">
-          <v-row align="center" no-gutters>
-            <v-col cols="auto">
-              <v-btn @click="toggleExpand(0, 0)" icon flat>
-                <v-icon>{{ expandedTrends[0][0] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
-              </v-btn>
-            </v-col>
-            <v-col>
-              <span class="card-title">{{ getChartOptions(trends[0]).title.text }}</span>
-            </v-col>
-          </v-row>
-          <v-expand-transition>
-            <div v-show="expandedTrends[0][0]">
-              <v-card class="trend">
-                <v-chart class="chart" :option="getChartOptions(trends[0])" autoresize />
-              </v-card>
-            </div>
-          </v-expand-transition>
-        </v-card>
-      </v-card>
-
-      <v-card v-if="trends[1]" flat>
-        <v-card class="expansible-card">
-          <v-row align="center" no-gutters>
-            <v-col cols="auto">
-              <v-btn @click="toggleExpand(1, 1)" icon flat>
-                <v-icon>{{ expandedTrends[1][1] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
-              </v-btn>
-            </v-col>
-            <v-col>
-              <span class="card-title">{{ getChartOptions(trends[1]).title.text }}</span>
-            </v-col>
-          </v-row>
-          <v-expand-transition>
-            <div v-show="expandedTrends[1][1]">
-              <v-card class="trend">
-                <v-chart class="chart" :option="getChartOptions(trends[1])" autoresize />
-              </v-card>
-            </div>
-          </v-expand-transition>
-        </v-card>
-      </v-card>
-    </div>
+  <div>
+    <v-expansion-panels
+      width="100%"
+      v-model="panels"
+      multiple
+    >
+      <v-expansion-panel
+        v-for="trend in trends" :key="trend.trendData.title"
+      >
+        <v-expansion-panel-title>{{ trend.trendData.title }}</v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <v-card class="trend">
+              <v-chart class="chart" :option="getChartOptions(trend)" autoresize />
+            </v-card>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 
@@ -68,23 +38,28 @@ use([
 ])
 
 export default {
+  props: {
+    drawer: {
+      type: Boolean
+    }
+  },
+  data () {
+    return {
+      panels: [0]
+    }
+  },
   computed: {
     ...mapGetters(['trends'])
   },
   components: {
     VChart
   },
-  data () {
-    return {
-      expandedTrends: [[true, true], [true, true]]
+  watch: {
+    trends () {
+      this.panels = [0]
     }
   },
   methods: {
-    toggleExpand (trendIndex, cardIndex) {
-      if (this.expandedTrends[trendIndex]) {
-        this.expandedTrends[trendIndex][cardIndex] = !this.expandedTrends[trendIndex][cardIndex]
-      }
-    },
     getChartOptions (trend) {
       if (!trend || !trend.trendData) return {}
 
@@ -221,35 +196,8 @@ export default {
 </script>
 
 <style>
-.trend-view {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: right;
-  align-items: end;
-  height: 50vh;
-  overflow-y: auto;
-}
-
-.trend-wrapper {
-  justify-content: center;
-  margin-bottom: 10px;
-  height: fit-content;
-}
-
 .trend {
   height: 45vh;
-  width: 70vw;
-}
-
-.expansible-card {
-  width: 70vw;
-  margin-bottom: 10px;
-}
-
-.card-title {
-  font-size: 22px;
-  font-weight: 500;
-  padding: 18px;
+  max-width: 70vw;
 }
 </style>

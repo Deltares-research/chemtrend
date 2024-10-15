@@ -39,7 +39,7 @@ export default createStore({
       state.trends = []
     },
     ADD_TREND (state, trend) {
-      state.trends.push(trend)
+      state.trends.unshift(trend)
     },
     TOGGLE_PANEL_COLLAPSE (state) {
       state.panelIsCollapsed = !state.panelIsCollapsed
