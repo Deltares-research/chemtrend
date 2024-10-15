@@ -186,6 +186,16 @@ end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.region(5.019, 52.325);
 
+-- view that couples locations and regions:
+drop view chemtrend.location_region cascade;
+create or replace view chemtrend.location_region as
+select loc.location_code, reg.region_id
+from (select *, st_transform(geom, 28992) as geom_rd from chemtrend.location) loc
+join chemtrend.region reg on 1=1
+-- join (select * from chemtrend.region where region_id in (select region_id from chemtrend.region(5.019, 52.325))) reg on 1=1
+where st_within(loc.geom_rd, reg.geometry)
+;
+
 -- function to return regional polygons based on given coordinates as geojson
 drop function if exists chemtrend.region_geojson(x decimal, y decimal);
 create or replace function chemtrend.region_geojson(x decimal, y decimal)
@@ -204,8 +214,6 @@ return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.region_geojson(5.019, 52.325);
-
-
 
 -- function to return closest location on given lon/lat (x,y) within 1 km
 drop function if exists chemtrend.location(x decimal, y decimal);
