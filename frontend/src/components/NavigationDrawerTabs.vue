@@ -4,9 +4,6 @@
       <v-tab value="substances">
         <v-icon>mdi-flask</v-icon>
       </v-tab>
-      <v-tab value="layers">
-        <v-icon>mdi-layers</v-icon>
-      </v-tab>
       <v-tab value="information">
         <v-icon>mdi-information</v-icon>
       </v-tab>
@@ -14,18 +11,15 @@
 
     <v-card-text>
       <v-tabs-window v-model="tab">
+
         <v-tabs-window-item value="substances" class="tab-content">
           <substance-tab />
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="layers">
-          Layers
-        </v-tabs-window-item>
-
         <v-tabs-window-item value="information" class="tab-content">
           <information-tab />
-
         </v-tabs-window-item>
+
       </v-tabs-window>
     </v-card-text>
   </div>
