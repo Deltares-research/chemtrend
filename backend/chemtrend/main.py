@@ -17,14 +17,20 @@ app.add_middleware(
 
 substances = metadata.tables["chemtrend.substance"]
 locations = metadata.tables["chemtrend.location_geojson"]
-waterbodies = metadata.tables["chemtrend.waterbody_geojson"]
-waterboards = metadata.tables["chemtrend.waterboard_geojson"]
-provinces = metadata.tables["chemtrend.province_geojson"]
 
 regions = {
-    "Waterboard": waterboards,
-    "Waterbodies": waterbodies,
-    "Province": provinces
+    "Waterschap": {
+        "color": "#32a852"
+    },
+    "Waterlichaam": {
+        "color": "#3632a8"
+    },
+    "Provincie": {
+        "color": "#a84832"
+    },
+    "Stroomgebied": {
+        "color": "#a89932"
+    },
 }
 
 catchments = metadata.tables["chemtrend.catchment_geojson"]
