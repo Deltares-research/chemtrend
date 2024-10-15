@@ -154,15 +154,15 @@ from (
 ;
 
 -- view with all regions
-drop view if exists chemtrend.region;
+drop view if exists chemtrend.region cascade;
 create or replace view chemtrend.region as
-select 'Provincie'::varchar as region_type, province_id as region_id, province_description as region_description, geometry from chemtrend.province
+select province_id+1000 as region_id, 'Provincie'::varchar as region_type, province_id as original_id, province_description as region_description, geometry from chemtrend.province
 union all
-select 'Waterschap'::varchar as region_type, waterboard_id as region_id, waterboard_description as region_description, geometry from chemtrend.waterboard
+select waterboard_id+2000 as region_id, 'Waterschap'::varchar as region_type, waterboard_id as original_id, waterboard_description as region_description, geometry from chemtrend.waterboard
 union all
-select 'Waterlichaam'::varchar as region_type, krwwaterbody_id as region_id, krwwaterbody_description as region_description, geometry from chemtrend.waterbody
+select krwwaterbody_id+3000 as region_id, 'Waterlichaam'::varchar as region_type, krwwaterbody_id as original_id, krwwaterbody_description as region_description, geometry from chemtrend.waterbody
 union all
-select 'Stroomgebied'::varchar as region_type, catchment_id as region_id, catchment_description_short as region_description, geometry from chemtrend.catchment
+select catchment_id+4000 as region_id, 'Stroomgebied'::varchar as region_type, catchment_id as original_id, catchment_description_short as region_description, geometry from chemtrend.catchment
 ;
 
 -- function to return regional polygons based on given coordinates
@@ -176,7 +176,7 @@ declare srid_xy int = 4326;
 declare srid_rd int = 28992;
 begin
 select ($$
-    select reg.region_type, region_id, region_description, st_transform(geometry, %3$s) as geometry
+    select reg.region_id, reg.region_type, original_id, reg.region_description, st_transform(geometry, %3$s) as geometry
     from chemtrend.region reg
     where st_within(st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s), reg.geometry)
     $$) into q;
