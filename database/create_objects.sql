@@ -19,7 +19,9 @@ SELECT wb.waterbeheerder_id          AS waterboard_id,
        wb.waterbeheerder_code         AS waterboard_code,
        wb.waterbeheerder_omschrijving AS waterboard_description,
        wb.geometry as geometry
-FROM public.waterbeheerder wb;
+FROM public.waterbeheerder wb
+where st_isempty(geometry)=false;
+;
 
 create or replace view chemtrend.waterboard_geojson as
 select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(waterboard)::json)) as geojson
