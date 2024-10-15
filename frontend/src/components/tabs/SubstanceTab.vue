@@ -17,16 +17,6 @@
             <v-radio v-for="region in regions" :key="region" :label="region" :value="region"></v-radio>
           </v-radio-group>
         </v-row>
-        <!-- <v-row>
-        <v-expansion-panels flat>
-          <v-expansion-panel>
-          <v-expansion-panel-title>All substances</v-expansion-panel-title>
-          <v-expansion-panel-text>
-              <v-list :items="substances"></v-list>
-          </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-row> -->
     </v-col>
   </div>
 </template>
