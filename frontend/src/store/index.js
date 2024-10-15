@@ -205,7 +205,7 @@ export default createStore({
               }
             }
 
-            store.commit('CLEAR_TRENDS')
+            // store.commit('CLEAR_TRENDS')
             store.commit('ADD_TREND', trend)
           } else {
             console.error('Invalid response structure:', response)

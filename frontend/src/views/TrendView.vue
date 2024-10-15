@@ -1,41 +1,45 @@
 <template>
   <div class="trend-view">
-    <div v-for="(trend, index) in trends" :key="trend.name" class="trend-wrapper">
-      <v-card v-show="expandedTrends[index]" flat>
+    <div class="trend-wrapper">
+
+      <v-card v-if="trends[0]" flat>
         <v-card class="expansible-card">
           <v-row align="center" no-gutters>
             <v-col cols="auto">
-              <v-btn @click="toggleExpand(index, 0)" icon flat>
-                <v-icon>{{ expandedTrends[index][0] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              <v-btn @click="toggleExpand(0, 0)" icon flat>
+                <v-icon>{{ expandedTrends[0][0] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
               </v-btn>
             </v-col>
             <v-col>
-              <span class="card-title">{{ trend.option.title.text }}</span>
+              <span class="card-title">{{ trends[0].option?.title?.text }}</span>
             </v-col>
           </v-row>
           <v-expand-transition>
-            <div v-show="expandedTrends[index][0]">
-              <v-card :title="trend.name" class="trend">
-                <v-chart class="chart" :option="trend.option" autoresize />
+            <div v-show="expandedTrends[0][0]">
+              <v-card class="trend">
+                <v-chart class="chart" :option="trends[0]?.option" autoresize />
               </v-card>
             </div>
           </v-expand-transition>
         </v-card>
+      </v-card>
+
+      <v-card v-if="trends[1]" flat>
         <v-card class="expansible-card">
           <v-row align="center" no-gutters>
             <v-col cols="auto">
-              <v-btn @click="toggleExpand(index, 1)" icon flat>
-                <v-icon>{{ expandedTrends[index][1] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              <v-btn @click="toggleExpand(1, 1)" icon flat>
+                <v-icon>{{ expandedTrends[1][1] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
               </v-btn>
             </v-col>
             <v-col>
-              <span class="card-title">{{ trend.option.title.text }}</span>
+              <span class="card-title">{{ trends[1].option?.title?.text }}</span>
             </v-col>
           </v-row>
           <v-expand-transition>
-            <div v-show="expandedTrends[index][1]">
-              <v-card :title="trend.name" class="trend">
-                <v-chart class="chart" :option="trend.option" autoresize />
+            <div v-show="expandedTrends[1][1]">
+              <v-card class="trend">
+                <v-chart class="chart" :option="trends[1]?.option" autoresize />
               </v-card>
             </div>
           </v-expand-transition>
@@ -72,13 +76,15 @@ export default {
   },
   data () {
     return {
-      expandedTrends: []
+      expandedTrends: [[true, true], [true, true]]
     }
   },
   watch: {
     trends: {
       handler (newTrends) {
-        this.expandedTrends = newTrends.map(() => [true, true])
+        if (newTrends.length >= 2) {
+          this.expandedTrends = newTrends.map(() => [true, true])
+        }
       },
       immediate: true // Run the watcher immediately on first render
     }
@@ -97,15 +103,16 @@ export default {
 .trend-view {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   justify-content: right;
-  align-items: right;
+  align-items: end;
   height: 50vh;
+  overflow-y: auto;
 }
 
 .trend-wrapper {
-  display: flex;
   justify-content: center;
-  margin: 10px;
+  margin-bottom: 10px;
   height: fit-content;
 }
 
