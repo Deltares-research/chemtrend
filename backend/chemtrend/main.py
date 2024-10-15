@@ -67,16 +67,15 @@ async def get_trend_data(x: float, y: float, substance_id: int):
     return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
-@app.get("/regions/", tags=["Regions"])
+@app.get("/list_regions/", tags=["Regions"])
 async def get_all_regions():
     """List all available regions"""
     return list(regions.keys())
 
-@app.get("/regions/{region_name}", tags=["Regions"])
-async def get_all_waterbodies(region_name):
-    """List all waterbodies"""
-    region = regions[region_name]
-    query = region.select()
+@app.get("/regions/", tags=["Regions"])
+async def get_all_waterbodies(x: float, y: float):
+    """Get regions from coordinates"""
+    query = f"select * from chemtrend.region_geojson({x},{y});"
     await database.connect()
     result = await database.fetch_one(query)
     return result.geojson

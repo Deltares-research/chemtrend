@@ -6,7 +6,7 @@ create or replace view chemtrend.province(province_id, province_code, province_d
 SELECT pr."FID"           AS province_id,
        pr."Code"         AS province_code,
        pr."Provincien" AS province_description,
-       pr.geometry as geometry
+       st_transform(pr.geometry, 28992) as geometry
 FROM public.provincies pr;
 
 create or replace view chemtrend.province_geojson as
@@ -150,6 +150,59 @@ from (
 --     where meetpunt_code='NL02_0037' and parameter_code='Cr'
 ) x
 ;
+
+-- view with all regions
+drop view if exists chemtrend.region;
+create or replace view chemtrend.region as
+select 'Provincie'::varchar as region_type, province_id as region_id, province_description as region_description, geometry from chemtrend.province
+union all
+select 'Waterschap'::varchar as region_type, waterboard_id as region_id, waterboard_description as region_description, geometry from chemtrend.waterboard
+union all
+select 'Waterlichaam'::varchar as region_type, krwwaterbody_id as region_id, krwwaterbody_description as region_description, geometry from chemtrend.waterbody
+union all
+select 'Stroomgebied'::varchar as region_type, catchment_id as region_id, catchment_description_short as region_description, geometry from chemtrend.catchment
+;
+
+-- function to return regional polygons based on given coordinates
+drop function if exists chemtrend.region(x decimal, y decimal);
+create or replace function chemtrend.region(x decimal, y decimal)
+-- 	returns table(region_type text, region_id text, region_description text, geom geometry) as
+    returns setof chemtrend.region as
+$ff$
+declare q text;
+declare srid_xy int = 4326;
+declare srid_rd int = 28992;
+begin
+select ($$
+    select reg.region_type, region_id, region_description, st_transform(geometry, %3$s) as geometry
+    from chemtrend.region reg
+    where st_within(st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s), reg.geometry)
+    $$) into q;
+q := format(q, x, y, srid_xy, srid_rd);
+return query execute q;
+end
+$ff$ language plpgsql;
+-- example: select * from chemtrend.region(5.019, 52.325);
+
+-- function to return regional polygons based on given coordinates as geojson
+drop function if exists chemtrend.region_geojson(x decimal, y decimal);
+create or replace function chemtrend.region_geojson(x decimal, y decimal)
+    returns table (geojson json) as
+$ff$
+declare q text;
+declare srid_xy int = 4326;
+-- declare srid_rd int = 28992;
+begin
+select ($$
+    select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(region)::json)) as geojson
+    from chemtrend.region(%1$s,%2$s)
+    $$) into q;
+q := format(q, x, y, srid_xy);
+return query execute q;
+end
+$ff$ language plpgsql;
+-- example: select * from chemtrend.region_geojson(5.019, 52.325);
+
 
 
 -- function to return closest location on given lon/lat (x,y) within 1 km
