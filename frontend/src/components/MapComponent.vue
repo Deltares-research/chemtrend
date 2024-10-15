@@ -80,15 +80,15 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId'])
+    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId', 'regions'])
   },
   methods: {
     ...mapActions(['addTrend', 'togglePanelCollapse']),
 
     initializeData () {
       this.addLocations()
-      this.addRegions()
       this.addFilteredLocations()
+      this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
       this.updateFilteredLocations()
@@ -111,7 +111,6 @@ export default {
           'circle-radius': 5
         }
       }).on('load', () => {
-        console.log('HELLO')
         this.checkSelection(name)
       })
 
@@ -140,15 +139,23 @@ export default {
 
     addRegions () {
       const name = 'regions'
+      const paintColor = ['case']
+      this.regions.forEach(region => {
+        paintColor.push(['==', 'region_id', region.name])
+        paintColor.push(region.color)
+      })
+      paintColor.push('#000000')
+      console.log(paintColor)
       this.map.addLayer({
-        id: name,
-        type: 'fill',
+        id: `selected-${name}`,
+        type: 'line',
         source: {
           type: 'geojson',
-          data: `${process.env.VUE_APP_SERVER_URL}/regions/${this.$route.query.region}`
+          data: initialData
         },
         paint: {
-          'fill-color': 'rgba(239, 239, 240, 0)'
+          'line-color': paintColor,
+          'line-width': 3
         }
       }).on('load', () => {
         this.checkSelection(name)
@@ -208,18 +215,6 @@ export default {
           'circle-radius': 4
         }
       })
-      this.map.addLayer({
-        id: 'selected-regions',
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: initialData
-        },
-        paint: {
-          'line-color': 'hsl(188, 59%, 50%)',
-          'line-width': 3
-        }
-      })
     },
 
     updateFilteredLocations () {
@@ -228,9 +223,13 @@ export default {
           .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
       }
     },
-    updateRegion () {
-      this.map.getSource('regions')
-      // TODO: update the regions map with the current selected region
+    updateRegion (lat, lng) {
+      console.log(`updateregion, ${lat}, ${lng}`)
+      const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
+      if (this.map.getSource('selected-regions')) {
+        this.map.getSource('selected-regions')
+          .setData(url)
+      }
     },
     initializeMapWithLatLon () {
       const lat = _.get(this.$route, 'query.latitude')
@@ -244,6 +243,11 @@ export default {
     interactionMap () {
       this.map.on('click', e => {
         this.mapLocation = e
+        this.map.easeTo({
+          center: e.lngLat,
+          zoom: 11,
+          duration: 800
+        })
         if (this.panelIsCollapsed) {
           this.togglePanelCollapse()
         }
@@ -255,18 +259,13 @@ export default {
         // TODO: implement clearTrends
         // this.clearTrends()
         // TODO: do we want to ease to a polygon or specific zoom level?
-        this.map.easeTo({
-          center: e.lngLat,
-          zoom: 12,
-          duration: 800
-        })
 
         this.$router.push({
           path: '/trends',
           query: newQuery
         })
-        const shapes = ['regions', 'locations']
-        shapes.forEach(shape => this.checkSelection(shape))
+        this.checkSelection('locations')
+        this.updateRegion(e.lngLat.lat, e.lngLat.lng)
       })
     },
     checkSelection (shape) {
@@ -281,7 +280,7 @@ export default {
         const y = feature._geometry.coordinates[1]
         const substanceId = this.selectedSubstanceId
 
-        this.addTrend({ x, y, substanceId }, shape)
+        this.addTrend({ x, y, substanceId })
       })
     }
   }

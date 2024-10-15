@@ -13,9 +13,17 @@
         ></v-autocomplete>
         </v-row>
         <v-row>
-          <v-radio-group v-model="region">
-            <v-radio v-for="region in regions" :key="region" :label="region" :value="region"></v-radio>
-          </v-radio-group>
+        <v-switch
+          v-model="region"
+          v-for="reg in regions"
+          :key="reg.name"
+          :label="reg.name"
+          :value="reg.name"
+          :color="reg.color"
+          width="100%"
+          hide-details
+          multiple
+        ></v-switch>
         </v-row>
         <v-row>
           <point-layer-legend style="margin-bottom: 15px;" />
@@ -45,7 +53,6 @@ export default {
         return this.substances.find(substance => substance.substance_id === subId) || null
       },
       set (substance) {
-        console.log('substance', substance)
         const newQuery = {
           ...this.$route.query,
           substance: substance.substance_id
@@ -56,13 +63,13 @@ export default {
     },
     region: {
       get () {
-        return _.get(this.$route, 'query.region', null) // Ensure it's an integer
+        const regions = _.get(this.$route, 'query.region', '')
+        return regions.split(',')
       },
       set (region) {
-        console.log('region', region)
         const newQuery = {
           ...this.$route.query,
-          region: region
+          region: region.join(',')
         }
         this.$router.push({ query: newQuery })
       }

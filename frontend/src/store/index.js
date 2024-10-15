@@ -60,7 +60,7 @@ export default createStore({
         })
     },
     loadRegions (store) {
-      const url = `${process.env.VUE_APP_SERVER_URL}/regions/`
+      const url = `${process.env.VUE_APP_SERVER_URL}/list_regions/`
       fetch(url)
         .then(res => {
           return res.json()

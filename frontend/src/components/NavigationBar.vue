@@ -4,7 +4,11 @@
         <v-app-bar-nav-icon  @click="$emit('toggle-drawer')"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title>CHEMtrend</v-app-bar-title>
+    <v-app-bar-title>
+      <router-link to="/trends">
+        CHEMtrend
+      </router-link>
+    </v-app-bar-title>
     <v-spacer></v-spacer>
     <img :src=rwsImgPath alt="Rijkswaterstaat Logo" height="40" />
     <img :src=deltaresImgPath alt="Deltares Logo" height="40" />

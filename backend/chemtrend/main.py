@@ -18,20 +18,19 @@ app.add_middleware(
 substances = metadata.tables["chemtrend.substance"]
 locations = metadata.tables["chemtrend.location_geojson"]
 
-regions = {
-    "Waterschap": {
+regions = [{
+        "name": "Waterschap",
         "color": "#32a852"
-    },
-    "Waterlichaam": {
+    }, {
+        "name": "Waterlichaam",
         "color": "#3632a8"
-    },
-    "Provincie": {
+    }, {
+        "name": "Provincie",
         "color": "#a84832"
-    },
-    "Stroomgebied": {
+    }, {
+        "name": "Stroomgebied",
         "color": "#a89932"
-    },
-}
+    }]
 
 catchments = metadata.tables["chemtrend.catchment_geojson"]
 
@@ -76,7 +75,7 @@ async def get_trend_data(x: float, y: float, substance_id: int):
 @app.get("/list_regions/", tags=["Regions"])
 async def get_all_regions():
     """List all available regions"""
-    return list(regions.keys())
+    return regions
 
 @app.get("/regions/", tags=["Regions"])
 async def get_all_waterbodies(x: float, y: float):
