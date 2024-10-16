@@ -139,9 +139,10 @@ export default {
 
     addRegions () {
       const name = 'regions'
-      const paintColor = ['case']
+      const paintColor = ['match']
+      paintColor.push(['get', 'region_type'])
       this.regions.forEach(region => {
-        paintColor.push(['==', 'region_id', region.name])
+        paintColor.push(region.name)
         paintColor.push(region.color)
       })
       paintColor.push('#000000')

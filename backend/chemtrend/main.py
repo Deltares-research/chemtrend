@@ -83,7 +83,7 @@ async def get_all_waterbodies(x: float, y: float):
     query = f"select * from chemtrend.region_geojson({x},{y});"
     await database.connect()
     result = await database.fetch_one(query)
-    return result.geojson
+    return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
 @app.get("/catchments/", tags=["catchment"])
