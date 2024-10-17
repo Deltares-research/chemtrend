@@ -114,16 +114,27 @@ export default createStore({
                 },
                 grid: {
                   top: 100,
-                  bottom: 50,
+                  bottom: 100,
                   right: 50,
                   left: 50
                 },
+                dataZoom: [
+                  {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                  },
+                  {
+                    start: 0,
+                    end: 100
+                  }
+                ],
                 tooltip: {
                   show: true
                 },
                 legend: {
                   show: true,
-                  bottom: 5,
+                  bottom: 50,
                   lineStyle: {
                     symbol: 'none'
                   },
