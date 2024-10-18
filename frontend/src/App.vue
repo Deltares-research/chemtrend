@@ -7,7 +7,7 @@
           <navigation-drawer-tabs />
         </v-navigation-drawer>
         <map-component class="flex-grow-1" />
-        <bottom-panel />
+        <bottom-panel :drawer="drawer" />
     </div>
     </v-main>
   </v-app>
