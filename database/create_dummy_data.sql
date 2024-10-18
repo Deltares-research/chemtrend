@@ -12,6 +12,7 @@ update voorbeelddata.trend set geom=st_transform(st_setsrid(st_point(x_rd, y_rd)
 
 -- select distinct meetpunt_code,geom, skendall_trend from voorbeelddata.trend where parameter_code='Cr';
 
+create index ix_meetpuntcode on voorbeelddata.trend (meetpunt_code);
 
 
 -- grant access
