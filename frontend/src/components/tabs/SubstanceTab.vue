@@ -26,7 +26,7 @@
         ></v-switch>
         </v-row>
         <v-row>
-          <point-layer-legend style="margin-bottom: 15px;" />
+          <point-layer-legend style="margin-bottom: 20px;" />
         </v-row>
     </v-col>
   </div>

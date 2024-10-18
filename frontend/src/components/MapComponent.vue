@@ -105,8 +105,8 @@ export default {
         },
         paint: {
           // 'circle-color': 'rgba(239, 239, 240, 1)',
-          'circle-color': 'black',
-          'circle-stroke-color': '#4F5759',
+          'circle-color': 'white',
+          'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
           'circle-radius': 5
         }
@@ -180,31 +180,8 @@ export default {
           data: initialData
         },
         paint: {
-          'circle-color': '#57b146',
-          // TODO: colour based on trend value, based on code below
-          // [
-          //   'case',
-          //   [
-          //     '<',
-          //     ['get', 'trend'],
-          //     0
-          //   ],
-          //   'hsl(0, 89%, 50%)',
-          //   [
-          //     '>',
-          //     ['get', 'trend'],
-          //     0
-          //   ],
-          //   'hsl(116, 88%, 59%)',
-          //   [
-          //     '==',
-          //     ['get', 'trend'],
-          //     0
-          //   ],
-          //   'black',
-          //   'black'
-          // ],
-          'circle-stroke-color': '#4F5759',
+          'circle-color': ['get', 'color'],
+          'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
           'circle-radius': 5
         }
