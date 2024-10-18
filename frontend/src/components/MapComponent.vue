@@ -211,7 +211,6 @@ export default {
       }
     },
     updateRegion (lat, lng) {
-      console.log(`updateregion, ${lat}, ${lng}`)
       const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
       if (this.map.getSource('selected-regions')) {
         this.map.getSource('selected-regions')
@@ -223,7 +222,7 @@ export default {
       const lng = _.get(this.$route, 'query.longitude')
       if (lat && lng) {
         this.map.fire('click', {
-          lngLat: { lat: lat, lng: lng }, originalEvent: { target: this.map }
+          lngLat: { lat, lng }, originalEvent: { target: this.map }
         })
       }
     },
@@ -232,42 +231,49 @@ export default {
         this.mapLocation = e
         this.map.easeTo({
           center: e.lngLat,
-          zoom: 11,
+          zoom: 10,
           duration: 800
         })
-        if (this.panelIsCollapsed) {
-          this.togglePanelCollapse()
-        }
-        const newQuery = {
-          ...this.$route.query, // Keep all existing query parameters, including 'substance'
-          latitude: e.lngLat.lat,
-          longitude: e.lngLat.lng
-        }
-        // TODO: implement clearTrends
-        // this.clearTrends()
-        // TODO: do we want to ease to a polygon or specific zoom level?
-
-        this.$router.push({
-          path: '/trends',
-          query: newQuery
+        this.map.once('moveend', () => {
+          if (this.panelIsCollapsed) {
+            this.togglePanelCollapse()
+          }
+          e.point = this.map.project([e.lngLat.lng, e.lngLat.lat])
+          const newQuery = {
+            ...this.$route.query, // Keep all existing query parameters, including 'substance'
+            latitude: e.lngLat.lat,
+            longitude: e.lngLat.lng
+          }
+          // TODO: implement clearTrends
+          // this.clearTrends()
+          // TODO: do we want to ease to a polygon or specific zoom level?
+          this.$router.push({
+            path: '/trends',
+            query: newQuery
+          })
+          this.checkSelection('locations')
+          this.updateRegion(e.lngLat.lat, e.lngLat.lng)
         })
-        this.checkSelection('locations')
-        this.updateRegion(e.lngLat.lat, e.lngLat.lng)
       })
     },
     checkSelection (shape) {
+      console.log('check selection', this.mapLocation.point)
       const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
           features: features
         })
+
+      console.log(features)
       features.forEach(feature => {
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
-        const substanceId = this.selectedSubstanceId
+        const substanceId = _.get(this.$route, 'query.substance')
 
-        this.addTrend({ x, y, substanceId })
+        if (substanceId) {
+          this.addTrend({ x, y, substanceId })
+        }
       })
     }
   }
