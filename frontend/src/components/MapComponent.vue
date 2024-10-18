@@ -72,7 +72,7 @@ export default {
       this.updateFilteredLocations()
     },
     '$route.query.region' (val, oldVal) {
-      this.updateRegion()
+      this.filterRegions()
     }
   },
   mounted () {
@@ -146,7 +146,6 @@ export default {
         paintColor.push(region.color)
       })
       paintColor.push('#000000')
-      console.log(paintColor)
       this.map.addLayer({
         id: `selected-${name}`,
         type: 'line',
@@ -158,9 +157,19 @@ export default {
           'line-color': paintColor,
           'line-width': 3
         }
-      }).on('load', () => {
-        this.checkSelection(name)
       })
+      this.filterRegions()
+    },
+    filterRegions () {
+      this.map.setFilter(
+        'selected-regions', [
+          'match',
+          ['get', 'region_type'],
+          _.get(this.$route, 'query.region').split(','),
+          true,
+          false
+        ]
+      )
     },
     addFilteredLocations () {
       this.map.addLayer({
