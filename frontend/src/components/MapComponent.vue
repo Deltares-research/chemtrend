@@ -165,7 +165,7 @@ export default {
         'selected-regions', [
           'match',
           ['get', 'region_type'],
-          _.get(this.$route, 'query.region').split(','),
+          _.get(this.$route, 'query.region', '').split(','),
           true,
           false
         ]
