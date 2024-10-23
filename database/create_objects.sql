@@ -242,6 +242,7 @@ return query execute q;
 end
 $ff$ language plpgsql;
 
+
 -- function that returns trend data based on a given location
 drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
 create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
@@ -260,22 +261,15 @@ select ($$
     )
     , tr_graph as (
         select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
-            , json_agg(json_build_object('x_value', x_value
-            , 'y_value_meting', y_value_meting
-            , 'y_value_lowess', y_value_lowess
-            , 'y_value_theil_sen', y_value_theil_sen
-            ) order by x_value
-        ) as timeseries
-        from tr_detail trd
+        , json_agg(x_value order by x_value) x_value
+        , json_agg(y_value_meting order by x_value) y_value_meting
+        , json_agg(y_value_lowess order by x_value) y_value_lowess
+        , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
+        from tr_detail
         group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
     )
-    , tr_final as (
-        select json_agg(trg.*) as graph
-        from tr_graph trg
-    )
-    -- select '{graph:'||right(left(graph, -1),-1)||'}'
-    select *
-    from tr_final
+    select json_agg(trg.*) as graph
+    from tr_graph trg
     $$) into q;
 q := format(q, x, y, sid);
 return query execute q;
