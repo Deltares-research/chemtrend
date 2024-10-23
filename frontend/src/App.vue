@@ -54,4 +54,8 @@ export default {
   max-height: 100vh;
   height: 100%;
 }
+
+html {
+  overflow-y: hidden;
+}
 </style>
