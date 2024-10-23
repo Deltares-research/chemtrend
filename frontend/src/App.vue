@@ -1,16 +1,23 @@
 <template>
-  <v-app>
-    <v-main>
-      <navigation-bar @toggle-drawer="toggleDrawer" />
-      <div class="d-flex flex-column content">
-        <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
-          <navigation-drawer-tabs />
-        </v-navigation-drawer>
-        <map-component class="flex-grow-1" />
-        <bottom-panel :drawer="drawer" />
-    </div>
-    </v-main>
-  </v-app>
+  <v-responsive>
+    <v-app>
+      <v-main>
+        <navigation-bar @toggle-drawer="toggleDrawer" />
+        <div class="d-flex flex-column content">
+          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
+            <navigation-drawer-tabs />
+          </v-navigation-drawer>
+          <map-component v-model:bottomPanel="bottomPanel" class="h-40"/>
+          <bottom-panel
+            v-if="bottomPanel"
+            class="flex-grow h-60"
+            :drawer="drawer"
+            v-model:bottomPanel="bottomPanel"
+          />
+      </div>
+      </v-main>
+    </v-app>
+  </v-responsive>'
 </template>
 
 <script>
@@ -30,7 +37,8 @@ export default {
   data () {
     return {
       drawer: true,
-      tab: null
+      tab: null,
+      bottomPanel: false
     }
   },
   methods: {

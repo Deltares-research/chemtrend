@@ -1,19 +1,19 @@
 <template>
-    <div class='map'>
-      <mapbox-map
-        ref='mapboxmap'
-        class='map'
-        :access-token='mapboxToken'
-        map-style='mapbox://styles/mapbox/light-v11'
-        :center='[4.7, 52.2]'
-        :zoom='7'
-      >
+  <div class='map'>
+    <mapbox-map
+      ref='mapboxmap'
+      class='map'
+      :access-token='mapboxToken'
+      map-style='mapbox://styles/mapbox/light-v11'
+      :center='[4.7, 52.2]'
+      :zoom='7'
+    >
       <MapboxNavigationControl :visualizePitch='true' />
       <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup">
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -80,10 +80,13 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId', 'regions'])
+    ...mapGetters(['selectedSubstanceId', 'regions']),
+    bottomPanel: {
+      type: Boolean
+    }
   },
   methods: {
-    ...mapActions(['addTrend', 'togglePanelCollapse']),
+    ...mapActions(['addTrend']),
 
     initializeData () {
       this.addLocations()
@@ -235,29 +238,23 @@ export default {
           duration: 800
         })
         this.map.once('moveend', () => {
-          if (this.panelIsCollapsed) {
-            this.togglePanelCollapse()
-          }
           e.point = this.map.project([e.lngLat.lng, e.lngLat.lat])
           const newQuery = {
             ...this.$route.query, // Keep all existing query parameters, including 'substance'
             latitude: e.lngLat.lat,
             longitude: e.lngLat.lng
           }
-          // TODO: implement clearTrends
-          // this.clearTrends()
-          // TODO: do we want to ease to a polygon or specific zoom level?
           this.$router.push({
             path: '/trends',
             query: newQuery
           })
           this.checkSelection('locations')
           this.updateRegion(e.lngLat.lat, e.lngLat.lng)
+          this.$emit('update:bottomPanel', true)
         })
       })
     },
     checkSelection (shape) {
-      console.log('check selection', this.mapLocation.point)
       const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
       this.map.getSource(`selected-${shape}`)
         .setData({

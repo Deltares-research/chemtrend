@@ -4,14 +4,6 @@ const webpack = require('webpack');
 module.exports = defineConfig({
   transpileDependencies: true,
 
-  configureWebpack: {
-    plugins: [
-      new webpack.DefinePlugin({
-        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
-      })
-    ]
-  },
-
   chainWebpack: config => {
     config.module
       .rule('pdf')
@@ -21,6 +13,9 @@ module.exports = defineConfig({
       .options({
         name: '[name].[hash:8].[ext]'
       });
+  },
+  devServer: {
+    webSocketServer: false
   },
 
   pluginOptions: {

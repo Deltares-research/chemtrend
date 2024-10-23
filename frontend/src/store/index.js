@@ -5,8 +5,7 @@ export default createStore({
     substances: [],
     selectedSubstanceId: null,
     trends: [],
-    regions: [],
-    panelIsCollapsed: true
+    regions: []
   },
   getters: {
     substances (state) {
@@ -20,9 +19,7 @@ export default createStore({
     },
     regions (state) {
       return state.regions
-    },
-    panelIsCollapsed: state => state.panelIsCollapsed
-
+    }
   },
   mutations: {
     SET_SUBSTANCES (state, data) {
@@ -40,9 +37,6 @@ export default createStore({
     },
     ADD_TREND (state, trend) {
       state.trends.unshift(trend)
-    },
-    TOGGLE_PANEL_COLLAPSE (state) {
-      state.panelIsCollapsed = !state.panelIsCollapsed
     },
     SET_SELECTED_COORDINATES (state, coords) {
       state.selectedCoordinates = coords
@@ -89,9 +83,6 @@ export default createStore({
         .catch(error => {
           console.error('Error fetching trend data:', error)
         })
-    },
-    togglePanelCollapse ({ commit }) {
-      commit('TOGGLE_PANEL_COLLAPSE')
     }
   },
   modules: {

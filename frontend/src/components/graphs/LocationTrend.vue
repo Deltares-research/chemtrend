@@ -42,19 +42,19 @@ export default {
     getChartOptions (trend) {
       console.log(trend)
       const trendData = {
-          title: "chloride NL02_0067",
-          h1_label: "MKN",
-          h1_value: 2.8,
-          h2_label: "MAC",
-          h2_value: 0.15,
-          subtitle_1: "Trendresultaat: trend neerwaarts (p=0.000000477436367329886)",
-          subtitle_2: "Trendhelling: -3.69059656218401600 ug/l per decennium",
+        title: 'chloride NL02_0067',
+        h1_label: 'MKN',
+        h1_value: 2.8,
+        h2_label: 'MAC',
+        h2_value: 0.15,
+        subtitle_1: 'Trendresultaat: trend neerwaarts (p=0.000000477436367329886)',
+        subtitle_2: 'Trendhelling: -3.69059656218401600 ug/l per decennium',
 
-          x_value: ["1990-01-08", "1990-02-07", "1990-03-07"],
-          y_value_lowess: [60.7822759909189, 60.6584567903033, 60.5431042527501],
-          y_value_meting: [92, 68, 68],
-          y_value_theil_sen: [58.5475227502528, 58.5475227502528, 58.5475227502528]
-        }
+        x_value: ['1990-01-08', '1990-02-07', '1990-03-07'],
+        y_value_lowess: [60.7822759909189, 60.6584567903033, 60.5431042527501],
+        y_value_meting: [92, 68, 68],
+        y_value_theil_sen: [58.5475227502528, 58.5475227502528, 58.5475227502528]
+      }
       return template(trendData)
     }
   }
