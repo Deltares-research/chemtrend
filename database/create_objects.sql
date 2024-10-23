@@ -121,8 +121,6 @@ $ff$ language plpgsql;
 -- select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location_substance)::json)) as geojson
 -- from chemtrend.location_substance;
 
-
-
 -- view with trend data (to plot the measurements and trends)
 drop view if exists chemtrend.trend;
 create or replace view chemtrend.trend as
@@ -196,6 +194,19 @@ join chemtrend.region reg on 1=1
 where st_within(loc.geom_rd, reg.geometry)
 ;
 
+-- view with trend data (to plot the measurements and trends)
+drop view if exists chemtrend.trend_region;
+create or replace view chemtrend.trend_region as
+select *
+from (
+--     TO DO: deze view baseren op echte data conform de structuur van de view 'chemtrend.trend'
+    select *
+    , region_description as region
+    , location_code as location
+    from voorbeelddata.trend_region_subset tr
+) x
+;
+
 -- function to return regional polygons based on given coordinates as geojson
 drop function if exists chemtrend.region_geojson(x decimal, y decimal);
 create or replace function chemtrend.region_geojson(x decimal, y decimal)
@@ -246,7 +257,6 @@ $ff$ language plpgsql;
 -- function that returns trend data based on a given location
 drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
 create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
--- 	returns setof chemtrend.trend as  --set of chemtrend.trend?
     returns table (geojson json) as
 $ff$
 declare q text;
@@ -276,6 +286,40 @@ return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend(5.019, 52.325,517);
+
+
+-- function that returns trend data based on a given location
+drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int);
+create or replace function chemtrend.trend_region(x decimal, y decimal, substance_id int)
+    returns table (geojson json) as
+$ff$
+declare q text;
+declare sid text = substance_id;
+begin
+select ($$
+    with tr_detail as (
+        select *
+        from chemtrend.trend_region
+        where region_id in (select region_id from chemtrend.region(%1$s,%2$s))
+        and substance_id = '%3$s'
+    )
+    , tr_graph as (
+        select region, location, title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+        , json_agg(x_value order by x_value) x_value
+        , json_agg(y_value_meting order by x_value) y_value_meting
+        , json_agg(y_value_lowess order by x_value) y_value_lowess
+        , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
+        from tr_detail
+        group by region, location, title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+    )
+    select json_agg(trg.*) as graph
+    from tr_graph trg
+    $$) into q;
+q := format(q, x, y, sid);
+return query execute q;
+end
+$ff$ language plpgsql;
+-- example: select * from chemtrend.trend_region(5.019, 52.325,517);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
