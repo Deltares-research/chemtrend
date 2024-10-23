@@ -1,9 +1,11 @@
+-- regio type (tbv tabel regio)
 drop table if exists public.regio_type;
 create table if not exists public.regio_type(
     regio_type_id int primary key,
     regio_type varchar
 );
 
+-- regio: verzameling van regionale polygonen van verschillende niveaus (provincie, waterschap, etc.) in één tabel
 drop table if exists public.regio;
 create table if not exists public.regio (
     regio_id serial primary key,
