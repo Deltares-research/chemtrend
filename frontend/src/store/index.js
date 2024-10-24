@@ -67,8 +67,7 @@ export default createStore({
       fetch(url)
         .then(res => res.json())
         .then(response => {
-          store.commit('ADD_TREND', { name, trendData: [response[0], response[0], response[0]], coordinates: [x, y] })
-          console.log('trends', this.state.trends)
+          store.commit('ADD_TREND', { name, trendData: response, coordinates: [x, y] })
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)
