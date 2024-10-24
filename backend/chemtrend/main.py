@@ -72,6 +72,15 @@ async def get_trend_data(x: float, y: float, substance_id: int):
     return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
+@app.get("/trends_regions/", tags=["Trends_regions"])
+async def get_trend_region_data(x: float, y: float, substance_id: int):
+    """Retrieve all trend data on regional level for a given location (lon, lat) and substance_id"""
+    query = f"select * from chemtrend.trend_region({x},{y},{substance_id});"
+    await database.connect()
+    result = await database.fetch_one(query)
+    return Response(content=dict(result).get("geojson"), media_type="application/json")
+
+
 @app.get("/list_regions/", tags=["Regions"])
 async def get_all_regions():
     """List all available regions"""
