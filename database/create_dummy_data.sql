@@ -33,8 +33,15 @@ select *
 into chemtrend.location_region_table
 from chemtrend.location_region;
 
-alter table  voorbeelddata.trend_region_subset add region_description varchar;
-update  voorbeelddata.trend_region_subset trs set region_description = reg.region_description from chemtrend.region reg where reg.region_id=trs.region_id;
+alter table voorbeelddata.trend_region_subset add region_description varchar;
+alter table voorbeelddata.trend_region_subset add region_type varchar;
+alter table voorbeelddata.trend_region_subset add trend_label varchar;
+alter table voorbeelddata.trend_region_subset add substance varchar;
+update voorbeelddata.trend_region_subset trs set region_type = reg.region_type from chemtrend.region reg where reg.region_id=trs.region_id;
+update voorbeelddata.trend_region_subset trs set substance=s.substance_description from chemtrend.substance s where s.substance_id=trs.substance_id;
+update voorbeelddata.trend_region_subset trs set trend_label = coalesce(location_code, region_description);
+update voorbeelddata.trend_region_subset trs set title = substance || ' ' || region_description;
+
 
 drop table if exists voorbeelddata.trend_region_subset_zonder_locatie;
 

@@ -203,11 +203,13 @@ from (
     select *
     , region_description as region
     , location_code as location
+    , case when location_code is null then 'trend' else 'locations' end as trend_type
     from voorbeelddata.trend_region_subset tr
 ) x
 ;
 
 -- function to return regional polygons based on given coordinates as geojson
+
 drop function if exists chemtrend.region_geojson(x decimal, y decimal);
 create or replace function chemtrend.region_geojson(x decimal, y decimal)
     returns table (geojson json) as
@@ -303,14 +305,17 @@ select ($$
         where region_id in (select region_id from chemtrend.region(%1$s,%2$s))
         and substance_id = '%3$s'
     )
-    , tr_graph as (
-        select region, location, title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
-        , json_agg(x_value order by x_value) x_value
-        , json_agg(y_value_meting order by x_value) y_value_meting
-        , json_agg(y_value_lowess order by x_value) y_value_lowess
-        , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
+    , tr_trends as (
+        select region_type, title, trend_label
+        , json_agg(x_value order by x_value) as x_value
+        , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
-        group by region, location, title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+        group by region_type, region, trend_type, location, title, trend_label
+    )
+    , tr_graph as (
+        select region_type, title, json_agg((select x from (select tr.trend_label, tr.x_value, tr.y_value_lowess) as x)) as locations
+        from tr_trends tr
+        group by region_type, title
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
