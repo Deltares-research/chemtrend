@@ -14,6 +14,15 @@ module.exports = defineConfig({
         name: '[name].[hash:8].[ext]'
       });
   },
+
+  configureWebpack: {
+    plugins: [
+      new webpack.DefinePlugin({
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+      })
+    ]
+  },
+
   devServer: {
     webSocketServer: false
   },

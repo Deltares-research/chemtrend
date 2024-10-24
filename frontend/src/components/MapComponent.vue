@@ -80,10 +80,7 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['selectedSubstanceId', 'regions']),
-    bottomPanel: {
-      type: Boolean
-    }
+    ...mapGetters(['selectedSubstanceName', 'regions'])
   },
   methods: {
     ...mapActions(['addTrend']),
@@ -262,14 +259,15 @@ export default {
           features: features
         })
 
-      console.log(features)
       features.forEach(feature => {
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
-        const substanceId = _.get(this.$route, 'query.substance')
+        const substanceId = parseInt(_.get(this.$route, 'query.substance'))
+        const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId })
+          this.addTrend({ x, y, substanceId, name })
         }
       })
     }

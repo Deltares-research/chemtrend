@@ -43,7 +43,7 @@ export default {
     PointLayerLegend
   },
   methods: {
-    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations', 'setSelectedSubstanceId'])
+    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations', 'setSelectedSubstanceName'])
   },
   computed: {
     ...mapGetters(['substances', 'regions']),
@@ -58,7 +58,7 @@ export default {
           substance: substance.substance_id
         }
         this.$router.push({ query: newQuery })
-        this.setSelectedSubstanceId(substance.substance_id)
+        this.setSelectedSubstanceName(substance.substance_id)
       }
     },
     region: {

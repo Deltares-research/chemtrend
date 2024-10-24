@@ -1,9 +1,9 @@
 import { createStore } from 'vuex'
+import _ from 'lodash'
 
 export default createStore({
   state: {
     substances: [],
-    selectedSubstanceId: null,
     trends: [],
     regions: []
   },
@@ -11,8 +11,10 @@ export default createStore({
     substances (state) {
       return state.substances
     },
-    selectedSubstanceId (state) {
-      return state.selectedSubstanceId
+    selectedSubstanceName: (state) => (id) => {
+      const substance = state.substances.find(sub => sub.substance_id === id)
+      const substanceName = _.upperFirst(substance.substance_description)
+      return substanceName
     },
     trends (state) {
       return state.trends
@@ -27,10 +29,6 @@ export default createStore({
     },
     SET_REGIONS (state, regions) {
       state.regions = regions
-    },
-    SET_SELECTED_SUBSTANCE_ID (state, id) {
-      console.log('mutation', id)
-      state.selectedSubstanceId = id
     },
     CLEAR_TRENDS (state) {
       state.trends = []
@@ -63,22 +61,14 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    setSelectedSubstanceId ({ commit }, id) {
-      commit('SET_SELECTED_SUBSTANCE_ID', id)
-    },
-    addTrend (store, { x, y, substanceId }, name) {
+    addTrend (store, { x, y, substanceId, name }) {
       const url = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
 
       fetch(url)
         .then(res => res.json())
         .then(response => {
-          if (Array.isArray(response) && response.length > 0 && response[0].timeseries) {
-            const trendData = response[0]
-            store.commit('ADD_TREND', { name, trendData })
-            console.log('trends', this.state.trends)
-          } else {
-            console.error('Invalid response structure:', response)
-          }
+          store.commit('ADD_TREND', { name, trendData: [response[0], response[0], response[0]], coordinates: [x, y] })
+          console.log('trends', this.state.trends)
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)
