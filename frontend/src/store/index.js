@@ -62,12 +62,17 @@ export default createStore({
         })
     },
     addTrend (store, { x, y, substanceId, name }) {
-      const url = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
+      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
+      substanceId = 517
+      x = 5.019
+      y = 52.325
+      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
 
-      fetch(url)
-        .then(res => res.json())
-        .then(response => {
-          store.commit('ADD_TREND', { name, trendData: response, coordinates: [x, y] })
+      Promise.all([fetch(urlRegions), fetch(urlTrends)])
+        .then((responses) => Promise.all(responses.map((r) => r.json())))
+        .then((jsons) => {
+          console.log(jsons.flat())
+          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y] })
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)

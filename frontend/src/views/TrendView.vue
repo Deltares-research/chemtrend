@@ -17,6 +17,7 @@
               :key="graph.name">
               <graph-wrapper
                 :trend="graph"
+                :graphType="graph.region_type || 'locations'"
               />
             </v-col>
           </v-row>

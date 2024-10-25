@@ -1,4 +1,4 @@
-export function template (trendData) {
+export function LocationTemplate (trendData) {
   return {
     title: {
       text: trendData.title,

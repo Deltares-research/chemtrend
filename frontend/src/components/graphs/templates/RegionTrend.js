@@ -1,8 +1,11 @@
-export function template (trendData) {
+import _ from 'lodash'
+
+/* eslint-disable */
+export function RegionTemplate (trendData) {
+  console.log(trendData.locations)
   return {
     title: {
       text: trendData.title,
-      subtext: `${trendData.subtitle_1}\n${trendData.subtitle_2}`,
       left: 'center',
       textStyle: {
         fontSize: 17
@@ -35,85 +38,33 @@ export function template (trendData) {
       lineStyle: {
         symbol: 'none'
       },
-      itemWidth: 70
+      itemWidth: 70,
+      data: ['Upward trend']
     },
-    xAxis: {
-      type: 'category',
-      data: trendData.x_value
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        name: 'Meting',
-        type: 'line',
-        data: trendData.y_value_meting,
-        lineStyle: {
-          color: '#000000'
-        },
-        symbol: 'circle',
-        symbolSize: 4,
-        showAllSymbol: true,
-        itemStyle: {
-          color: '#f8766d',
-          borderColor: '#000000',
-          borderWidth: 1
-        },
-        markLine: {
-          data: [
-            {
-              yAxis: trendData.h1_value,
-              name: trendData.h1_label,
-              label: {
-                formatter: params => params.data.name
-              }
-            },
-            {
-              yAxis: trendData.h2_value,
-              name: trendData.h2_label,
-              label: {
-                formatter: params => params.data.name
-              }
-            }
-          ],
-          emphasis: {
-            disabled: true
-          },
-          lineStyle: {
-            color: '#373737'
-          },
-          symbol: ['none', 'none'],
-          tooltip: {
-            show: true,
-            formatter: params => `${params.data.name}  ${params.data.yAxis}`
-          }
-        }
-      },
-      {
-        name: 'Lowess',
-        type: 'line',
-        data: trendData.y_value_lowess,
-        lineStyle: {
-          color: '#0000ff'
-        },
-        symbol: 'none',
-        showSymbol: false
-      },
-      {
-        name: 'Theil Sen',
-        type: 'line',
-        data: trendData.y_value_theil_sen,
-        lineStyle: {
-          color: '#FFA500',
-          type: 'dashed'
-        },
-        symbol: 'none',
-        showSymbol: false,
-        itemStyle: {
-          color: '#FFA500'
+    yAxis: {},
+    xAxis: { type: 'time' },
+    series: trendData.locations.map(loc => {
+      const color = loc.color || 'green'
+      let lineStyle = {
+        color: loc.color || 'green',
+        opacity: 0.2
+      }
+      let name = 'Neerwaartse trend'
+      if (color === 'green') {
+        name = 'Stijgende trend'
+      }
+      if (trendData.title.includes(loc.trend_label)) {
+        lineStyle = {
+          color: 'black'
         }
       }
-    ]
+      return {
+        name: loc.trend_label,
+        type: 'line',
+        data: _.zip.apply(_, [loc.x_value, loc.y_value_lowess]),
+        symbol: 'none',
+        lineStyle
+      }
+    })
   }
 }

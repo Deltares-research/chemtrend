@@ -1,7 +1,10 @@
 <template>
   <div class="trend">
     <v-card class="trend">
-      <v-chart class="chart" :option="chartOptions" autoresize />
+      <v-chart v-if="chartOptions" class="chart" :option="chartOptions" autoresize />
+      <v-card v-else>
+        No trend available
+      </v-card>
     </v-card>
   </div>
 </template>
@@ -12,7 +15,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, TitleComponent, TooltipComponent, LegendComponent, MarkLineComponent, DataZoomComponent, ToolboxComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import { template } from './templates/LocationTrend.js'
+import { LocationTemplate } from './templates/LocationTrend.js'
+import { RegionTemplate } from './templates/RegionTrend.js'
 
 use([
   CanvasRenderer,
@@ -30,6 +34,9 @@ export default {
   props: {
     trend: {
       type: Object
+    },
+    graphType: {
+      type: String
     }
   },
   components: {
@@ -37,7 +44,10 @@ export default {
   },
   computed: {
     chartOptions () {
-      return template(this.trend)
+      if (this.graphType === 'locations') {
+        return LocationTemplate(this.trend)
+      }
+      return RegionTemplate(this.trend)
     }
   }
 }
