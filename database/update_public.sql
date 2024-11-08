@@ -41,5 +41,43 @@ from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
 ;
 
+-- TO DO: uitzondering voor waterschap: rijkswateren vallen hier niet in
+
+
 -- TO DO: locaties koppelen aan region
 -- select * from public.regio
+
+
+-- trend data
+create table public.trend_regio (
+    trend_regio_id serial primary key,
+    regio_id int references public.regio (regio_id),
+    parameter_id int references public.parameter(parameter_id),
+    eenheid_id int references public.eenheid(eenheid_id),
+    hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id),
+    compartiment_id int references public.compartiment(compartiment_id),
+    datum date,
+    lowess_p25 numeric,
+    lowess_p50 numeric,--staat in importtabel als p0
+    lowess_p75 numeric
+);
+
+-- drop table public.trend_locatie;
+create table public.trend_locatie (
+    trend_locatie serial primary key,
+    meetpunt_id int references public.locatie(meetpunt_id),
+    parameter_id int references public.parameter(parameter_id),
+    eenheid_id int references public.eenheid(eenheid_id),
+    hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id),
+    compartiment_id int references public.compartiment(compartiment_id),
+    kwaliteitsoordeel_id int references public.kwaliteitsoordeel(kwaliteitsoordeel_id),
+    datum date,
+    tijd time,
+    waarde_meting numeric,
+    ats_y numeric,
+    lowline_y numeric,
+    skendall_trend smallint
+);
+
+
+-- select * from import."03_data_trend_ats_info" limit 55;
