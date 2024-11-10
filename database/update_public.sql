@@ -79,5 +79,8 @@ create table public.trend_locatie (
     skendall_trend smallint
 );
 
+-- grant access
+GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
+alter table public.trend_locatie owner to waterkwaliteit_readonly;
+alter table public.trend_regio owner to waterkwaliteit_readonly;
 
--- select * from import."03_data_trend_ats_info" limit 55;
