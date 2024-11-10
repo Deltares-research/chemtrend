@@ -41,11 +41,18 @@ from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
 ;
 
+-- locaties koppelen aan regio
+create table public.locatie_regio (
+    locatie_regio_id serial primary key,
+    meetpunt_id int references public.locatie(meetpunt_id),
+    regio_id int references public.regio(regio_id)
+);
+insert into public.locatie_regio (meetpunt_id, regio_id)
+select l.meetpunt_id, r.regio_id
+from public.locatie l
+join public.regio r on 1=1 and st_within(l.geom, r.geom_rd) and st_isempty(l.geom)=false
+;
 -- TO DO: uitzondering voor waterschap: rijkswateren vallen hier niet in
-
-
--- TO DO: locaties koppelen aan region
--- select * from public.regio
 
 
 -- trend data
@@ -83,4 +90,7 @@ create table public.trend_locatie (
 GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
 alter table public.trend_locatie owner to waterkwaliteit_readonly;
 alter table public.trend_regio owner to waterkwaliteit_readonly;
+alter table public.regio_type owner to waterkwaliteit_readonly;
+alter table public.regio owner to waterkwaliteit_readonly;
+alter table public.locatie_regio owner to waterkwaliteit_readonly;
 
