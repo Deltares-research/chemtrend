@@ -57,10 +57,18 @@ export default {
   },
   methods: {
     graphRows (trend) {
+      console.log('hallo?')
       const rows = []
-      const data = trend.trendData
+      const trendData = trend.trendData
       const regions = _.get(this.$route, 'query.region', '').split(',')
-      data.filter(d => d in regions)
+      console.log('regions', regions)
+      console.log('data', trendData)
+
+      const data = trendData.filter(d => {
+        console.log('test', d.region_type, regions, d.region_type in regions, !_.has(d, 'region_type'))
+        return regions.includes(d.region_type) || !_.has(d, 'region_type')
+      })
+      console.log('data', data)
       if (data) {
         for (let i = 0; i < data.length; i += 2) {
           if (data[i + 1]) {
