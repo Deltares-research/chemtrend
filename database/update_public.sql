@@ -41,5 +41,56 @@ from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
 ;
 
--- TO DO: locaties koppelen aan region
--- select * from public.regio
+-- locaties koppelen aan regio
+create table public.locatie_regio (
+    locatie_regio_id serial primary key,
+    meetpunt_id int references public.locatie(meetpunt_id),
+    regio_id int references public.regio(regio_id)
+);
+insert into public.locatie_regio (meetpunt_id, regio_id)
+select l.meetpunt_id, r.regio_id
+from public.locatie l
+join public.regio r on 1=1 and st_within(l.geom, r.geom_rd) and st_isempty(l.geom)=false
+;
+-- TO DO: uitzondering voor waterschap: rijkswateren vallen hier niet in
+
+
+-- trend data
+create table public.trend_regio (
+    trend_regio_id serial primary key,
+    regio_id int references public.regio (regio_id),
+    parameter_id int references public.parameter(parameter_id),
+    eenheid_id int references public.eenheid(eenheid_id),
+    hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id),
+    compartiment_id int references public.compartiment(compartiment_id),
+    datum date,
+    lowess_p25 numeric,
+    lowess_p50 numeric,--staat in importtabel als p0
+    lowess_p75 numeric
+);
+
+-- drop table public.trend_locatie;
+create table public.trend_locatie (
+    trend_locatie serial primary key,
+    meetpunt_id int references public.locatie(meetpunt_id),
+    parameter_id int references public.parameter(parameter_id),
+    eenheid_id int references public.eenheid(eenheid_id),
+    hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id),
+    compartiment_id int references public.compartiment(compartiment_id),
+    kwaliteitsoordeel_id int references public.kwaliteitsoordeel(kwaliteitsoordeel_id),
+    datum date,
+    tijd time,
+    waarde_meting numeric,
+    ats_y numeric,
+    lowline_y numeric,
+    skendall_trend smallint
+);
+
+-- grant access
+GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
+alter table public.trend_locatie owner to waterkwaliteit_readonly;
+alter table public.trend_regio owner to waterkwaliteit_readonly;
+alter table public.regio_type owner to waterkwaliteit_readonly;
+alter table public.regio owner to waterkwaliteit_readonly;
+alter table public.locatie_regio owner to waterkwaliteit_readonly;
+
