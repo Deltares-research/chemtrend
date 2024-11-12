@@ -7,10 +7,9 @@
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
             <navigation-drawer-tabs />
           </v-navigation-drawer>
-          <map-component v-model:bottomPanel="bottomPanel" class="h-25" />
+          <map-component v-model:bottomPanel="bottomPanel" :class="bottomPanel ? 'h-25' : 'h-100'" />
           <bottom-panel
-            v-if="bottomPanel"
-            class="flex-grow h-75"
+            :class="bottomPanel ? 'h-75' : 'h-0'"
             :drawer="drawer"
             v-model:bottomPanel="bottomPanel"
           />
