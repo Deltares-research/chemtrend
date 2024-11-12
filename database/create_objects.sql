@@ -136,8 +136,8 @@ from (
     , s.substance_description || ' ' || l.location_code as title
     , 'Trendresultaat: '
           || case tr.skendall_trend when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
-          || ' (p=' || (tr.p_value_skendall) || ')' as subtitle_1
-    , 'Trendhelling: ' || (tr.theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
+          || ' (p=' || round(tr.p_value_skendall,4) || ')' as subtitle_1
+    , 'Trendhelling: ' || round(tr.theilsen_slope * 365 * 10,4) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
