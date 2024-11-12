@@ -1,4 +1,23 @@
 export function LocationTemplate (trendData) {
+  const marklines = []
+  if (trendData.h1_value) {
+    marklines.push({
+      yAxis: trendData.h1_value,
+      name: trendData.h1_label,
+      label: {
+        formatter: params => params.data.name
+      }
+    })
+  }
+  if (trendData.h2_value) {
+    marklines.push({
+      yAxis: trendData.h2_value,
+      name: trendData.h2_label,
+      label: {
+        formatter: params => params.data.name
+      }
+    })
+  }
   return {
     title: {
       text: trendData.title,
@@ -61,22 +80,7 @@ export function LocationTemplate (trendData) {
           borderWidth: 1
         },
         markLine: {
-          data: [
-            {
-              yAxis: trendData.h1_value,
-              name: trendData.h1_label,
-              label: {
-                formatter: params => params.data.name
-              }
-            },
-            {
-              yAxis: trendData.h2_value,
-              name: trendData.h2_label,
-              label: {
-                formatter: params => params.data.name
-              }
-            }
-          ],
+          data: marklines,
           emphasis: {
             disabled: true
           },

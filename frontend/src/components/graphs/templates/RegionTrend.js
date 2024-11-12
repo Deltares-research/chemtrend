@@ -1,14 +1,15 @@
 import _ from 'lodash'
 
 /* eslint-disable */
-export function RegionTemplate (trendData) {
+export function RegionTemplate (trendData, titleColor) {
   console.log(trendData.locations)
   return {
     title: {
       text: trendData.title,
       left: 'center',
       textStyle: {
-        fontSize: 17
+        fontSize: 17,
+        color: titleColor
       },
       subtextStyle: {
         fontSize: 12

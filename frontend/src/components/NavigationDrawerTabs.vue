@@ -43,19 +43,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.tab-content {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 80%;
-}
-</style>

@@ -103,8 +103,8 @@ export default {
           type: 'geojson',
           data: `${process.env.VUE_APP_SERVER_URL}/locations/`
         },
+        // 'circle-color': 'rgba(239, 239, 240, 1)',
         paint: {
-          // 'circle-color': 'rgba(239, 239, 240, 1)',
           'circle-color': 'white',
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,

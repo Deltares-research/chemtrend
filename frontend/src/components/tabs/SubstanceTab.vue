@@ -2,6 +2,9 @@
   <div class="content-wrapper">
     <v-col>
       <v-row>
+        <h1>1. Substanties </h1>
+      </v-row>
+      <v-row>
         <v-autocomplete
           label="Select substance"
           :items="substances"
@@ -11,8 +14,11 @@
           :return-object="true"
           v-model="substance"
         ></v-autocomplete>
-        </v-row>
-        <v-row>
+      </v-row>
+      <v-row>
+        <h1>2. Regio's </h1>
+      </v-row>
+      <v-row>
         <v-switch
           v-model="region"
           v-for="reg in regions"
@@ -25,7 +31,7 @@
           multiple
         ></v-switch>
         </v-row>
-        <v-row>
+        <v-row class="align-end">
           <point-layer-legend style="margin-bottom: 20px;" />
         </v-row>
     </v-col>

@@ -17,6 +17,7 @@ import { GridComponent, TitleComponent, TooltipComponent, LegendComponent, MarkL
 import VChart from 'vue-echarts'
 import { LocationTemplate } from './templates/LocationTrend.js'
 import { RegionTemplate } from './templates/RegionTrend.js'
+import { mapGetters } from 'vuex'
 
 use([
   CanvasRenderer,
@@ -43,11 +44,15 @@ export default {
     VChart
   },
   computed: {
+    ...mapGetters(['regions']),
     chartOptions () {
       if (this.graphType === 'locations') {
         return LocationTemplate(this.trend)
       }
-      return RegionTemplate(this.trend)
+      const region = this.regions.find(region => region.name === this.trend.region_type)
+      console.log(region, this.regions, this.trend)
+      const titleColor = _.get(region, 'color', 'black')
+      return RegionTemplate(this.trend, titleColor)
     }
   }
 }

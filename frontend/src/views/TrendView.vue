@@ -50,14 +50,13 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['trends'])
+    ...mapGetters(['trends', 'regions'])
   },
   components: {
     GraphWrapper
   },
   methods: {
     graphRows (trend) {
-      console.log('hallo?')
       const rows = []
       const trendData = trend.trendData
       const regions = _.get(this.$route, 'query.region', '').split(',')
