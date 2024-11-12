@@ -131,7 +131,7 @@ create or replace view chemtrend.trend as
 select *
 from (
     select l.location_code
-    , s.substance_id, s.substance_code
+    , s.substance_id, s.substance_code, s.substance_description
     , 'meting' as category
     , s.substance_description || ' ' || l.location_code as title
     , 'Trendresultaat: '
@@ -161,13 +161,16 @@ from (
 -- view with all regions
 drop view if exists chemtrend.region cascade;
 create or replace view chemtrend.region as
-select province_id+1000 as region_id, 'Provincie'::varchar as region_type, province_id as original_id, province_description as region_description, geometry from chemtrend.province
-union all
-select waterboard_id+2000 as region_id, 'Waterschap'::varchar as region_type, waterboard_id as original_id, waterboard_description as region_description, geometry from chemtrend.waterboard
-union all
-select krwwaterbody_id+3000 as region_id, 'Waterlichaam'::varchar as region_type, krwwaterbody_id as original_id, krwwaterbody_description as region_description, geometry from chemtrend.waterbody
-union all
-select catchment_id+4000 as region_id, 'Stroomgebied'::varchar as region_type, catchment_id as original_id, catchment_description_short as region_description, geometry from chemtrend.catchment
+-- select province_id+1000 as region_id, 'Provincie'::varchar as region_type, province_id as original_id, province_description as region_description, geometry from chemtrend.province
+-- union all
+-- select waterboard_id+2000 as region_id, 'Waterschap'::varchar as region_type, waterboard_id as original_id, waterboard_description as region_description, geometry from chemtrend.waterboard
+-- union all
+-- select krwwaterbody_id+3000 as region_id, 'Waterlichaam'::varchar as region_type, krwwaterbody_id as original_id, krwwaterbody_description as region_description, geometry from chemtrend.waterbody
+-- union all
+-- select catchment_id+4000 as region_id, 'Stroomgebied'::varchar as region_type, catchment_id as original_id, catchment_description_short as region_description, geometry from chemtrend.catchment
+select r.regio_id as region_id, rt.regio_type as region_type, r.bron_id as original_id, r.regio_omschrijving as region_description, geom, geom_rd
+from public.regio r
+join public.regio_type rt on rt.regio_type_id=r.regio_type_id
 ;
 
 -- function to return regional polygons based on given coordinates
@@ -181,9 +184,9 @@ declare srid_xy int = 4326;
 declare srid_rd int = 28992;
 begin
 select ($$
-    select reg.region_id, reg.region_type, original_id, reg.region_description, st_transform(geometry, %3$s) as geometry
+    select reg.region_id, reg.region_type, original_id, reg.region_description, geom, geom_rd
     from chemtrend.region reg
-    where st_within(st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s), reg.geometry)
+    where st_within(st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s), reg.geom_rd)
     $$) into q;
 q := format(q, x, y, srid_xy, srid_rd);
 return query execute q;
@@ -198,25 +201,45 @@ select loc.location_code, reg.region_id
 from (select *, st_transform(geom, 28992) as geom_rd from chemtrend.location) loc
 join chemtrend.region reg on 1=1
 -- join (select * from chemtrend.region where region_id in (select region_id from chemtrend.region(5.019, 52.325))) reg on 1=1
-where st_within(loc.geom_rd, reg.geometry)
+where st_within(loc.geom_rd, reg.geom_rd)
 ;
 
 -- view with trend data (to plot the measurements and trends)
 drop view if exists chemtrend.trend_region;
 create or replace view chemtrend.trend_region as
-select *
+-- twee delen: 1. regio trends (trend van de trends) 2. locatietrends (cf trend_locatie maar dan met regio_id)
+select
+    tr.regio_id
+    , s.substance_id
+    , 'trend' as category
+    , s.substance_description || ' ' || r.regio_omschrijving as title
+    , 'datum' as x_label
+    , tr.datum as x_value
+    , tr.y_value_lowess
+    , tr.trend_label
+    , rt.regio_type as region_type
 from (
---     TO DO: deze view baseren op echte data conform de structuur van de view 'chemtrend.trend'
-    select *
-    , region_description as region
-    , location_code as location
-    , case when location_code is null then 'trend' else 'locations' end as trend_type
-    from voorbeelddata.trend_region_subset tr
-) x
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label
+    from public.trend_regio
+    union all
+    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label
+    from public.trend_regio
+    union all
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label
+    from public.trend_regio
+    union all
+    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
+    from public.trend_locatie tl
+    join public.locatie l on l.meetpunt_id=tl.meetpunt_id
+    join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
+    join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id=4
+) tr
+join chemtrend.substance s on s.substance_id=tr.parameter_id
+join public.regio r on r.regio_id=tr.regio_id
+join public.regio_type rt on rt.regio_type_id=r.regio_type_id
 ;
 
 -- function to return regional polygons based on given coordinates as geojson
-
 drop function if exists chemtrend.region_geojson(x decimal, y decimal);
 create or replace function chemtrend.region_geojson(x decimal, y decimal)
     returns table (geojson json) as
@@ -309,7 +332,7 @@ select ($$
     with tr_detail as (
         select *
         from chemtrend.trend_region
-        where region_id in (select region_id from chemtrend.region(%1$s,%2$s))
+        where regio_id in (select region_id from chemtrend.region(%1$s,%2$s))
         and substance_id = '%3$s'
     )
     , tr_trends as (
@@ -317,7 +340,7 @@ select ($$
         , json_agg(x_value order by x_value) as x_value
         , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
-        group by region_type, region, trend_type, location, title, trend_label
+        group by region_type, regio_id, trend_label, title
     )
     , tr_graph as (
         select region_type, title, json_agg((select x from (select tr.trend_label, tr.x_value, tr.y_value_lowess) as x)) as locations
@@ -332,7 +355,9 @@ return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend_region(5.019, 52.325,517);
+-- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
 alter schema chemtrend owner to waterkwaliteit_readonly;
+
