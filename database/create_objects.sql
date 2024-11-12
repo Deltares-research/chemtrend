@@ -64,40 +64,42 @@ SELECT p.parameter_id           AS substance_id,
        p.parameter_code         AS substance_code,
        p.parameter_omschrijving AS substance_description,
        p."CAS" as cas
-FROM public.parameter p join (select distinct parameter_code from voorbeelddata.trend) t on t.parameter_code=p.parameter_code
+FROM public.parameter p
+join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
 where p."CAS" <> 'NVT'
 ;
 
--- locations: FOR NOW: BASED ON EXAMPLE DATA
+-- locations:
 drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
-select distinct meetpunt_code as location_code, geom from voorbeelddata.trend;
+select l.* , l.meetpunt_code_2022 as location_code
+from public.locatie l
+join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
+where st_isempty(l.geom)=false;
 
 -- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
 create or replace view chemtrend.location_geojson as
--- select distinct meetpunt_code as location_code, st_asgeojson(geom) as geom from voorbeelddata.trend;
 select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location)::json)) as geojson
 from chemtrend.location;
 
 -- view with locations and its trend color per parameter
 drop view if exists chemtrend.location_substance cascade;
 create or replace view chemtrend.location_substance as
-select location_code, substance_id, substance_code, color, geom
-from (
-    select meetpunt_code as location_code
-    , s.substance_id
-    , s.substance_code
-    , geom
-    , case skendall_trend
-        when 'trend opwaarts' then 'red'
-        when 'geen trend' then 'grey'
-        when 'trend neerwaarts' then 'green'
+select l.meetpunt_code_2022 as location_code, tl.parameter_id as substance_id, s.substance_code
+, case skendall_trend
+        when 1 then 'red'
+        when 0 then 'grey'
+        when -1 then 'green'
     end as color
-    from voorbeelddata.trend tr
-    join chemtrend.substance s on s.substance_code=tr.parameter_code
-) x
-group by location_code, substance_id, substance_code, color, geom
+, l.geom
+from (
+    select tr.meetpunt_id, tr.parameter_id, tr.skendall_trend
+    from public.trend_locatie tr
+    group by tr.meetpunt_id, tr.parameter_id, tr.skendall_trend
+) tl
+join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
+join chemtrend.substance s on s.substance_id=tl.parameter_id
 ;
 
 -- functions that returns locations per substance
@@ -126,28 +128,33 @@ drop view if exists chemtrend.trend;
 create or replace view chemtrend.trend as
 select *
 from (
-    select meetpunt_code as location_code
+    select l.meetpunt_code_2022 as location_code
     , s.substance_id, s.substance_code
     , 'meting' as category
-    , s.substance_description || ' ' || meetpunt_code as title
-    , 'Trendresultaat: ' || skendall_trend || ' (p=' || (p_value_skendall) || ')' as subtitle_1
-    , 'Trendhelling: ' || (theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
+    , s.substance_description || ' ' || l.meetpunt_code_2022 as title
+    , 'Trendresultaat: '
+          || case tr.skendall_trend when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
+          || ' (p=' || (tr.p_value_skendall) || ')' as subtitle_1
+    , 'Trendhelling: ' || (tr.theilsen_slope * 365 * 10) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
-    , parameter_code || ' [' || eenheid_code || ' ' || hoedanigheidcode || ']' as y_label
+    , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
-    , lowline_x x_days -- dagen sinds 1980? nee sinds 1970-01-01
-    , case meting when 'Boven detectielimiet' then true else false end as point_filled
-    , waarde as y_value_meting
-    , lowline_y as y_value_lowess
-    , theilsen_intercept y_value_theil_sen
+--     , lowline_x x_days -- dagen sinds 1970-01-01
+--     , case meting when 'Boven detectielimiet' then true else false end as point_filled
+    , true point_filled
+    , tr.waarde_meting as y_value_meting
+    , tr.lowline_y as y_value_lowess
+    , tr.ats_y y_value_theil_sen
     , 'MKN' as h1_label
-    , norm_n as h1_value
+    , 0 as h1_value -- TO DO
     , 'MAC' as h2_label
-    , norm_p as h2_value
+    , 0 as h2_value -- TO DO
     -- select *
-    from voorbeelddata.trend tr
-    join chemtrend.substance s  on substance_code=tr.parameter_code
---     where meetpunt_code='NL02_0037' and parameter_code='Cr'
+    from public.trend_locatie tr
+    join chemtrend.substance s on s.substance_id=tr.parameter_id
+    join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
+    join public.eenheid e on e.eenheid_id=tr.eenheid_id
+    join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
 ) x
 ;
 
@@ -185,7 +192,7 @@ $ff$ language plpgsql;
 -- example: select * from chemtrend.region(5.019, 52.325);
 
 -- view that couples locations and regions:
-drop view chemtrend.location_region cascade;
+drop view if exists chemtrend.location_region cascade;
 create or replace view chemtrend.location_region as
 select loc.location_code, reg.region_id
 from (select *, st_transform(geom, 28992) as geom_rd from chemtrend.location) loc
