@@ -85,7 +85,8 @@ create table public.trend_locatie (
     lowline_y numeric,
     skendall_trend smallint,
     p_value_skendall numeric,
-    theilsen_slope numeric
+    theilsen_slope numeric,
+    rapportagegrens bool
 );
 
 -- grant access
