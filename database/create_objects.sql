@@ -72,7 +72,9 @@ where p."CAS" <> 'NVT'
 -- locations:
 drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
-select l.* , l.meetpunt_code_2022 as location_code
+select l.meetpunt_id, l.meetpunt_id as location_id,
+    l.meetpunt_code_2022 as location_code,
+    st_transform(l.geom, 4326) as geom
 from public.locatie l
 join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
 where st_isempty(l.geom)=false;
@@ -86,7 +88,7 @@ from chemtrend.location;
 -- view with locations and its trend color per parameter
 drop view if exists chemtrend.location_substance cascade;
 create or replace view chemtrend.location_substance as
-select l.meetpunt_code_2022 as location_code, tl.parameter_id as substance_id, s.substance_code
+select l.location_code, tl.parameter_id as substance_id, s.substance_code
 , case skendall_trend
         when 1 then 'red'
         when 0 then 'grey'
@@ -128,10 +130,10 @@ drop view if exists chemtrend.trend;
 create or replace view chemtrend.trend as
 select *
 from (
-    select l.meetpunt_code_2022 as location_code
+    select l.location_code
     , s.substance_id, s.substance_code
     , 'meting' as category
-    , s.substance_description || ' ' || l.meetpunt_code_2022 as title
+    , s.substance_description || ' ' || l.location_code as title
     , 'Trendresultaat: '
           || case tr.skendall_trend when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
           || ' (p=' || (tr.p_value_skendall) || ')' as subtitle_1
@@ -139,16 +141,14 @@ from (
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
---     , lowline_x x_days -- dagen sinds 1970-01-01
---     , case meting when 'Boven detectielimiet' then true else false end as point_filled
-    , true point_filled
+    , tr.rapportagegrens point_filled
     , tr.waarde_meting as y_value_meting
     , tr.lowline_y as y_value_lowess
     , tr.ats_y y_value_theil_sen
     , 'MKN' as h1_label
-    , 0 as h1_value -- TO DO
+    , null::numeric as h1_value -- TO DO
     , 'MAC' as h2_label
-    , 0 as h2_value -- TO DO
+    , null::numeric as h2_value -- TO DO
     -- select *
     from public.trend_locatie tr
     join chemtrend.substance s on s.substance_id=tr.parameter_id
