@@ -130,7 +130,7 @@ drop view if exists chemtrend.trend;
 create or replace view chemtrend.trend as
 select *
 from (
-    select l.location_code
+    select tr.meetpunt_id,l.location_code
     , s.substance_id, s.substance_code, s.substance_description
     , 'meting' as category
     , s.substance_description || ' ' || l.location_code as title
@@ -262,16 +262,16 @@ $ff$ language plpgsql;
 drop function if exists chemtrend.location(x decimal, y decimal);
 create or replace function chemtrend.location(x decimal, y decimal)
 --     returns varchar as
-	returns table(location_code text, geom geometry) as
+	returns table(meetpunt_id int, location_code text, geom geometry) as
 $ff$
 declare q text;
 declare srid_xy int = 4326;
 declare srid_rd int = 28992;
 begin
 select ($$
-    select loc.location_code, loc.geom
+    select loc.meetpunt_id, loc.location_code, loc.geom
     from (
-        select location_code, geom
+        select meetpunt_id, location_code, geom
         , st_transform(geom,28992) geom_rd
         , st_transform(geom,%4$s) <-> st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s) as distance
         from chemtrend.location
@@ -298,7 +298,7 @@ select ($$
     with tr_detail as (
         select *
         from chemtrend.trend
-        where location_code = (select location_code from chemtrend.location(%1$s,%2$s))
+        where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
         and substance_id = '%3$s'
     )
     , tr_graph as (
