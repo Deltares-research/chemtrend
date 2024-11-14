@@ -39,21 +39,23 @@ export default {
     },
     graphType: {
       type: String
+    },
+    currentLocation: {
+      type: String
     }
   },
   components: {
     VChart
   },
   computed: {
-    ...mapGetters(['regions']),
+    ...mapGetters(['regions', 'selectedColor']),
     chartOptions () {
       if (this.graphType === 'locations') {
-        return LocationTemplate(this.trend)
+        return LocationTemplate(this.trend, this.selectedColor)
       }
       const region = this.regions.find(region => region.name === this.trend.region_type)
-      console.log(region, this.regions, this.trend)
       const titleColor = _.get(region, 'color', 'black')
-      return RegionTemplate(this.trend, titleColor)
+      return RegionTemplate(this.trend, titleColor, this.selectedColor, this.currentLocation)
     }
   }
 }
@@ -62,6 +64,7 @@ export default {
 <style>
 .trend {
   height: 35vh;
-  max-width: 70vw;
+  width: 100%;
+  /* max-width: 70vw; */
 }
 </style>

@@ -1,4 +1,4 @@
-export function LocationTemplate (trendData) {
+export function LocationTemplate (trendData, selectedColor) {
   const marklines = []
   if (trendData.h1_value) {
     marklines.push({
@@ -18,6 +18,15 @@ export function LocationTemplate (trendData) {
       }
     })
   }
+
+  let lowessColor = 'red'
+  if (trendData.subtitle_1.includes('geen')) {
+    lowessColor = 'grey'
+  }
+  if (trendData.subtitle_1.includes('neerwaarts')) {
+    lowessColor = 'green'
+  } 
+
   return {
     title: {
       text: trendData.title,
@@ -31,9 +40,10 @@ export function LocationTemplate (trendData) {
       }
     },
     grid: {
-      bottom: 50,
-      right: 50,
-      left: 50
+      bottom: 60,
+      right: 40,
+      left: 30,
+      top: 50
     },
     tooltip: {
       show: true
@@ -69,7 +79,7 @@ export function LocationTemplate (trendData) {
         type: 'line',
         data: trendData.y_value_meting,
         lineStyle: {
-          color: '#000000'
+          color: selectedColor
         },
         symbol: 'circle',
         symbolSize: 4,
@@ -99,10 +109,11 @@ export function LocationTemplate (trendData) {
         type: 'line',
         data: trendData.y_value_lowess,
         lineStyle: {
-          color: '#0000ff'
+          color: lowessColor
         },
-        symbol: 'none',
-        showSymbol: false
+        itemStyle: {
+          color: 'transparent'
+        }
       },
       {
         name: 'Theil Sen',
@@ -112,8 +123,6 @@ export function LocationTemplate (trendData) {
           color: '#FFA500',
           type: 'dashed'
         },
-        symbol: 'none',
-        showSymbol: false,
         itemStyle: {
           color: '#FFA500'
         }

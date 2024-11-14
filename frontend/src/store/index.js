@@ -5,7 +5,8 @@ export default createStore({
   state: {
     substances: [],
     trends: [],
-    regions: []
+    regions: [],
+    selectedColor: '#2de0e0'
   },
   getters: {
     substances (state) {
@@ -21,6 +22,9 @@ export default createStore({
     },
     regions (state) {
       return state.regions
+    },
+    selectedColor (state) {
+      return state.selectedColor
     }
   },
   mutations: {
@@ -97,7 +101,7 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    addTrend (store, { x, y, substanceId, name }) {
+    addTrend (store, { x, y, substanceId, name, currentLocation}) {
       const existingTrend = store.state.trends.find(t => t.name === name) || []
       if (existingTrend.length > 0) {
         store.commit('SET_TREND_STATE', name)
@@ -112,7 +116,7 @@ export default createStore({
       Promise.all([fetch(urlRegions), fetch(urlTrends)])
         .then((responses) => Promise.all(responses.map((r) => r.json())))
         .then((jsons) => {
-          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y] })
+          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation })
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)

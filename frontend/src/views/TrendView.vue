@@ -30,6 +30,7 @@
               <graph-wrapper
                 :trend="graph"
                 :graphType="graph.region_type || 'locations'"
+                :currentLocation="trend.currentLocation"
               />
             </v-col>
           </v-row>
@@ -73,14 +74,9 @@ export default {
       const rows = []
       const trendData = trend.trendData || []
       const regions = _.get(this.$route, 'query.region', '').split(',')
-      console.log('regions', regions)
-      console.log('data', trendData)
-
       const data = trendData.filter(d => {
-        console.log('test', d.region_type, regions, d.region_type in regions, !_.has(d, 'region_type'))
         return regions.includes(d.region_type) || !_.has(d, 'region_type')
       })
-      console.log('data', data)
       if (data) {
         for (let i = 0; i < data.length; i += 2) {
           if (data[i + 1]) {

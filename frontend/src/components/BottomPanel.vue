@@ -8,7 +8,7 @@
       <v-toolbar-title text="Trendresultaten">
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn @click="$emit('update:bottomPanel', false)" flat icon="mdi-close"></v-btn>
+      <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
       </v-toolbar>
       <v-card-text class="bottom-panel ma-0 pa-0">
         <router-view></router-view>

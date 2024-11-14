@@ -81,7 +81,7 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['selectedSubstanceName', 'regions'])
+    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor'])
   },
   methods: {
     ...mapActions(['addTrend']),
@@ -162,6 +162,9 @@ export default {
       this.filterRegions()
     },
     filterRegions () {
+      if (!this.map.getSource('selected-regions')) {
+        return
+      }
       this.map.setFilter(
         'selected-regions', [
           'match',
@@ -198,7 +201,7 @@ export default {
         },
         paint: {
           'circle-color': 'rgba(239, 239, 240, 0)',
-          'circle-stroke-color': 'hsl(188, 59%, 50%)',
+          'circle-stroke-color': this.selectedColor,
           'circle-stroke-width': 3,
           'circle-radius': 4
         }
@@ -271,7 +274,7 @@ export default {
         const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId, name })
+          this.addTrend({ x, y, substanceId, name, currentLocation: location})
         }
       })
     }

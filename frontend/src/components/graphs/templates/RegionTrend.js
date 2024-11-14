@@ -1,8 +1,7 @@
 import _ from 'lodash'
 
 /* eslint-disable */
-export function RegionTemplate (trendData, titleColor) {
-  console.log(trendData.locations)
+export function RegionTemplate (trendData, titleColor, selectedColor, currentLocation) {
   return {
     title: {
       text: trendData.title,
@@ -17,12 +16,16 @@ export function RegionTemplate (trendData, titleColor) {
     },
     legend: {
       show: true,
-      bottom: 5
+      bottom: 0,
+      itemStyle: {
+        color: 'transparent'
+      }
     },
     grid: {
-      bottom: 50,
-      right: 50,
-      left: 50
+      bottom: 60,
+      right: 40,
+      left: 30,
+      top: 30
     },
     tooltip: {
       show: true,
@@ -46,10 +49,21 @@ export function RegionTemplate (trendData, titleColor) {
         color: loc.color || 'green',
         opacity: 0.2
       }
-      let name = 'Neerwaartse trend'
+      let name = 'Dalende trend'
       if (color === 'green') {
         name = 'Stijgende trend'
       }
+      if (color === 'grey') {
+        name = 'Geen Trend'
+      }
+
+      if (loc.trend_label === currentLocation) {
+        lineStyle = {
+          color: selectedColor
+        }
+        name = currentLocation
+      }
+
       if (loc.trend_label === 'p50') {
         name = loc.trend_label
         lineStyle = {

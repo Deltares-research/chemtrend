@@ -20,16 +20,16 @@ locations = metadata.tables["chemtrend.location_geojson"]
 
 regions = [{
         "name": "Waterschap",
-        "color": "#32a852"
+        "color": "#a8610a"
     }, {
         "name": "Waterlichaam",
-        "color": "#3632a8"
+        "color": "#a8a00a"
     }, {
         "name": "Provincie",
-        "color": "#a84832"
+        "color": "#0a79a8"
     }, {
         "name": "Stroomgebied",
-        "color": "#a89932"
+        "color": "#830aa8"
     }]
 
 catchments = metadata.tables["chemtrend.catchment_geojson"]
