@@ -9,8 +9,15 @@
       <v-expansion-panel
         v-for="trend in trends" :key="trend.name"
       >
-        <v-expansion-panel-title>{{ trend.name }}</v-expansion-panel-title>
-        <v-expansion-panel-text class="panel-text">
+        <v-expansion-panel-title>
+          {{ trend.name }}
+          <v-progress-circular
+            v-if="trend.loading"
+            color="primary"
+            indeterminate
+          ></v-progress-circular>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text v-if="!trend.loading" class="panel-text">
           <v-row v-for="row in graphRows(trend)" :key="row" no-gutters>
             <v-col
               v-for="graph in row"
@@ -58,7 +65,7 @@ export default {
   methods: {
     graphRows (trend) {
       const rows = []
-      const trendData = trend.trendData
+      const trendData = trend.trendData || []
       const regions = _.get(this.$route, 'query.region', '').split(',')
       console.log('regions', regions)
       console.log('data', trendData)

@@ -34,6 +34,45 @@ export default createStore({
       state.trends = []
     },
     ADD_TREND (state, trend) {
+      console.log('add trend', trend)
+      let existingTrend = false
+      state.trends = state.trends.map(t => {
+        if (t.name === trend.name) {
+          existingTrend = true
+          console.log('HELLO', existingTrend)
+          if (t.loading) {
+            trend.loading = false
+            trend.state = 'open'
+            return trend
+          } else {
+            t.state = 'open'
+            return t
+          }
+        } else {
+          t.state = 'closed'
+          return t
+        }
+      })
+      console.log('HELLO again', existingTrend)
+
+      if (!existingTrend) {
+        trend.state = 'open'
+        state.trends.unshift(trend)
+      }
+    },
+    SET_TREND_STATE (state, name) {
+      state.trends.forEach(t => {
+        if (t.name === name) {
+          t.state = 'open'
+        } else {
+          t.state = 'closed'
+        }
+      })
+    },
+    REMOVE_TREND (state, name) {
+      state.trends = state.trends.filter(t => t.name === name)
+    },
+    ADD_LOADING_TREND (state, trend) {
       state.trends.unshift(trend)
     },
     SET_SELECTED_COORDINATES (state, coords) {
@@ -62,16 +101,22 @@ export default createStore({
         })
     },
     addTrend (store, { x, y, substanceId, name }) {
+      const existingTrend = store.state.trends.find(t => t.name === name) || []
+      console.log(existingTrend, existingTrend.length > 0, existingTrend.loading)
+      if (existingTrend.length > 0) {
+        store.commit('SET_TREND_STATE', name)
+        if (!existingTrend[0].loading) {
+          return
+        }
+      }
       const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
-      substanceId = 517
-      x = 5.019
-      y = 52.325
       const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
+      store.commit('ADD_LOADING_TREND', { name, loading: true })
 
       Promise.all([fetch(urlRegions), fetch(urlTrends)])
         .then((responses) => Promise.all(responses.map((r) => r.json())))
         .then((jsons) => {
-          console.log(jsons.flat())
+          console.log(jsons)
           store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y] })
         })
         .catch(error => {

@@ -18,6 +18,7 @@ import VChart from 'vue-echarts'
 import { LocationTemplate } from './templates/LocationTrend.js'
 import { RegionTemplate } from './templates/RegionTrend.js'
 import { mapGetters } from 'vuex'
+import _ from 'lodash'
 
 use([
   CanvasRenderer,

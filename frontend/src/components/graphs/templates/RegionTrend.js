@@ -54,9 +54,15 @@ export function RegionTemplate (trendData, titleColor) {
       if (color === 'green') {
         name = 'Stijgende trend'
       }
-      if (trendData.title.includes(loc.trend_label)) {
+      if (loc.trend_label === 'p50') {
         lineStyle = {
           color: 'black'
+        }
+      }
+
+      if (loc.trend_label === 'p25' || loc.trend_label === 'p75') {
+        lineStyle = {
+          color: 'grey'
         }
       }
       return {
