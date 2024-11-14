@@ -7,9 +7,9 @@
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
             <navigation-drawer-tabs />
           </v-navigation-drawer>
-          <map-component v-model:bottomPanel="bottomPanel" :class="bottomPanel ? 'h-25' : 'h-100'" />
+          <map-component v-model:bottomPanel="bottomPanel" :class="bottomPanel ? 'h-40' : 'h-100'" />
           <bottom-panel
-            :class="bottomPanel ? 'h-75' : 'h-0'"
+            :class="bottomPanel ? 'h-60' : 'h-0'"
             :drawer="drawer"
             v-model:bottomPanel="bottomPanel"
           />
@@ -56,5 +56,13 @@ export default {
 
 html {
   overflow-y: hidden !important;
+}
+
+.h-60 {
+  height: 60% !important
+}
+
+.h-40 {
+  height: 40% !important
 }
 </style>

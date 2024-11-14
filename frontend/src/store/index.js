@@ -34,7 +34,6 @@ export default createStore({
       state.trends = []
     },
     ADD_TREND (state, trend) {
-      console.log('add trend', trend)
       let existingTrend = false
       state.trends = state.trends.map(t => {
         if (t.name === trend.name) {
@@ -53,8 +52,6 @@ export default createStore({
           return t
         }
       })
-      console.log('HELLO again', existingTrend)
-
       if (!existingTrend) {
         trend.state = 'open'
         state.trends.unshift(trend)
@@ -70,7 +67,7 @@ export default createStore({
       })
     },
     REMOVE_TREND (state, name) {
-      state.trends = state.trends.filter(t => t.name === name)
+      state.trends = state.trends.filter(t => t.name !== name)
     },
     ADD_LOADING_TREND (state, trend) {
       state.trends.unshift(trend)
@@ -102,7 +99,6 @@ export default createStore({
     },
     addTrend (store, { x, y, substanceId, name }) {
       const existingTrend = store.state.trends.find(t => t.name === name) || []
-      console.log(existingTrend, existingTrend.length > 0, existingTrend.loading)
       if (existingTrend.length > 0) {
         store.commit('SET_TREND_STATE', name)
         if (!existingTrend[0].loading) {
@@ -116,7 +112,6 @@ export default createStore({
       Promise.all([fetch(urlRegions), fetch(urlTrends)])
         .then((responses) => Promise.all(responses.map((r) => r.json())))
         .then((jsons) => {
-          console.log(jsons)
           store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y] })
         })
         .catch(error => {

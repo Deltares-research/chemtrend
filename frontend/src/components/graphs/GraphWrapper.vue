@@ -61,7 +61,7 @@ export default {
 
 <style>
 .trend {
-  height: 45vh;
+  height: 35vh;
   max-width: 70vw;
 }
 </style>

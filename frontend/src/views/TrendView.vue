@@ -5,17 +5,22 @@
       v-model="panels"
       multiple
       variant="accordion"
+      density="compact"
     >
       <v-expansion-panel
         v-for="trend in trends" :key="trend.name"
       >
+      <v-spacer/>
         <v-expansion-panel-title>
           {{ trend.name }}
+          <v-spacer />
           <v-progress-circular
             v-if="trend.loading"
             color="primary"
             indeterminate
           ></v-progress-circular>
+          <v-btn icon="mdi-delete" size="x-small" @click.stop="REMOVE_TREND(trend.name)">
+          </v-btn>
         </v-expansion-panel-title>
         <v-expansion-panel-text v-if="!trend.loading" class="panel-text">
           <v-row v-for="row in graphRows(trend)" :key="row" no-gutters>
@@ -36,7 +41,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import GraphWrapper from '@/components/graphs/GraphWrapper.vue'
 import _ from 'lodash'
 
@@ -63,6 +68,7 @@ export default {
     GraphWrapper
   },
   methods: {
+    ...mapMutations(['REMOVE_TREND']),
     graphRows (trend) {
       const rows = []
       const trendData = trend.trendData || []

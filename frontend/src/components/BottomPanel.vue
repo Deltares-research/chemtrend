@@ -4,7 +4,7 @@
     height="100%"
     >
     <v-card height="100%">
-      <v-toolbar>
+      <v-toolbar density="compact">
       <v-toolbar-title text="Trendresultaten">
       </v-toolbar-title>
       <v-spacer></v-spacer>

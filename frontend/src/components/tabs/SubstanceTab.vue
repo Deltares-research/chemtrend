@@ -56,7 +56,7 @@ export default {
     substance: {
       get () {
         const subId = parseInt(_.get(this.$route, 'query.substance'), 10) // Ensure it's an integer
-        return this.substances.find(substance => substance.substance_id === subId) || null
+        return this.substances.find(substance => parseInt(substance.substance_id) === subId) || null
       },
       set (substance) {
         const newQuery = {

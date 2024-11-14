@@ -15,13 +15,18 @@ export function RegionTemplate (trendData, titleColor) {
         fontSize: 12
       }
     },
+    legend: {
+      show: true,
+      bottom: 5
+    },
     grid: {
       bottom: 50,
       right: 50,
       left: 50
     },
     tooltip: {
-      show: true
+      show: true,
+      trigger: 'item',
     },
     toolbox: {
       right: 10,
@@ -32,15 +37,6 @@ export function RegionTemplate (trendData, titleColor) {
         restore: {},
         saveAsImage: {}
       }
-    },
-    legend: {
-      show: true,
-      bottom: 5,
-      lineStyle: {
-        symbol: 'none'
-      },
-      itemWidth: 70,
-      data: ['Upward trend']
     },
     yAxis: {},
     xAxis: { type: 'time' },
@@ -55,18 +51,21 @@ export function RegionTemplate (trendData, titleColor) {
         name = 'Stijgende trend'
       }
       if (loc.trend_label === 'p50') {
+        name = loc.trend_label
         lineStyle = {
           color: 'black'
         }
       }
 
       if (loc.trend_label === 'p25' || loc.trend_label === 'p75') {
+        name = loc.trend_label
         lineStyle = {
-          color: 'grey'
+          color: 'grey',
+          type: 'dashed'
         }
       }
       return {
-        name: loc.trend_label,
+        name: name,
         type: 'line',
         data: _.zip.apply(_, [loc.x_value, loc.y_value_lowess]),
         symbol: 'none',

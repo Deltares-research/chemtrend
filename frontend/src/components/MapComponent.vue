@@ -9,7 +9,7 @@
       :zoom='7'
     >
       <MapboxNavigationControl :visualizePitch='true' />
-      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup">
+      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup" :closeButton="false">
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
@@ -70,6 +70,7 @@ export default {
   watch: {
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
+      this.checkSelection('locations')
     },
     '$route.query.region' (val, oldVal) {
       this.filterRegions()
@@ -252,6 +253,9 @@ export default {
       })
     },
     checkSelection (shape) {
+      if (!this.mapLocation) {
+        return
+      }
       const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
       this.map.getSource(`selected-${shape}`)
         .setData({
