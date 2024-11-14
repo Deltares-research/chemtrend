@@ -218,17 +218,23 @@ select
     , tr.y_value_lowess
     , tr.trend_label
     , rt.regio_type as region_type
+    , tr.color
 from (
-    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label
+    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color
     from public.trend_regio
     union all
     select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
+    , case tl.skendall_trend
+        when 1 then 'red'
+        when 0 then 'grey'
+        when -1 then 'green'
+    end as color
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
@@ -336,14 +342,14 @@ select ($$
         and substance_id = '%3$s'
     )
     , tr_trends as (
-        select region_type, title, trend_label
+        select region_type, title, trend_label, color
         , json_agg(x_value order by x_value) as x_value
         , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
-        group by region_type, regio_id, trend_label, title
+        group by region_type, regio_id, trend_label, title, color
     )
     , tr_graph as (
-        select region_type, title, json_agg((select x from (select tr.trend_label, tr.x_value, tr.y_value_lowess) as x)) as locations
+        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.x_value, tr.y_value_lowess) as x)) as locations
         from tr_trends tr
         group by region_type, title
     )
