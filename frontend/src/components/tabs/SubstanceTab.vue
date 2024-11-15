@@ -2,6 +2,9 @@
   <div class="content-wrapper">
     <v-col>
       <v-row>
+        <h1>1. Substanties </h1>
+      </v-row>
+      <v-row>
         <v-autocomplete
           label="Select substance"
           :items="substances"
@@ -11,8 +14,11 @@
           :return-object="true"
           v-model="substance"
         ></v-autocomplete>
-        </v-row>
-        <v-row>
+      </v-row>
+      <v-row>
+        <h1>2. Regio's </h1>
+      </v-row>
+      <v-row>
         <v-switch
           v-model="region"
           v-for="reg in regions"
@@ -25,7 +31,7 @@
           multiple
         ></v-switch>
         </v-row>
-        <v-row>
+        <v-row class="align-end">
           <point-layer-legend style="margin-bottom: 20px;" />
         </v-row>
     </v-col>
@@ -43,14 +49,14 @@ export default {
     PointLayerLegend
   },
   methods: {
-    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations', 'setSelectedSubstanceId'])
+    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations'])
   },
   computed: {
     ...mapGetters(['substances', 'regions']),
     substance: {
       get () {
         const subId = parseInt(_.get(this.$route, 'query.substance'), 10) // Ensure it's an integer
-        return this.substances.find(substance => substance.substance_id === subId) || null
+        return this.substances.find(substance => parseInt(substance.substance_id) === subId) || null
       },
       set (substance) {
         const newQuery = {
@@ -58,7 +64,6 @@ export default {
           substance: substance.substance_id
         }
         this.$router.push({ query: newQuery })
-        this.setSelectedSubstanceId(substance.substance_id)
       }
     },
     region: {

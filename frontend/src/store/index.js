@@ -1,19 +1,21 @@
 import { createStore } from 'vuex'
+import _ from 'lodash'
 
 export default createStore({
   state: {
     substances: [],
-    selectedSubstanceId: null,
     trends: [],
     regions: [],
-    panelIsCollapsed: true
+    selectedColor: '#2de0e0'
   },
   getters: {
     substances (state) {
       return state.substances
     },
-    selectedSubstanceId (state) {
-      return state.selectedSubstanceId
+    selectedSubstanceName: (state) => (id) => {
+      const substance = state.substances.find(sub => sub.substance_id === id)
+      const substanceName = _.upperFirst(substance.substance_description)
+      return substanceName
     },
     trends (state) {
       return state.trends
@@ -21,8 +23,9 @@ export default createStore({
     regions (state) {
       return state.regions
     },
-    panelIsCollapsed: state => state.panelIsCollapsed
-
+    selectedColor (state) {
+      return state.selectedColor
+    }
   },
   mutations: {
     SET_SUBSTANCES (state, data) {
@@ -31,18 +34,47 @@ export default createStore({
     SET_REGIONS (state, regions) {
       state.regions = regions
     },
-    SET_SELECTED_SUBSTANCE_ID (state, id) {
-      console.log('mutation', id)
-      state.selectedSubstanceId = id
-    },
     CLEAR_TRENDS (state) {
       state.trends = []
     },
     ADD_TREND (state, trend) {
-      state.trends.unshift(trend)
+      let existingTrend = false
+      state.trends = state.trends.map(t => {
+        if (t.name === trend.name) {
+          existingTrend = true
+          console.log('HELLO', existingTrend)
+          if (t.loading) {
+            trend.loading = false
+            trend.state = 'open'
+            return trend
+          } else {
+            t.state = 'open'
+            return t
+          }
+        } else {
+          t.state = 'closed'
+          return t
+        }
+      })
+      if (!existingTrend) {
+        trend.state = 'open'
+        state.trends.unshift(trend)
+      }
     },
-    TOGGLE_PANEL_COLLAPSE (state) {
-      state.panelIsCollapsed = !state.panelIsCollapsed
+    SET_TREND_STATE (state, name) {
+      state.trends.forEach(t => {
+        if (t.name === name) {
+          t.state = 'open'
+        } else {
+          t.state = 'closed'
+        }
+      })
+    },
+    REMOVE_TREND (state, name) {
+      state.trends = state.trends.filter(t => t.name !== name)
+    },
+    ADD_LOADING_TREND (state, trend) {
+      state.trends.unshift(trend)
     },
     SET_SELECTED_COORDINATES (state, coords) {
       state.selectedCoordinates = coords
@@ -69,29 +101,26 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    setSelectedSubstanceId ({ commit }, id) {
-      commit('SET_SELECTED_SUBSTANCE_ID', id)
-    },
-    addTrend (store, { x, y, substanceId }, name) {
-      const url = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
+    addTrend (store, { x, y, substanceId, name, currentLocation }) {
+      const existingTrend = store.state.trends.find(t => t.name === name) || []
+      if (existingTrend.length > 0) {
+        store.commit('SET_TREND_STATE', name)
+        if (!existingTrend[0].loading) {
+          return
+        }
+      }
+      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
+      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
+      store.commit('ADD_LOADING_TREND', { name, loading: true })
 
-      fetch(url)
-        .then(res => res.json())
-        .then(response => {
-          if (Array.isArray(response) && response.length > 0 && response[0].timeseries) {
-            const trendData = response[0]
-            store.commit('ADD_TREND', { name, trendData })
-            console.log('trends', this.state.trends)
-          } else {
-            console.error('Invalid response structure:', response)
-          }
+      Promise.all([fetch(urlRegions), fetch(urlTrends)])
+        .then((responses) => Promise.all(responses.map((r) => r.json())))
+        .then((jsons) => {
+          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation })
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)
         })
-    },
-    togglePanelCollapse ({ commit }) {
-      commit('TOGGLE_PANEL_COLLAPSE')
     }
   },
   modules: {

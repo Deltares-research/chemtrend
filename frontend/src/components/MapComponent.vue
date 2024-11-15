@@ -1,19 +1,19 @@
 <template>
-    <div class='map'>
-      <mapbox-map
-        ref='mapboxmap'
-        class='map'
-        :access-token='mapboxToken'
-        map-style='mapbox://styles/mapbox/light-v11'
-        :center='[4.7, 52.2]'
-        :zoom='7'
-      >
+  <div class='map'>
+    <mapbox-map
+      ref='mapboxmap'
+      class='map'
+      :access-token='mapboxToken'
+      map-style='mapbox://styles/mapbox/light-v11'
+      :center='[4.7, 52.2]'
+      :zoom='7'
+    >
       <MapboxNavigationControl :visualizePitch='true' />
-      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup">
+      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup" :closeButton="false">
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -70,6 +70,7 @@ export default {
   watch: {
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
+      this.checkSelection('locations')
     },
     '$route.query.region' (val, oldVal) {
       this.filterRegions()
@@ -80,10 +81,10 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['panelIsCollapsed', 'selectedSubstanceId', 'regions'])
+    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor'])
   },
   methods: {
-    ...mapActions(['addTrend', 'togglePanelCollapse']),
+    ...mapActions(['addTrend']),
 
     initializeData () {
       this.addLocations()
@@ -103,8 +104,8 @@ export default {
           type: 'geojson',
           data: `${process.env.VUE_APP_SERVER_URL}/locations/`
         },
+        // 'circle-color': 'rgba(239, 239, 240, 1)',
         paint: {
-          // 'circle-color': 'rgba(239, 239, 240, 1)',
           'circle-color': 'white',
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
@@ -161,6 +162,9 @@ export default {
       this.filterRegions()
     },
     filterRegions () {
+      if (!this.map.getSource('selected-regions')) {
+        return
+      }
       this.map.setFilter(
         'selected-regions', [
           'match',
@@ -197,7 +201,7 @@ export default {
         },
         paint: {
           'circle-color': 'rgba(239, 239, 240, 0)',
-          'circle-stroke-color': 'hsl(188, 59%, 50%)',
+          'circle-stroke-color': this.selectedColor,
           'circle-stroke-width': 3,
           'circle-radius': 4
         }
@@ -235,29 +239,26 @@ export default {
           duration: 800
         })
         this.map.once('moveend', () => {
-          if (this.panelIsCollapsed) {
-            this.togglePanelCollapse()
-          }
           e.point = this.map.project([e.lngLat.lng, e.lngLat.lat])
           const newQuery = {
             ...this.$route.query, // Keep all existing query parameters, including 'substance'
             latitude: e.lngLat.lat,
             longitude: e.lngLat.lng
           }
-          // TODO: implement clearTrends
-          // this.clearTrends()
-          // TODO: do we want to ease to a polygon or specific zoom level?
           this.$router.push({
             path: '/trends',
             query: newQuery
           })
           this.checkSelection('locations')
           this.updateRegion(e.lngLat.lat, e.lngLat.lng)
+          this.$emit('update:bottomPanel', true)
         })
       })
     },
     checkSelection (shape) {
-      console.log('check selection', this.mapLocation.point)
+      if (!this.mapLocation) {
+        return
+      }
       const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
       this.map.getSource(`selected-${shape}`)
         .setData({
@@ -265,14 +266,15 @@ export default {
           features: features
         })
 
-      console.log(features)
       features.forEach(feature => {
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
-        const substanceId = _.get(this.$route, 'query.substance')
+        const substanceId = parseInt(_.get(this.$route, 'query.substance'))
+        const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId })
+          this.addTrend({ x, y, substanceId, name, currentLocation: location })
         }
       })
     }

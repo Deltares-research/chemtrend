@@ -69,7 +69,7 @@ create table public.trend_regio (
     lowess_p75 numeric
 );
 
--- drop table public.trend_locatie;
+-- drop table public.trend_locatie cascade;
 create table public.trend_locatie (
     trend_locatie serial primary key,
     meetpunt_id int references public.locatie(meetpunt_id),
@@ -83,7 +83,10 @@ create table public.trend_locatie (
     waarde_meting numeric,
     ats_y numeric,
     lowline_y numeric,
-    skendall_trend smallint
+    skendall_trend smallint,
+    p_value_skendall numeric,
+    theilsen_slope numeric,
+    rapportagegrens bool
 );
 
 -- grant access
