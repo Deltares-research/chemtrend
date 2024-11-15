@@ -274,7 +274,7 @@ export default {
         const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId, name, currentLocation: location})
+          this.addTrend({ x, y, substanceId, name, currentLocation: location })
         }
       })
     }

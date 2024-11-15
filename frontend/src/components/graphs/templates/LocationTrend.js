@@ -25,7 +25,7 @@ export function LocationTemplate (trendData, selectedColor) {
   }
   if (trendData.subtitle_1.includes('neerwaarts')) {
     lowessColor = 'green'
-  } 
+  }
 
   return {
     title: {

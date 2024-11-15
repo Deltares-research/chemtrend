@@ -101,7 +101,7 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    addTrend (store, { x, y, substanceId, name, currentLocation}) {
+    addTrend (store, { x, y, substanceId, name, currentLocation }) {
       const existingTrend = store.state.trends.find(t => t.name === name) || []
       if (existingTrend.length > 0) {
         store.commit('SET_TREND_STATE', name)
