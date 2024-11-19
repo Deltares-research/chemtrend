@@ -89,6 +89,9 @@ create table public.trend_locatie (
     rapportagegrens bool
 );
 
+-- add index to locatie table
+create index ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_2022) include (geom);
+
 -- grant access
 GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
 alter table public.trend_locatie owner to waterkwaliteit_readonly;
