@@ -104,7 +104,6 @@ export default {
           type: 'geojson',
           data: `${process.env.VUE_APP_SERVER_URL}/locations/`
         },
-        // 'circle-color': 'rgba(239, 239, 240, 1)',
         paint: {
           'circle-color': 'white',
           'circle-stroke-color': '#000000',
@@ -242,8 +241,8 @@ export default {
           e.point = this.map.project([e.lngLat.lng, e.lngLat.lat])
           const newQuery = {
             ...this.$route.query, // Keep all existing query parameters, including 'substance'
-            latitude: e.lngLat.lat,
-            longitude: e.lngLat.lng
+            longitude: e.lngLat.lng,
+            latitude: e.lngLat.lat
           }
           this.$router.push({
             path: '/trends',
@@ -251,7 +250,6 @@ export default {
           })
           this.checkSelection('locations')
           this.updateRegion(e.lngLat.lat, e.lngLat.lng)
-          this.$emit('update:bottomPanel', true)
         })
       })
     },
@@ -259,7 +257,13 @@ export default {
       if (!this.mapLocation) {
         return
       }
-      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [shape] })
+
+      // TODO: check layers and their names, to make it consistent so you can just use shape here
+      let layer = shape
+      if (shape === 'locations') {
+        layer = 'filtered-locations'
+      }
+      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [layer] })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
@@ -267,6 +271,8 @@ export default {
         })
 
       features.forEach(feature => {
+        console.log('feature', feature)
+        const layer = feature.layer
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
@@ -275,6 +281,7 @@ export default {
 
         if (substanceId) {
           this.addTrend({ x, y, substanceId, name, currentLocation: location })
+          this.$emit('update:bottomPanel', true)
         }
       })
     }

@@ -1,4 +1,6 @@
+
 export function LocationTemplate (trendData, selectedColor) {
+  const zip = (a1, a2) => a1.map((x, i) => [x, a2[i]])
   const marklines = []
   if (trendData.h1_value) {
     marklines.push({
@@ -55,7 +57,8 @@ export function LocationTemplate (trendData, selectedColor) {
           yAxisIndex: 'none'
         },
         restore: {},
-        saveAsImage: {}
+        saveAsImage: {},
+        dataView: { readOnly: false }
       }
     },
     legend: {
@@ -67,8 +70,7 @@ export function LocationTemplate (trendData, selectedColor) {
       itemWidth: 70
     },
     xAxis: {
-      type: 'category',
-      data: trendData.x_value
+      type: 'time'
     },
     yAxis: {
       type: 'value'
@@ -77,7 +79,7 @@ export function LocationTemplate (trendData, selectedColor) {
       {
         name: 'Meting',
         type: 'line',
-        data: trendData.y_value_meting,
+        data: zip(trendData.x_value, trendData.y_value_meting),
         lineStyle: {
           color: selectedColor
         },
@@ -107,25 +109,23 @@ export function LocationTemplate (trendData, selectedColor) {
       {
         name: 'Lowess',
         type: 'line',
-        data: trendData.y_value_lowess,
+        data: zip(trendData.x_value, trendData.y_value_lowess),
         lineStyle: {
           color: lowessColor
         },
-        itemStyle: {
-          color: 'transparent'
-        }
+        symbol: 'none',
+        itemStyle: { color: 'transparent' }
       },
       {
         name: 'Theil Sen',
         type: 'line',
-        data: trendData.y_value_theil_sen,
+        data: zip(trendData.x_value, trendData.y_value_theil_sen),
         lineStyle: {
           color: '#FFA500',
           type: 'dashed'
         },
-        itemStyle: {
-          color: '#FFA500'
-        }
+        symbol: 'none',
+        itemStyle: { color: 'transparent' }
       }
     ]
   }

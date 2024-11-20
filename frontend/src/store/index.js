@@ -42,7 +42,6 @@ export default createStore({
       state.trends = state.trends.map(t => {
         if (t.name === trend.name) {
           existingTrend = true
-          console.log('HELLO', existingTrend)
           if (t.loading) {
             trend.loading = false
             trend.state = 'open'
@@ -75,9 +74,6 @@ export default createStore({
     },
     ADD_LOADING_TREND (state, trend) {
       state.trends.unshift(trend)
-    },
-    SET_SELECTED_COORDINATES (state, coords) {
-      state.selectedCoordinates = coords
     }
   },
   actions: {
@@ -116,7 +112,7 @@ export default createStore({
       Promise.all([fetch(urlRegions), fetch(urlTrends)])
         .then((responses) => Promise.all(responses.map((r) => r.json())))
         .then((jsons) => {
-          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation })
+          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId})
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)

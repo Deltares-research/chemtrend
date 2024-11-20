@@ -2,23 +2,23 @@
   <div class="map-legend">
     <div class="legend-item">
       <span class="legend-color-data-unselected" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Substance not selected</span>
+      <span class="legend-label">Stof niet geselecteerd</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-up" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Upward trend</span>
+      <span class="legend-label">Stijgende trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-down" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Downward trend</span>
+      <span class="legend-label">Neerwaartse trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">No clear trend</span>
+      <span class="legend-label">Geen duidelijke trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-no-data" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">No measurement data available</span>
+      <span class="legend-label">Geen meetdata beschikbaar</span>
     </div>
 
   </div>

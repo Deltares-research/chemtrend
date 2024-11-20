@@ -38,7 +38,8 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
           yAxisIndex: 'none'
         },
         restore: {},
-        saveAsImage: {}
+        saveAsImage: {},
+        dataView: { readOnly: false }
       }
     },
     yAxis: {},

@@ -5,9 +5,7 @@
     </template>
 
     <v-app-bar-title>
-      <router-link to="/trends">
-        CHEMtrend
-      </router-link>
+      <a href="/">CHEMtrend</a>
     </v-app-bar-title>
     <v-spacer></v-spacer>
     <img :src=rwsImgPath alt="Rijkswaterstaat Logo" height="40" />

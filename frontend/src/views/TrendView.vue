@@ -3,7 +3,6 @@
     <v-expansion-panels
       width="100%"
       v-model="panels"
-      multiple
       variant="accordion"
       density="compact"
     >
@@ -28,6 +27,7 @@
               v-for="graph in row"
               :key="graph.name">
               <graph-wrapper
+                :id="graph.name"
                 :trend="graph"
                 :graphType="graph.region_type || 'locations'"
                 :currentLocation="trend.currentLocation"
@@ -60,6 +60,26 @@ export default {
   watch: {
     trends () {
       this.panels = [0]
+    },
+    panels () {
+      if (!this.panels) {
+        return
+      }
+      const openTrend = this.trends[this.panels]
+      if (!openTrend) {
+        return
+      }
+      console.log(openTrend.coordinates)
+      const newQuery = {
+        ...this.$route.query, // Keep all existing query parameters, including 'substance'
+        longitude: openTrend.coordinates[0],
+        latitude: openTrend.coordinates[1],
+        substance: openTrend.substanceId
+      }
+      this.$router.push({
+        path: '/trends',
+        query: newQuery
+      })
     }
   },
   computed: {
