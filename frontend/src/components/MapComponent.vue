@@ -272,7 +272,6 @@ export default {
 
       features.forEach(feature => {
         console.log('feature', feature)
-        const layer = feature.layer
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
