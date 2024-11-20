@@ -21,14 +21,6 @@ export function LocationTemplate (trendData, selectedColor) {
     })
   }
 
-  let lowessColor = 'red'
-  if (trendData.subtitle_1.includes('geen')) {
-    lowessColor = 'grey'
-  }
-  if (trendData.subtitle_1.includes('neerwaarts')) {
-    lowessColor = 'green'
-  }
-
   return {
     title: {
       text: trendData.title,
@@ -41,6 +33,7 @@ export function LocationTemplate (trendData, selectedColor) {
         fontSize: 12
       }
     },
+    animation: false,
     grid: {
       bottom: 60,
       right: 40,
@@ -111,7 +104,7 @@ export function LocationTemplate (trendData, selectedColor) {
         type: 'line',
         data: zip(trendData.x_value, trendData.y_value_lowess),
         lineStyle: {
-          color: lowessColor
+          color: trendData.color
         },
         symbol: 'none',
         itemStyle: { color: 'transparent' }

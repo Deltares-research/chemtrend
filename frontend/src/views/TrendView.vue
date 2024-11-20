@@ -62,6 +62,7 @@ export default {
       this.panels = [0]
     },
     panels () {
+      // TODO: clean up if statements
       if (!this.panels) {
         return
       }
@@ -69,7 +70,9 @@ export default {
       if (!openTrend) {
         return
       }
-      console.log(openTrend.coordinates)
+      if (openTrend.loading) {
+        return
+      }
       const newQuery = {
         ...this.$route.query, // Keep all existing query parameters, including 'substance'
         longitude: openTrend.coordinates[0],

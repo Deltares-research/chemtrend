@@ -112,7 +112,7 @@ export default createStore({
       Promise.all([fetch(urlRegions), fetch(urlTrends)])
         .then((responses) => Promise.all(responses.map((r) => r.json())))
         .then((jsons) => {
-          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId})
+          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
         })
         .catch(error => {
           console.error('Error fetching trend data:', error)
