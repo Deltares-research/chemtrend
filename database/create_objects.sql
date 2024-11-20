@@ -149,6 +149,12 @@ from (
     , null::numeric as h1_value -- TO DO
     , 'MAC' as h2_label
     , null::numeric as h2_value -- TO DO
+    , case tr.skendall_trend
+        when 1 then 'red'
+        when 0 then 'grey'
+        when -1 then 'green'
+        else ''
+    end as color
     -- select *
     from public.trend_locatie tr
     join chemtrend.substance s on s.substance_id=tr.parameter_id
@@ -308,13 +314,13 @@ select ($$
         and substance_id = '%3$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value
+        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
@@ -323,7 +329,7 @@ q := format(q, x, y, sid);
 return query execute q;
 end
 $ff$ language plpgsql;
--- example: select * from chemtrend.trend(5.019, 52.325,517);
+-- example: select * from chemtrend.trend(5.113007176643064,52.02272937705282,333);
 
 
 -- function that returns trend data based on a given location
