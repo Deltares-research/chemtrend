@@ -136,16 +136,6 @@ end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.region(5.019, 52.325);
 
--- view that couples locations and regions:
-drop view if exists chemtrend.location_region cascade;
-create or replace view chemtrend.location_region as
-select loc.location_code, reg.region_id
-from (select *, st_transform(geom, 28992) as geom_rd from chemtrend.location) loc
-join chemtrend.region reg on 1=1
--- join (select * from chemtrend.region where region_id in (select region_id from chemtrend.region(5.019, 52.325))) reg on 1=1
-where st_within(loc.geom_rd, reg.geom_rd)
-;
-
 -- view with trend data (to plot the measurements and trends)
 drop view if exists chemtrend.trend_region;
 create or replace view chemtrend.trend_region as
