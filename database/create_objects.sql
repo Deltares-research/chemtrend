@@ -152,6 +152,7 @@ select
     , rt.regio_type as region_type
     , tr.color
 from (
+    -- deel 1:
     select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color
     from public.trend_regio
     union all
@@ -161,6 +162,7 @@ from (
     select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color
     from public.trend_regio
     union all
+    -- deel 2:
     select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
     , case tl.skendall_trend
         when 1 then 'red'
