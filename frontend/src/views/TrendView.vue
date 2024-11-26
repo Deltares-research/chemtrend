@@ -14,6 +14,7 @@
           {{ trend.name }}
           <v-spacer />
           <v-progress-circular
+            class="mx-1"
             v-if="trend.loading"
             color="primary"
             indeterminate
@@ -22,6 +23,13 @@
           </v-btn>
         </v-expansion-panel-title>
         <v-expansion-panel-text v-if="!trend.loading" class="panel-text">
+          <v-alert
+            v-if="trend.error"
+            type="error"
+            variant="outlined"
+          >
+            {{ trend.error }}
+          </v-alert>
           <v-row v-for="row in graphRows(trend)" :key="row" no-gutters>
             <v-col
               v-for="graph in row"
@@ -70,7 +78,7 @@ export default {
       if (!openTrend) {
         return
       }
-      if (openTrend.loading) {
+      if (openTrend.loading || openTrend.error) {
         return
       }
       const newQuery = {
