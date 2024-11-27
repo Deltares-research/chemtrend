@@ -20,7 +20,7 @@ join public.compartiment c on c.compartiment_code=imp.compartiment_code
 ;
 
 -- trend_locatie
-insert into public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id, datum, tijd, waarde_meting, ats_y, lowline_y, skendall_trend, p_value_skendall, theilsen_slope, rapportagegrens)
+insert into public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id, datum, tijd, waarde_meting, ats_y, lowline_y, skendall_trend, p_value_skendall, theilsen_slope, rapportagegrens, ats_slope)
 select
 l.meetpunt_id meetpunt_id,
 p.parameter_id,
@@ -40,7 +40,8 @@ case imp.skendall_trend
     end ::smallint as skendall_trend,
 imp.p_value_skendall::numeric,
 imp.theilsen_slope::numeric,
-imp.rg::bool as rapportagegrens
+imp.rg::bool as rapportagegrens,
+imp.ats_slope::numeric as ats_slope
 -- select count(*) --885279
 from import."03_data_trend_ats_info" imp
 join public.locatie l on l.meetpunt_code_2022=imp.meetpunt_code_2022

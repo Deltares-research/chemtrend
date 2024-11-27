@@ -86,7 +86,8 @@ create table public.trend_locatie (
     skendall_trend smallint,
     p_value_skendall numeric,
     theilsen_slope numeric,
-    rapportagegrens bool
+    rapportagegrens bool,
+    ats_slope numeric
 );
 
 -- add index to locatie table
