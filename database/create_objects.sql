@@ -15,18 +15,26 @@ where p."CAS" <> 'NVT'
 -- locations:
 drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
-select l.meetpunt_id, l.meetpunt_id as location_id,
+select
+    l.meetpunt_id,
     l.meetpunt_code_2022 as location_code,
+    l.meetpunt_omschrijving as omschrijving,
+    w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geom, 4326) as geom
 from public.locatie l
+left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
 where st_isempty(l.geom)=false;
 
 -- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
 create or replace view chemtrend.location_geojson as
-select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location)::json)) as geojson
-from chemtrend.location;
+select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(mp)::json)) as geojson
+from (select location_code as meetpuntcode
+      , omschrijving
+      , waterbeheerder
+      , geom
+      from chemtrend.location) mp;
 
 -- view with locations and its trend color per parameter
 drop view if exists chemtrend.location_substance cascade;
