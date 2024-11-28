@@ -52,8 +52,26 @@ select l.meetpunt_id, r.regio_id
 from public.locatie l
 join public.regio r on 1=1 and st_within(l.geom, r.geom_rd) and st_isempty(l.geom)=false
 ;
--- TO DO: uitzondering voor waterschap: rijkswateren vallen hier niet in
-
+-- correctie: meetpunten op grensgebied of onder beheer van RWS:
+drop table if exists public._temp_correctie_locatie_regio;
+select l.meetpunt_id, l.meetpunt_code_2022, w.waterbeheerder_id, w.waterbeheerder_code, w.waterbeheerder_omschrijving, r.regio_id, r.bron_id, r.regio_omschrijving
+, wr.regio_id as new_regio_id
+into public._temp_correctie_locatie_regio
+-- select count(*)
+from public.locatie l
+join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
+join public.regio wr on wr.bron_id=w.waterbeheerder_id and wr.regio_type_id=4
+join public.locatie_regio lr on lr.meetpunt_id=l.meetpunt_id
+join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id=4
+where r.bron_id<>w.waterbeheerder_id
+-- and l.meetpunt_id=6237
+-- and left(l.meetpunt_code_2022,2) != w.waterbeheerder_id::varchar
+-- and l.meetpunt_id in (select distinct meetpunt_id from public.trend_locatie)
+;
+update public.locatie_regio lr set regio_id=x.new_regio_id
+from public._temp_correctie_locatie_regio x
+where x.meetpunt_id=lr.meetpunt_id and x.regio_id=lr.regio_id
+;
 
 -- trend data
 create table public.trend_regio (
