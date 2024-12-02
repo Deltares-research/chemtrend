@@ -33,7 +33,7 @@ where st_isempty(geometry)=false
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select waterbeheerder_id as bron_id, 4 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
 from public.waterbeheerder
-where st_isempty(geometry)=false
+where (st_isempty(geometry)=false or (waterbeheerder_code='80' and waterbeheerder_omschrijving='Rijkswaterstaat'))
 ;
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select db_id_extern as bron_id, 5 as region_type_id, waterlichaam_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
@@ -47,6 +47,7 @@ create table public.locatie_regio (
     meetpunt_id int references public.locatie(meetpunt_id),
     regio_id int references public.regio(regio_id)
 );
+-- locatiekoppeling o.b.v. regio
 insert into public.locatie_regio (meetpunt_id, regio_id)
 select l.meetpunt_id, r.regio_id
 from public.locatie l
@@ -71,6 +72,16 @@ where r.bron_id<>w.waterbeheerder_id
 update public.locatie_regio lr set regio_id=x.new_regio_id
 from public._temp_correctie_locatie_regio x
 where x.meetpunt_id=lr.meetpunt_id and x.regio_id=lr.regio_id
+;
+drop table if exists public._temp_correctie_locatie_regio;
+
+-- view to use for regional data
+create or replace view public.locatie_regio_info as
+select r.regio_id, r.regio_omschrijving, rt.regio_type, l.meetpunt_id, l.meetpunt_code_2022 as meetpunt_code
+from public.regio r
+join public.regio_type rt on r.regio_type_id = rt.regio_type_id
+join public.locatie_regio lr on r.regio_id = lr.regio_id
+join public.locatie l on lr.meetpunt_id = l.meetpunt_id
 ;
 
 -- trend data
