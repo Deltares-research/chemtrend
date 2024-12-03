@@ -130,23 +130,23 @@ export default createStore({
               store.commit('ADD_ERROR_TREND', { name, message: 'Geen regiotrend beschikbaar.' })
             }
           })
-          .catch(error => {
+          .catch(() => {
             // The request gave an error
             store.commit('ADD_ERROR_TREND', { name, message: 'De regiotrend kan niet worden opgehaald.' })
           }),
         fetch(urlTrends)
-        .then(r => {
-          try {
-            return r.json()
-          } catch (e) {
-            // The request gave a response, but no json body to be parsed
-            store.commit('ADD_ERROR_TREND', { name, message: 'Geen locatietrend beschikbaar.' })
-          }
-        })
-        .catch(error => {
-          // The request gave an error
-          store.commit('ADD_ERROR_TREND', { name, message: 'De locatietrend kan niet worden opgehaald.' })
-        })
+          .then(r => {
+            try {
+              return r.json()
+            } catch (e) {
+              // The request gave a response, but no json body to be parsed
+              store.commit('ADD_ERROR_TREND', { name, message: 'Geen locatietrend beschikbaar.' })
+            }
+          })
+          .catch(() => {
+            // The request gave an error
+            store.commit('ADD_ERROR_TREND', { name, message: 'De locatietrend kan niet worden opgehaald.' })
+          })
       ])
         .then((jsons) => {
           jsons = jsons.map(j => j.value)
@@ -155,7 +155,7 @@ export default createStore({
             store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
           }
         })
-        .catch(error => {
+        .catch(() => {
           // Both requests failed to be retrieved.
           store.commit('ADD_ERROR_TREND', { name, message: 'Zowel de locatie als de regiotrend kunnen niet worden berekend.' })
         })
