@@ -206,7 +206,7 @@ end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.region_geojson(5.019, 52.325);
 
--- function to return closest location on given lon/lat (x,y) within 1 km
+-- function to return closest location on given lon/lat (x,y) within 100 meter
 drop function if exists chemtrend.location(x decimal, y decimal);
 create or replace function chemtrend.location(x decimal, y decimal)
 --     returns varchar as
@@ -224,7 +224,7 @@ select ($$
         , st_transform(geom,%4$s) <-> st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s) as distance
         from chemtrend.location
     ) loc
-    where distance<1000
+    where distance<100
     order by distance
     limit 1
     $$) into q;
@@ -280,8 +280,14 @@ select ($$
     with tr_detail as (
         select *
         from chemtrend.trend_region
-        where regio_id in (select region_id from chemtrend.region(%1$s,%2$s))
-        and substance_id = '%3$s'
+        where substance_id = '%3$s'
+        and (
+            (regio_id in (select region_id from chemtrend.region(%1$s,%2$s)))
+            or
+            (regio_id in (select regio_id from public.locatie_regio lr
+                          join chemtrend.location(%1$s,%2$s) loc on loc.meetpunt_id=lr.meetpunt_id)
+            )
+        )
     )
     , tr_trends as (
         select region_type, title, trend_label, color
