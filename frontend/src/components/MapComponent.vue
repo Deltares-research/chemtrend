@@ -42,7 +42,7 @@ export default {
       popupLngLat: { lng: 0, lat: 0 },
       popupHeaders: [
         {
-          text: 'Properties',
+          text: 'Eigenschappen',
           align: 'left',
           sortable: false,
           value: 'name',

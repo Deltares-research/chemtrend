@@ -2,11 +2,11 @@
   <div class="content-wrapper">
     <v-col>
       <v-row>
-        <h1>1. Substanties </h1>
+        <h1>1. Chemische stoffen </h1>
       </v-row>
       <v-row>
         <v-autocomplete
-          label="Select substance"
+          label="Selecteer stof"
           :items="substances"
           class="autocomplete-list"
           item-value="substance_id"
