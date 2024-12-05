@@ -126,15 +126,16 @@ join public.regio_type rt on rt.regio_type_id=r.regio_type_id
 -- function to return regional polygons based on given coordinates
 drop function if exists chemtrend.region(x decimal, y decimal);
 create or replace function chemtrend.region(x decimal, y decimal)
--- 	returns table(region_type text, region_id text, region_description text, geom geometry) as
-    returns setof chemtrend.region as
+	returns table(region_id int, region_type text, region_description text, geom geometry) as
+--     returns setof chemtrend.region as
 $ff$
 declare q text;
 declare srid_xy int = 4326;
 declare srid_rd int = 28992;
 begin
 select ($$
-    select reg.region_id, reg.region_type, original_id, reg.region_description, geom, geom_rd
+--     select reg.region_id, reg.region_type, original_id, reg.region_description, geom, geom_rd
+    select region_id, region_type::text, region_description::text, geom
     from chemtrend.region reg
     where st_within(st_transform(st_setsrid(st_makepoint(%1$s,%2$s),%3$s),%4$s), reg.geom_rd)
     $$) into q;
