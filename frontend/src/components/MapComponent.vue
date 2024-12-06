@@ -21,7 +21,6 @@ import { mapActions, mapGetters } from 'vuex'
 import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
-import mapboxgl from 'mapbox-gl'
 
 const initialData = {
   type: 'FeatureCollection',
