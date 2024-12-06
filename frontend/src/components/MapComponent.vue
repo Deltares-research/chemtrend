@@ -58,7 +58,8 @@ export default {
       ],
       popupItems: [],
       map: null,
-      mapLocation: null
+      mapLocation: null,
+      regionsGeojson: {}
     }
   },
   components: {
@@ -223,6 +224,13 @@ export default {
         this.map.getSource('selected-regions')
           .setData(url)
       }
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          this.regionsGeojson = response
+        })
     },
     initializeMapWithLatLon () {
       const lat = _.get(this.$route, 'query.latitude')
@@ -293,16 +301,18 @@ export default {
       })
     },
     zoomToRegion (name) {
-      const features = this.map.querySourceFeatures('selected-regions', { filter: ['match', ['get', 'region_type'], [name], true, false] })
-      if (features.length === 0) {
-        return
-      }
+      // const features = this.map.querySourceFeatures('selected-regions', { filter: ['match', ['get', 'region_type'], [name], true, false] })
       // Not all coordinates in geometries have the same depth.. Multipolygon vs polygon
       // for example, therefore I flatten the whole thing to 1D array and then get the lat lon
       // from there.
-      const rawCoords = features.map(f => {
-        return f.geometry.coordinates.flat(Infinity)
-      }).flat()
+      if (!_.has(this.regionsGeojson, 'features')) {
+        return
+      }
+      const feature = this.regionsGeojson.features.filter(feat => feat.properties.region_type === name)
+      if (feature.length === 0) {
+        return
+      }
+      const rawCoords = feature[0].geometry.coordinates.flat(Infinity)
       const lat = []
       const lon = []
       rawCoords.forEach((c, i) => {
@@ -317,7 +327,7 @@ export default {
       ], [
         Math.max(...lon), Math.max(...lat)
       ]]
-      this.map.fitBounds(bounds, { padding: 20 })
+      this.map.fitBounds(bounds, { padding: { top: 10, bottom: 10, left: 40, right: 10 } })
       this.$store.state.zoomTo = null
     }
   }
