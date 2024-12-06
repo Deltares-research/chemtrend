@@ -41,43 +41,54 @@ from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
 ;
 
--- locaties koppelen aan regio
+--------- LOCATIES KOPPELEN AAN REGIO -----------
+create schema if not exists temp;
+-- 1. koppeltabel aanmaken
 create table public.locatie_regio (
     locatie_regio_id serial primary key,
     meetpunt_id int references public.locatie(meetpunt_id),
     regio_id int references public.regio(regio_id)
 );
--- locatiekoppeling o.b.v. regio
+-- 2. locatiekoppeling o.b.v. geometrie
 insert into public.locatie_regio (meetpunt_id, regio_id)
 select l.meetpunt_id, r.regio_id
 from public.locatie l
 join public.regio r on 1=1 and st_within(l.geom, r.geom_rd) and st_isempty(l.geom)=false
 ;
--- correctie: meetpunten op grensgebied of onder beheer van RWS:
-drop table if exists public._temp_correctie_locatie_regio;
+-- 3. correctie: meetpunten op grensgebied of onder beheer van RWS:
+drop table if exists temp.correctie_locatie_regio;
+-- (vul temp tabel)
 select l.meetpunt_id, l.meetpunt_code_2022, w.waterbeheerder_id, w.waterbeheerder_code, w.waterbeheerder_omschrijving, r.regio_id, r.bron_id, r.regio_omschrijving
 , wr.regio_id as new_regio_id
-into public._temp_correctie_locatie_regio
--- select count(*)
+into temp.correctie_locatie_regio
 from public.locatie l
 join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 join public.regio wr on wr.bron_id=w.waterbeheerder_id and wr.regio_type_id=4
 join public.locatie_regio lr on lr.meetpunt_id=l.meetpunt_id
 join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id=4
-where r.bron_id<>w.waterbeheerder_id
--- and l.meetpunt_id=6237
--- and left(l.meetpunt_code_2022,2) != w.waterbeheerder_id::varchar
--- and l.meetpunt_id in (select distinct meetpunt_id from public.trend_locatie)
-;
+where r.bron_id<>w.waterbeheerder_id;
+-- (update obv temp tabel)
 update public.locatie_regio lr set regio_id=x.new_regio_id
-from public._temp_correctie_locatie_regio x
-where x.meetpunt_id=lr.meetpunt_id and x.regio_id=lr.regio_id
+from temp.correctie_locatie_regio x
+where x.meetpunt_id=lr.meetpunt_id and x.regio_id=lr.regio_id;
+-- 4. aanvulling: meetpunten die horen bij een waterbeheerder maar buiten polygoon vallen (en om die reden nog niet in koppeltabel toegevoegd)
+drop table if exists temp.aanvulling_loc_reg;
+select l.meetpunt_id, l.waterbeheerder_id, r2b.regio_id
+into temp.aanvulling_loc_reg
+from public.locatie l
+left join public.locatie_regio_info lr on lr.meetpunt_id=l.meetpunt_id and lr.regio_type_id=4
+join public.waterbeheerder w on l.waterbeheerder_id = w.waterbeheerder_id
+join public.regio r2b on r2b.regio_type_id=4 and r2b.bron_id=l.waterbeheerder_id
+where lr.meetpunt_id is null
+and st_isempty(l.geom)=false
 ;
-drop table if exists public._temp_correctie_locatie_regio;
+insert into public.locatie_regio (meetpunt_id, regio_id)
+select meetpunt_id, regio_id from temp.aanvulling_loc_reg;
 
 -- view to use for regional data
+drop view public.locatie_regio_info;
 create or replace view public.locatie_regio_info as
-select r.regio_id, r.regio_omschrijving, rt.regio_type, l.meetpunt_id, l.meetpunt_code_2022 as meetpunt_code
+select r.regio_id, r.regio_omschrijving, rt.regio_type, l.meetpunt_id, l.meetpunt_code_2022 as meetpunt_code, rt.regio_type_id
 from public.regio r
 join public.regio_type rt on r.regio_type_id = rt.regio_type_id
 join public.locatie_regio lr on r.regio_id = lr.regio_id

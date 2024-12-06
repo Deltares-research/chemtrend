@@ -210,7 +210,6 @@ $ff$ language plpgsql;
 -- function to return closest location on given lon/lat (x,y) within 100 meter
 drop function if exists chemtrend.location(x decimal, y decimal);
 create or replace function chemtrend.location(x decimal, y decimal)
---     returns varchar as
 	returns table(meetpunt_id int, location_code text, geom geometry) as
 $ff$
 declare q text;
