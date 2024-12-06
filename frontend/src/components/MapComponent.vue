@@ -9,7 +9,7 @@
       :zoom='7'
     >
       <MapboxNavigationControl :visualizePitch='true' />
-      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup" :closeButton="false">
+      <MapboxPopup v-if="popupItems.length != 0" :lng-lat="[popupLngLat.lng, popupLngLat.lat]" ref="popup" max-width="500px" :closeButton="false">
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
@@ -43,7 +43,7 @@ export default {
       popupLngLat: { lng: 0, lat: 0 },
       popupHeaders: [
         {
-          text: 'Properties',
+          text: 'Eigenschappen',
           align: 'left',
           sortable: false,
           value: 'name',

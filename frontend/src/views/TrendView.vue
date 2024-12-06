@@ -14,6 +14,7 @@
           {{ trend.name }}
           <v-spacer />
           <v-progress-circular
+            class="mx-1"
             v-if="trend.loading"
             color="primary"
             indeterminate
@@ -24,17 +25,24 @@
         <v-expansion-panel-text v-if="!trend.loading" class="panel-text">
           <v-row v-for="row in graphRows(trend)" :key="row" no-gutters>
             <v-col
-              v-for="graph in row"
-              :key="graph.name">
-              <graph-wrapper
-                :id="graph.name"
-                :trend="graph"
-                :graphType="graph.region_type || 'locations'"
-                :currentLocation="trend.currentLocation"
-              />
-            </v-col>
-          </v-row>
-
+            v-for="graph in row"
+            :key="graph.name">
+            <graph-wrapper
+            :id="graph.name"
+            :trend="graph"
+            :graphType="graph.region_type || 'locations'"
+            :currentLocation="trend.currentLocation"
+            />
+          </v-col>
+        </v-row>
+        <v-alert
+          v-if="trend.error"
+          type="info"
+          variant="outlined"
+          density="compact"
+        >
+          {{ trend.error }}
+        </v-alert>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -70,7 +78,7 @@ export default {
       if (!openTrend) {
         return
       }
-      if (openTrend.loading) {
+      if (openTrend.loading || openTrend.error) {
         return
       }
       const newQuery = {
