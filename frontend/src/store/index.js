@@ -6,7 +6,8 @@ export default createStore({
     substances: [],
     trends: [],
     regions: [],
-    selectedColor: '#2de0e0'
+    selectedColor: '#2de0e0',
+    zoomTo: ''
   },
   getters: {
     substances (state) {
@@ -85,6 +86,9 @@ export default createStore({
     ADD_LOADING_TREND (state, trend) {
       console.log('loading trend')
       state.trends.unshift(trend)
+    },
+    ZOOM_TO (state, zoomLayerName) {
+      state.zoomTo = zoomLayerName
     }
   },
   actions: {

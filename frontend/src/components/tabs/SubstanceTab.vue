@@ -18,19 +18,21 @@
       <v-row>
         <h1>2. Regio's </h1>
       </v-row>
-      <v-row>
+      <v-row
+        v-for="reg in regions"
+        :key="reg.name">
         <v-switch
           v-model="region"
-          v-for="reg in regions"
-          :key="reg.name"
           :label="reg.name"
           :value="reg.name"
           :color="reg.color"
-          width="100%"
           hide-details
           multiple
         ></v-switch>
-        </v-row>
+        <v-spacer/>
+        <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
+        </v-btn>
+      </v-row>
         <v-row class="align-end">
           <point-layer-legend style="margin-bottom: 20px;" />
         </v-row>
@@ -39,7 +41,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapMutations } from 'vuex'
 import _ from 'lodash'
 import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
@@ -49,6 +51,7 @@ export default {
     PointLayerLegend
   },
   methods: {
+    ...mapMutations(['ZOOM_TO']),
     ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations'])
   },
   computed: {
