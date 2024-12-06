@@ -21,6 +21,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
+import mapboxgl from 'mapbox-gl'
 
 const initialData = {
   type: 'FeatureCollection',
@@ -74,6 +75,11 @@ export default {
     },
     '$route.query.region' (val, oldVal) {
       this.filterRegions()
+    },
+    '$store.state.zoomTo' (val) {
+      if (val && this.mapLocation) {
+        this.zoomToRegion(val)
+      }
     }
   },
   mounted () {
@@ -85,7 +91,6 @@ export default {
   },
   methods: {
     ...mapActions(['addTrend']),
-
     initializeData () {
       this.addLocations()
       this.addFilteredLocations()
@@ -271,7 +276,6 @@ export default {
         })
 
       features.forEach(feature => {
-        console.log('feature', feature)
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
@@ -283,6 +287,21 @@ export default {
           this.$emit('update:bottomPanel', true)
         }
       })
+    },
+    zoomToRegion (name) {
+      const features = this.map.querySourceFeatures('selected-regions', { filter: ['match', ['get', 'region_type'], [name], true, false] })
+      if (features.length === 0) {
+        return
+      }
+      const coordinates = features.map(f => f.geometry.coordinates.flat(1)).flat()
+      const flippedCoords = coordinates[0].map((_, colIndex) => coordinates.map(row => row[colIndex]))
+      const bounds = [[
+        Math.min(...flippedCoords[0]), Math.min(...flippedCoords[1])
+      ], [
+        Math.max(...flippedCoords[0]), Math.max(...flippedCoords[1])
+      ]]
+      this.map.fitBounds(bounds, { padding: 20 })
+      this.$store.state.zoomTo = null
     }
   }
 }
