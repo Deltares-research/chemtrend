@@ -237,9 +237,14 @@ export default {
     interactionMap () {
       this.map.on('click', e => {
         this.mapLocation = e
+        // If zoomed in further than 10, don't zoom out on click
+        let zoom = this.map.getZoom()
+        if (zoom <= 10) {
+          zoom = 10
+        }
         this.map.easeTo({
           center: e.lngLat,
-          zoom: 10,
+          zoom: zoom,
           duration: 800
         })
         this.map.once('moveend', () => {
@@ -293,12 +298,25 @@ export default {
       if (features.length === 0) {
         return
       }
-      const coordinates = features.map(f => f.geometry.coordinates.flat(1)).flat()
-      const flippedCoords = coordinates[0].map((_, colIndex) => coordinates.map(row => row[colIndex]))
+      // Not all coordinates in geometries have the same depth.. Multipolygon vs polygon
+      // for example, therefore I flatten the whole thing to 1D array and then get the lat lon
+      // from there.
+      const rawCoords = features.map(f => {
+        return f.geometry.coordinates.flat(Infinity)
+      }).flat()
+      const lat = []
+      const lon = []
+      rawCoords.forEach((c, i) => {
+        if ((i % 2) === 0) {
+          lon.push(c)
+        } else {
+          lat.push(c)
+        }
+      })
       const bounds = [[
-        Math.min(...flippedCoords[0]), Math.min(...flippedCoords[1])
+        Math.min(...lon), Math.min(...lat)
       ], [
-        Math.max(...flippedCoords[0]), Math.max(...flippedCoords[1])
+        Math.max(...lon), Math.max(...lat)
       ]]
       this.map.fitBounds(bounds, { padding: 20 })
       this.$store.state.zoomTo = null
