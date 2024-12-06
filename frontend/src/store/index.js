@@ -42,9 +42,10 @@ export default createStore({
       state.trends = state.trends.map(t => {
         if (t.name === trend.name) {
           existingTrend = true
-          if (t.loading) {
+          if (t.loading || t.error) {
             trend.loading = false
             trend.state = 'open'
+            trend.error = t.error
             return trend
           } else {
             t.state = 'open'
@@ -60,6 +61,15 @@ export default createStore({
         state.trends.unshift(trend)
       }
     },
+    ADD_ERROR_TREND (state, props) {
+      state.trends = state.trends.map(trend => {
+        if (trend.name === props.name) {
+          trend.loading = false
+          trend.error = props.message
+        }
+        return trend
+      })
+    },
     SET_TREND_STATE (state, name) {
       state.trends.forEach(t => {
         if (t.name === name) {
@@ -73,6 +83,7 @@ export default createStore({
       state.trends = state.trends.filter(t => t.name !== name)
     },
     ADD_LOADING_TREND (state, trend) {
+      console.log('loading trend')
       state.trends.unshift(trend)
     }
   },
@@ -109,13 +120,44 @@ export default createStore({
       const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
       store.commit('ADD_LOADING_TREND', { name, loading: true })
 
-      Promise.all([fetch(urlRegions), fetch(urlTrends)])
-        .then((responses) => Promise.all(responses.map((r) => r.json())))
+      Promise.allSettled([
+        fetch(urlRegions)
+          .then(r => {
+            try {
+              return r.json()
+            } catch (e) {
+              // The request gave a response, but no json body to be parsed
+              store.commit('ADD_ERROR_TREND', { name, message: 'Geen regiotrend beschikbaar.' })
+            }
+          })
+          .catch(() => {
+            // The request gave an error
+            store.commit('ADD_ERROR_TREND', { name, message: 'De regiotrend kan niet worden opgehaald.' })
+          }),
+        fetch(urlTrends)
+          .then(r => {
+            try {
+              return r.json()
+            } catch (e) {
+              // The request gave a response, but no json body to be parsed
+              store.commit('ADD_ERROR_TREND', { name, message: 'Geen locatietrend beschikbaar.' })
+            }
+          })
+          .catch(() => {
+            // The request gave an error
+            store.commit('ADD_ERROR_TREND', { name, message: 'De locatietrend kan niet worden opgehaald.' })
+          })
+      ])
         .then((jsons) => {
-          store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
+          jsons = jsons.map(j => j.value)
+          jsons = jsons.filter(j => j)
+          if (jsons) {
+            store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
+          }
         })
-        .catch(error => {
-          console.error('Error fetching trend data:', error)
+        .catch(() => {
+          // Both requests failed to be retrieved.
+          store.commit('ADD_ERROR_TREND', { name, message: 'Zowel de locatie als de regiotrend kunnen niet worden berekend.' })
         })
     }
   },
