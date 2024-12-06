@@ -30,7 +30,7 @@
           multiple
         ></v-switch>
         <v-spacer/>
-        <v-btn icon="mdi-magnify" flat size="x-small" @click.stop="ZOOM_TO(reg.name)">
+        <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
         </v-btn>
       </v-row>
         <v-row class="align-end">
