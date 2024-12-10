@@ -5,6 +5,7 @@
       v-model="panels"
       variant="accordion"
       density="compact"
+      multiple="true"
     >
       <v-expansion-panel
         v-for="trend in trends" :key="trend.name"

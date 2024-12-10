@@ -8,11 +8,14 @@
       <v-toolbar-title text="Trendresultaten">
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn @click="$emit('update:mapPanel', !mapPanel )" flat :icon="mapPanel ? 'mdi-earth-off' : 'mdi-earth'"></v-btn>
       <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
       </v-toolbar>
-      <v-card-text class="bottom-panel ma-0 pa-0">
+      <v-card height="100%" class="bottom-panel">
+        <v-card-text class="bottom-panel ma-0 pa-0">
         <router-view></router-view>
       </v-card-text>
+      </v-card>
     </v-card>
   </v-sheet>
 </template>
@@ -24,6 +27,9 @@ export default {
       type: Boolean
     },
     bottomPanel: {
+      type: Boolean
+    },
+    mapPanel: {
       type: Boolean
     }
   }
