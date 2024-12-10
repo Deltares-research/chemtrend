@@ -66,8 +66,17 @@ export default {
     }
   },
   watch: {
-    trends () {
-      this.panels = [0]
+    trends: {
+      handler (newTrends) {
+        let newPanels = newTrends.map((trend, index) => {
+          return trend.state === 'open' ? index : -1
+        }).filter(i => i >= 0)
+        if (newPanels === undefined || newPanels.length === 0) {
+          newPanels = [0]
+        }
+        this.panels = newPanels
+      },
+      deep: true
     },
     panels () {
       // TODO: clean up if statements
@@ -76,9 +85,11 @@ export default {
       }
       const openTrend = this.trends[this.panels]
       if (!openTrend) {
+        console.log('no open trend')
         return
       }
       if (openTrend.loading || openTrend.error) {
+        console.log('loading or error')
         return
       }
       const newQuery = {

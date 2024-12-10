@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import _ from 'lodash'
+import { toRaw } from 'vue'
 
 export default createStore({
   state: {
@@ -109,10 +110,12 @@ export default createStore({
         })
     },
     addTrend (store, { x, y, substanceId, name, currentLocation }) {
-      const existingTrend = store.state.trends.find(t => t.name === name) || []
-      if (existingTrend.length > 0) {
+      const existingTrend = store.state.trends.find(t => {
+        return toRaw(t).name === name
+      })
+      if (existingTrend !== undefined) {
         store.commit('SET_TREND_STATE', name)
-        if (!existingTrend[0].loading) {
+        if (!existingTrend.loading) {
           return
         }
       }
