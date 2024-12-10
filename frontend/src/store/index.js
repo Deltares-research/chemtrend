@@ -7,6 +7,7 @@ export default createStore({
     substances: [],
     trends: [],
     regions: [],
+    panelTrigger: false,
     selectedColor: '#2de0e0'
   },
   getters: {
@@ -20,6 +21,9 @@ export default createStore({
     },
     trends (state) {
       return state.trends
+    },
+    panelTrigger (state) {
+      return state.panelTrigger
     },
     regions (state) {
       return state.regions
@@ -79,6 +83,7 @@ export default createStore({
           t.state = 'closed'
         }
       })
+      state.panelTrigger = true
     },
     REMOVE_TREND (state, name) {
       state.trends = state.trends.filter(t => t.name !== name)
