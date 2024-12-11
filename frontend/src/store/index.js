@@ -83,7 +83,7 @@ export default createStore({
           t.state = 'closed'
         }
       })
-      state.panelTrigger = true
+      state.panelTrigger = !state.panelTrigger
     },
     REMOVE_TREND (state, name) {
       state.trends = state.trends.filter(t => t.name !== name)
@@ -124,6 +124,11 @@ export default createStore({
           return
         }
       }
+
+      if (store.state.trends.length >= 10) {
+        return
+      }
+
       const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
       const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
       store.commit('ADD_LOADING_TREND', { name, loading: true })
