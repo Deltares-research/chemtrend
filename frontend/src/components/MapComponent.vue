@@ -58,7 +58,8 @@ export default {
       ],
       popupItems: [],
       map: null,
-      mapLocation: null
+      mapLocation: null,
+      regionsGeojson: {}
     }
   },
   components: {
@@ -74,6 +75,11 @@ export default {
     },
     '$route.query.region' (val, oldVal) {
       this.filterRegions()
+    },
+    '$store.state.zoomTo' (val) {
+      if (val && this.mapLocation) {
+        this.zoomToRegion(val)
+      }
     }
   },
   mounted () {
@@ -85,7 +91,6 @@ export default {
   },
   methods: {
     ...mapActions(['addTrend']),
-
     initializeData () {
       this.addLocations()
       this.addFilteredLocations()
@@ -219,6 +224,13 @@ export default {
         this.map.getSource('selected-regions')
           .setData(url)
       }
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          this.regionsGeojson = response
+        })
     },
     initializeMapWithLatLon () {
       const lat = _.get(this.$route, 'query.latitude')
@@ -232,9 +244,14 @@ export default {
     interactionMap () {
       this.map.on('click', e => {
         this.mapLocation = e
+        // If zoomed in further than 10, don't zoom out on click
+        let zoom = this.map.getZoom()
+        if (zoom <= 10) {
+          zoom = 10
+        }
         this.map.easeTo({
           center: e.lngLat,
-          zoom: 10,
+          zoom: zoom,
           duration: 800
         })
         this.map.once('moveend', () => {
@@ -271,7 +288,6 @@ export default {
         })
 
       features.forEach(feature => {
-        console.log('feature', feature)
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
@@ -283,6 +299,36 @@ export default {
           this.$emit('update:bottomPanel', true)
         }
       })
+    },
+    zoomToRegion (name) {
+      // const features = this.map.querySourceFeatures('selected-regions', { filter: ['match', ['get', 'region_type'], [name], true, false] })
+      // Not all coordinates in geometries have the same depth.. Multipolygon vs polygon
+      // for example, therefore I flatten the whole thing to 1D array and then get the lat lon
+      // from there.
+      if (!_.has(this.regionsGeojson, 'features')) {
+        return
+      }
+      const feature = this.regionsGeojson.features.filter(feat => feat.properties.region_type === name)
+      if (feature.length === 0) {
+        return
+      }
+      const rawCoords = feature[0].geometry.coordinates.flat(Infinity)
+      const lat = []
+      const lon = []
+      rawCoords.forEach((c, i) => {
+        if ((i % 2) === 0) {
+          lon.push(c)
+        } else {
+          lat.push(c)
+        }
+      })
+      const bounds = [[
+        Math.min(...lon), Math.min(...lat)
+      ], [
+        Math.max(...lon), Math.max(...lat)
+      ]]
+      this.map.fitBounds(bounds, { padding: { top: 10, bottom: 10, left: 40, right: 10 } })
+      this.$store.state.zoomTo = null
     }
   }
 }
