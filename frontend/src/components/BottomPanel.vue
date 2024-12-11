@@ -11,7 +11,7 @@
               {{ writeNumberTrends() }}
             </v-toolbar-title>
           </template>
-          <span>Only 10 trends are allowed to be open at the same time.</span>
+          <span>Er mogen maximaal 10 trends tegelijkertijd openstaan.</span>
         </v-tooltip>
         <v-spacer></v-spacer>
         <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
