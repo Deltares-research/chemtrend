@@ -181,7 +181,7 @@ from (
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
-    join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id=4
+    join public.regio r on r.regio_id=lr.regio_id
 ) tr
 join chemtrend.substance s on s.substance_id=tr.parameter_id
 join public.regio r on r.regio_id=tr.regio_id
