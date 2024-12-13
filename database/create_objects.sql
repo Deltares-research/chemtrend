@@ -40,16 +40,16 @@ from (select location_code as meetpuntcode
 drop view if exists chemtrend.location_substance cascade;
 create or replace view chemtrend.location_substance as
 select l.location_code, tl.parameter_id as substance_id, s.substance_code
-, case skendall_trend
+, case trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
         when -1 then 'green'
     end as color
 , l.geom
 from (
-    select tr.meetpunt_id, tr.parameter_id, tr.skendall_trend
+    select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
     from public.trend_locatie tr
-    group by tr.meetpunt_id, tr.parameter_id, tr.skendall_trend
+    group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
@@ -86,8 +86,8 @@ from (
     , 'meting' as category
     , s.substance_description || ' ' || l.location_code as title
     , 'Trendresultaat: '
-          || case tr.skendall_trend when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
-          || ' (p=' || round(tr.p_value_skendall,4) || ')' as subtitle_1
+          || case tr.trend_conclusie when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
+          || ' (p=' || round(tr.p_value_trend,4) || ')' as subtitle_1
     , 'Trendhelling: ' || round(tr.ats_slope * 365 * 10,4) || ' ug/l per decennium' as subtitle_2
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
@@ -100,7 +100,7 @@ from (
     , null::numeric as h1_value -- TO DO
     , 'MAC' as h2_label
     , null::numeric as h2_value -- TO DO
-    , case tr.skendall_trend
+    , case tr.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
         when -1 then 'green'
@@ -173,7 +173,7 @@ from (
     union all
     -- deel 2:
     select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
-    , case tl.skendall_trend
+    , case tl.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
         when -1 then 'green'

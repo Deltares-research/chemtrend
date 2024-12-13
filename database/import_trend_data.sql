@@ -1,4 +1,5 @@
 --  trend_regio
+truncate table public.trend_regio;
 insert into public.trend_regio (regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, datum, lowess_p0, lowess_p25, lowess_p75)
 select
 r.regio_id,
@@ -20,7 +21,8 @@ join public.compartiment c on c.compartiment_code=imp.compartiment_code
 ;
 
 -- trend_locatie
-insert into public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id, datum, tijd, waarde_meting, ats_y, lowline_y, skendall_trend, p_value_skendall, theilsen_slope, rapportagegrens, ats_slope)
+truncate table public.trend_locatie;
+insert into public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id, datum, tijd, waarde_meting, ats_y, lowline_y, trend_conclusie, p_value_trend, theilsen_slope, rapportagegrens, ats_slope)
 select
 l.meetpunt_id meetpunt_id,
 p.parameter_id,
@@ -33,12 +35,12 @@ imp.tijd::time,
 imp.waarden::numeric as waarde_meting,
 imp.ats_y::numeric,
 imp.lowline_y::numeric,
-case imp.skendall_trend
+case imp.trend_conclusie
     when 'trend neerwaarts' then -1
     when 'geen trend' then 0
     when 'trend opwaarts' then 1
     end ::smallint as skendall_trend,
-imp.p_value_skendall::numeric,
+imp.p_value_trend::numeric,
 imp.theilsen_slope::numeric,
 imp.rg::bool as rapportagegrens,
 imp.ats_slope::numeric as ats_slope
@@ -51,4 +53,3 @@ join public.hoedanigheid h on h.hoedanigheid_code=imp.hoedanigheid_code
 join public.compartiment c on c.compartiment_code=imp.compartiment_code
 join public.kwaliteitsoordeel k on k.kwaliteitsoordeel_code=coalesce(imp.kwaliteitsoordeel_code,'00')
 ;
-
