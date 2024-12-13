@@ -3,7 +3,13 @@
     <template v-slot:prepend>
         <v-app-bar-nav-icon  @click="$emit('toggle-drawer')"></v-app-bar-nav-icon>
     </template>
-
+    <v-btn
+      icon
+      class="tour-button"
+      @click="startTour"
+    >
+      <v-icon>mdi-flag-outline</v-icon>
+    </v-btn>
     <v-app-bar-title>
       <a href="/">CHEMtrend</a>
     </v-app-bar-title>
@@ -21,6 +27,12 @@ export default {
     return {
       deltaresImgPath: deltaresLogo,
       rwsImgPath: rwsLogo
+    }
+  },
+  methods: {
+    startTour () {
+      // Placeholder for future functionality to start the tour
+      console.log('Tour button clicked!')
     }
   }
 }
