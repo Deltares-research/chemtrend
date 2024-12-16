@@ -32,8 +32,6 @@ regions = [{
         "color": "#830aa8"
     }]
 
-catchments = metadata.tables["chemtrend.catchment_geojson"]
-
 # asyncio.run(setup_connection())
 
 @app.get("/substances/", response_model=List[Substance], tags=["Substances"])
@@ -93,12 +91,3 @@ async def get_all_waterbodies(x: float, y: float):
     await database.connect()
     result = await database.fetch_one(query)
     return Response(content=dict(result).get("geojson"), media_type="application/json")
-
-
-@app.get("/catchments/", tags=["catchment"])
-async def list_catchment_all():
-    """List all catchment (=stroomgebied)"""
-    query = catchments.select()
-    await database.connect()
-    result = await database.fetch_one(query)
-    return result.geojson
