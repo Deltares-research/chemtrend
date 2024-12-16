@@ -14,6 +14,7 @@
           <span>Er mogen maximaal 10 trends tegelijkertijd openstaan.</span>
         </v-tooltip>
         <v-spacer></v-spacer>
+        <v-btn icon="mdi-delete-outline" @click.stop="CLEAR_TRENDS()"></v-btn>
         <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
       </v-toolbar>
       <v-card-text class="bottom-panel ma-0 pa-0">
@@ -24,7 +25,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default {
   props: {
@@ -58,6 +59,7 @@ export default {
     ...mapGetters(['trends'])
   },
   methods: {
+    ...mapMutations(['CLEAR_TRENDS']),
     writeNumberTrends () {
       return 'Trendresultaten ' + this.trends.length + '/10'
     }
