@@ -92,7 +92,7 @@ from (
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
-    , tr.rapportagegrens point_filled
+    , case when tr.rapportagegrens = true then false else true end point_filled
     , tr.waarde_meting as y_value_meting
     , tr.lowline_y as y_value_lowess
     , tr.ats_y y_value_theil_sen
