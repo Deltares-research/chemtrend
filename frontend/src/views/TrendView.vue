@@ -85,11 +85,9 @@ export default {
       }
       const openTrend = this.trends[this.panels]
       if (!openTrend) {
-        console.log('no open trend')
         return
       }
       if (openTrend.loading || openTrend.error) {
-        console.log('loading or error')
         return
       }
       const newQuery = {
