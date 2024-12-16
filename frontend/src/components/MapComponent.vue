@@ -281,6 +281,8 @@ export default {
         if (substanceId) {
           this.addTrend({ x, y, substanceId, name, currentLocation: location })
           this.$emit('update:bottomPanel', true)
+        } else {
+          this.selectedSubstance = false // does not work
         }
       })
     }

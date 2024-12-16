@@ -4,6 +4,11 @@
       <v-row>
         <h1>1. Chemische stoffen </h1>
       </v-row>
+      <v-row v-model:selectedSubstance="selectedSubstance">
+        <span :class="selectedSubstance ? 'd-none' : 'text-primary'">
+          Selecteer een chemische stof om de locaties te bekijken waar deze stof is gemeten.
+        </span>
+      </v-row>
       <v-row>
         <v-autocomplete
           label="Selecteer stof"
@@ -44,6 +49,11 @@ import _ from 'lodash'
 import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
 export default {
+  data () {
+    return {
+      selectedSubstance: false
+    }
+  },
   name: 'SubstanceTab',
   components: {
     PointLayerLegend
@@ -64,6 +74,7 @@ export default {
           substance: substance.substance_id
         }
         this.$router.push({ query: newQuery })
+        this.selectedSubstance = true
       }
     },
     region: {
