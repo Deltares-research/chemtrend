@@ -123,8 +123,8 @@ create table public.trend_locatie (
     waarde_meting numeric,
     ats_y numeric,
     lowline_y numeric,
-    skendall_trend smallint,
-    p_value_skendall numeric,
+    trend_conclusie smallint,
+    p_value_trend numeric,
     theilsen_slope numeric,
     rapportagegrens bool,
     ats_slope numeric
