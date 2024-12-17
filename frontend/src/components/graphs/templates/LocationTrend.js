@@ -1,6 +1,7 @@
 
 export function LocationTemplate (trendData, selectedColor) {
   const zip = (a1, a2) => a1.map((x, i) => [x, a2[i]])
+  const zippedMetingData = zip(trendData.x_value, trendData.y_value_meting)
   const marklines = []
   if (trendData.h1_value) {
     marklines.push({
@@ -72,13 +73,15 @@ export function LocationTemplate (trendData, selectedColor) {
       {
         name: 'Meting',
         type: 'line',
-        data: zip(trendData.x_value, trendData.y_value_meting),
+        data: zippedMetingData,
         lineStyle: {
           color: selectedColor
         },
         symbol: 'circle',
-        symbolSize: 4,
-        showAllSymbol: true,
+        symbolSize: (_, params) => {
+          if (trendData.point_filled === undefined) { return 4 }
+          return trendData.point_filled[params.dataIndex] ? 4 : 0
+        },
         itemStyle: {
           color: '#f8766d',
           borderColor: '#000000',
@@ -99,6 +102,7 @@ export function LocationTemplate (trendData, selectedColor) {
           }
         }
       },
+      createLagerDanRapportagegrens(zippedMetingData, selectedColor, trendData),
       {
         name: 'Lowess',
         type: 'line',
@@ -121,5 +125,29 @@ export function LocationTemplate (trendData, selectedColor) {
         itemStyle: { color: 'transparent' }
       }
     ]
+  }
+}
+
+function createLagerDanRapportagegrens (zippedMetingData, selectedColor, trendData) {
+  if (trendData.point_filled === undefined || trendData.point_filled.filter(filled => !filled).length === 0) {
+    return undefined
+  }
+  return {
+    name: 'Lager dan rapportagegrens',
+    type: 'line',
+    data: zippedMetingData,
+    itemStyle: {
+      color: 'transparent',
+      borderColor: '#000000',
+      borderWidth: 1
+    },
+    lineStyle: {
+      color: selectedColor
+    },
+    symbol: 'circle',
+    showSymbol: true,
+    symbolSize: (_, params) => {
+      return !trendData.point_filled[params.dataIndex] ? 4 : 0
+    }
   }
 }
