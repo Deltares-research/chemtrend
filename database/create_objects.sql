@@ -255,6 +255,7 @@ select ($$
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
+        , json_agg(point_filled order by x_value) point_filled
         from tr_detail
         group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
     )
