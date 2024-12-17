@@ -13,17 +13,6 @@ module.exports = defineConfig({
       .options({
         name: '[name].[hash:8].[ext]'
       })
-
-      config.module
-      .rule('vue')
-      .use('vue-loader')
-      .tap(options => {
-        if (!options.compilerOptions) {
-          options.compilerOptions = {}
-        }
-        options.compilerOptions.isCustomElement = tag => tag === 'v-tour' || tag === 'v-step'
-        return options
-      })
   },
 
   configureWebpack: {
