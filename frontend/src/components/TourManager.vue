@@ -14,6 +14,10 @@ export default {
       this.steps.push(step)
     },
     startTour () {
+      if (this.steps.length === 0) {
+        console.error('No steps defined for the tour.')
+        return
+      }
       this.$tours.globalTour.start()
     },
     stopTour () {

@@ -31,8 +31,12 @@ export default {
   },
   methods: {
     startTour () {
-      // Placeholder for future functionality to start the tour
-      console.log('Tour button clicked!')
+      const tourManager = this.$root.$refs.tourManager
+      if (tourManager) {
+        tourManager.startTour()
+      } else {
+        console.error('TourManager not found. Ensure it is registered as a ref in App.vue.')
+      }
     }
   }
 }

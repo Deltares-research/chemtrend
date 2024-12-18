@@ -5,11 +5,12 @@
         <navigation-bar @toggle-drawer="toggleDrawer" data-v-step="0" />
         <div class="d-flex flex-column content">
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360" data-v-step="1">
-            <navigation-drawer-tabs />
+            <navigation-drawer-tabs data-v-step="3" />
           </v-navigation-drawer>
           <map-component
             v-model:bottomPanel="bottomPanel"
             :class="bottomPanel ? 'h-40' : 'h-100-48'"
+            data-v-step="2"
           />
           <bottom-panel
             :class="bottomPanel ? 'h-60' : 'h-48'"
@@ -20,7 +21,7 @@
       </v-main>
     </v-app>
     <TourManager ref="tourManager" />
-  </v-responsive>'
+  </v-responsive>
 </template>
 
 <script>
@@ -53,16 +54,54 @@ export default {
     startGlobalTour () {
       this.$refs.tourManager.addStep({
         target: '[data-v-step="0"]',
-        content: 'Welkom op het CHEMtrend platform!',
+        content: 'Welkom op het CHEMtrend platform.',
         params: { placement: 'bottom' }
       })
       this.$refs.tourManager.addStep({
         target: '[data-v-step="1"]',
-        header: { title: 'Navigation Drawer' },
-        content: 'This is your navigation drawer. Use it to navigate through the app.',
-        params: { placement: 'right' }
+        content: 'Selecteer een stof.',
+        params: {
+          placement: 'right',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [-300, 0]
+              }
+            }
+          ]
+        }
       })
-      this.$refs.tourManager.startTour()
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="2"]',
+        content: 'Klik op een locatie.',
+        params: {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, -500]
+              }
+            }
+          ]
+        }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="3"]',
+        content: 'Selecteer een regio.',
+        params: {
+          placement: 'right',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 0]
+              }
+            }
+          ]
+        }
+      })
     }
   },
   mounted () {
