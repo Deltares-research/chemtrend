@@ -20,7 +20,7 @@
       </v-toolbar>
       <v-card height="100%" class="bottom-panel" :max-height="mapPanel ? '50vh' : '83vh'">
         <v-card-text class="bottom-panel ma-0 pa-0">
-          <v-alert v-if="noTrends" color="info" variant="outlined" density="compact">
+          <v-alert v-if="trends.length===0" color="info" variant="outlined" density="compact">
             Selecteer een stof en een locatie op de kaart om de trends te zien.
           </v-alert>
           <router-view></router-view>
@@ -48,8 +48,7 @@ export default {
   data () {
     return {
       showTooltip: false,
-      warningColor: false,
-      noTrends: true
+      warningColor: false
     }
   },
   watch: {
@@ -63,11 +62,6 @@ export default {
         this.showTooltip = false
       }
       this.warningColor = false
-      if (this.trends.length === 0) {
-        this.noTrends = true
-      } else {
-        this.noTrends = false
-      }
     }
   },
   computed: {
