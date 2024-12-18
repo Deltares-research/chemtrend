@@ -5,7 +5,7 @@
         <h1>1. Chemische stoffen </h1>
       </v-row>
       <v-row v-model:selectedSubstance="selectedSubstance">
-        <span :class="selectedSubstance ? 'd-none' : 'text-primary'">
+        <span :class="selectedSubstance ? 'd-none' : 'text-info'">
           Selecteer een chemische stof om de locaties te bekijken waar deze stof is gemeten.
         </span>
       </v-row>
