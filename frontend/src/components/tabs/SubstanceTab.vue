@@ -13,6 +13,7 @@
           item-title="substance_description"
           :return-object="true"
           v-model="substance"
+          data-v-step="2"
         ></v-autocomplete>
       </v-row>
       <v-row>
@@ -86,6 +87,13 @@ export default {
   created () {
     this.loadSubstances()
     this.loadRegions()
+
+    this.$root.$refs.tourManager.addStep({
+      target: '[data-v-step="2"]',
+      header: { title: 'Substance Selector' },
+      content: 'Use this dropdown to select a chemical substance.',
+      params: { placement: 'bottom' }
+    })
   }
 }
 </script>

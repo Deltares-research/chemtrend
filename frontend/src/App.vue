@@ -10,7 +10,6 @@
           <map-component
             v-model:bottomPanel="bottomPanel"
             :class="bottomPanel ? 'h-40' : 'h-100-48'"
-            data-v-step="2"
           />
           <bottom-panel
             :class="bottomPanel ? 'h-60' : 'h-48'"
@@ -20,7 +19,7 @@
       </div>
       </v-main>
     </v-app>
-    <v-tour name="myTour" :steps="steps"></v-tour>
+    <TourManager ref="tourManager" />
   </v-responsive>'
 </template>
 
@@ -29,6 +28,7 @@ import NavigationBar from '@/components/NavigationBar'
 import MapComponent from '@/components/MapComponent.vue'
 import NavigationDrawerTabs from '@/components/NavigationDrawerTabs.vue'
 import BottomPanel from '@/components/BottomPanel'
+import TourManager from '@/components/TourManager.vue'
 
 export default {
   name: 'App',
@@ -36,41 +36,37 @@ export default {
     NavigationBar,
     MapComponent,
     NavigationDrawerTabs,
-    BottomPanel
+    BottomPanel,
+    TourManager
   },
   data () {
     return {
       drawer: true,
       tab: null,
-      bottomPanel: false,
-      steps: [
-        {
-          target: '[data-v-step="0"]',
-          content: 'Welkom op het CHEMtrend platform!',
-          params: { placement: 'bottom' }
-        },
-        {
-          target: '[data-v-step="1"]',
-          header: { title: 'Navigation Drawer' },
-          content: 'This is your navigation drawer. Use it to navigate through the app.',
-          params: { placement: 'right' }
-        },
-        {
-          target: '[data-v-step="2"]',
-          header: { title: 'Map Component' },
-          content: 'This is the map component where you can view and interact with maps.'
-        }
-      ]
+      bottomPanel: false
     }
   },
   methods: {
     toggleDrawer () {
       this.drawer = !this.drawer
+    },
+    startGlobalTour () {
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="0"]',
+        content: 'Welkom op het CHEMtrend platform!',
+        params: { placement: 'bottom' }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="1"]',
+        header: { title: 'Navigation Drawer' },
+        content: 'This is your navigation drawer. Use it to navigate through the app.',
+        params: { placement: 'right' }
+      })
+      this.$refs.tourManager.startTour()
     }
   },
   mounted () {
-    this.$tours.myTour.start()
-    console.log(this.$tours)
+    this.startGlobalTour()
   }
 }
 </script>
