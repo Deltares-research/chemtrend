@@ -14,16 +14,25 @@
           <span>Er mogen maximaal 10 trends tegelijkertijd openstaan</span>
         </v-tooltip>
         <v-spacer></v-spacer>
-<<<<<<< HEAD
-        <v-tooltip text="Alle geselecteerde locaties wissen" location="top">
-          <template #activator="{ props }">
-            <v-btn
-              icon="mdi-delete-outline"
-              @click.stop="CLEAR_TRENDS()"
-              v-bind="props">
-            </v-btn>
+        <v-dialog max-width="500">
+          <template v-slot:activator="{ props: activatorProps }">
+            <v-btn icon="mdi-delete-outline" v-bind="activatorProps"></v-btn>
           </template>
-        </v-tooltip>
+
+          <template v-slot:default="{ isActive }">
+            <v-card title="Verwijder alle trends">
+              <v-card-text>
+                Weet u zeker dat u alle open trends wilt verwijderen?
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text="Verwijder trends" @click.stop="CLEAR_TRENDS() ; isActive.value = false" variant="flat" color="red"></v-btn>
+                <v-btn text="Annuleren" @click="isActive.value = false"></v-btn>
+              </v-card-actions>
+            </v-card>
+          </template>
+        </v-dialog>
         <v-tooltip  :text="mapPanel ? 'Verberg kaart' : 'Kaart weergeven'" location="top">
           <template #activator="{ props }">
             <v-btn
@@ -44,32 +53,6 @@
             </v-btn>
         </template>
       </v-tooltip>
-=======
-
-        <v-dialog max-width="500">
-          <template v-slot:activator="{ props: activatorProps }">
-            <v-btn icon="mdi-delete-outline" v-bind="activatorProps"></v-btn>
-          </template>
-
-          <template v-slot:default="{ isActive }">
-            <v-card title="Verwijder alle trends">
-              <v-card-text>
-                Weet u zeker dat u alle open trends wilt verwijderen?
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn text="Verwijder trends" @click.stop="CLEAR_TRENDS()" variant="flat" color="red"></v-btn>
-                <v-btn text="Annuleren" @click="isActive.value = false"></v-btn>
-              </v-card-actions>
-            </v-card>
-          </template>
-        </v-dialog>
-
-        <!-- <v-btn icon="mdi-delete-outline" @click.stop="CLEAR_TRENDS()"></v-btn> -->
-        <v-btn @click="$emit('update:mapPanel', !mapPanel )" flat :icon="mapPanel ? 'mdi-earth-off' : 'mdi-earth'"></v-btn>
-        <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
->>>>>>> b60611b14fbdc80030f552a373c0d3d7e42c0622
       </v-toolbar>
       <v-card height="100%" class="bottom-panel" :max-height="mapPanel ? '50vh' : '83vh'">
         <v-card-text class="bottom-panel ma-0 pa-0">
