@@ -4,13 +4,17 @@
       <v-main>
         <navigation-bar @toggle-drawer="toggleDrawer" />
         <div class="d-flex flex-column content">
-          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
+          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360" data-v-step="0">
             <navigation-drawer-tabs />
           </v-navigation-drawer>
           <map-component
             v-model:bottomPanel="bottomPanel"
             :class="bottomPanel ? 'h-40' : 'h-100-48'"
+            data-v-step="1"
           />
+          <div id="simple-step" style="margin: 50px; padding: 20px; background: lightblue;">
+            Simple Step Test
+          </div>
           <bottom-panel
             :class="bottomPanel ? 'h-60' : 'h-48'"
             :drawer="drawer"
@@ -19,6 +23,7 @@
       </div>
       </v-main>
     </v-app>
+    <v-tour name="myTour" :steps="steps"></v-tour>
   </v-responsive>'
 </template>
 
@@ -40,13 +45,34 @@ export default {
     return {
       drawer: true,
       tab: null,
-      bottomPanel: false
+      bottomPanel: false,
+      steps: [
+        {
+          target: '#simple-step',
+          content: 'This is a test step.'
+        },
+        {
+          target: '[data-v-step="0"]',
+          header: { title: 'Navigation Drawer' },
+          content: 'This is your navigation drawer. Use it to navigate through the app.',
+          params: { placement: 'right' }
+        },
+        {
+          target: '[data-v-step="1"]',
+          header: { title: 'Map Component' },
+          content: 'This is the map component where you can view and interact with maps.'
+        }
+      ]
     }
   },
   methods: {
     toggleDrawer () {
       this.drawer = !this.drawer
     }
+  },
+  mounted () {
+    this.$tours.myTour.start()
+    console.log(this.$tours)
   }
 }
 </script>
