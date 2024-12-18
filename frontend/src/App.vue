@@ -86,6 +86,13 @@ export default {
           placement: 'right'
         }
       })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="4"]',
+        content: 'Kijk hier voor meer informatie.',
+        params: {
+          placement: 'bottom'
+        }
+      })
     }
   },
   mounted () {
