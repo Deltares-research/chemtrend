@@ -46,9 +46,8 @@ export default {
       steps: [
         {
           target: '[data-v-step="0"]',
-          header: { title: 'Navigation Drawer' },
-          content: 'This is your navigation drawer. Use it to navigate through the app.',
-          params: { placement: 'right' }
+          content: 'Welkom op het CHEMtrend platform!',
+          params: { placement: 'bottom' }
         },
         {
           target: '[data-v-step="1"]',
