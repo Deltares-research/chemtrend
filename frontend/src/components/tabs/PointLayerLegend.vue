@@ -29,7 +29,7 @@ export default {
 .map-legend {
   position: relative;
   top: 15px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255);
   padding: 10px;
   margin-inline: 15px;
   border-radius: 5px;
