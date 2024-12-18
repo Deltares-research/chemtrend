@@ -2,19 +2,16 @@
   <v-responsive>
     <v-app>
       <v-main>
-        <navigation-bar @toggle-drawer="toggleDrawer" />
+        <navigation-bar @toggle-drawer="toggleDrawer" data-v-step="0" />
         <div class="d-flex flex-column content">
-          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360" data-v-step="0">
+          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360" data-v-step="1">
             <navigation-drawer-tabs />
           </v-navigation-drawer>
           <map-component
             v-model:bottomPanel="bottomPanel"
             :class="bottomPanel ? 'h-40' : 'h-100-48'"
-            data-v-step="1"
+            data-v-step="2"
           />
-          <div id="simple-step" style="margin: 50px; padding: 20px; background: lightblue;">
-            Simple Step Test
-          </div>
           <bottom-panel
             :class="bottomPanel ? 'h-60' : 'h-48'"
             :drawer="drawer"
@@ -48,10 +45,6 @@ export default {
       bottomPanel: false,
       steps: [
         {
-          target: '#simple-step',
-          content: 'This is a test step.'
-        },
-        {
           target: '[data-v-step="0"]',
           header: { title: 'Navigation Drawer' },
           content: 'This is your navigation drawer. Use it to navigate through the app.',
@@ -59,6 +52,12 @@ export default {
         },
         {
           target: '[data-v-step="1"]',
+          header: { title: 'Navigation Drawer' },
+          content: 'This is your navigation drawer. Use it to navigate through the app.',
+          params: { placement: 'right' }
+        },
+        {
+          target: '[data-v-step="2"]',
           header: { title: 'Map Component' },
           content: 'This is the map component where you can view and interact with maps.'
         }
