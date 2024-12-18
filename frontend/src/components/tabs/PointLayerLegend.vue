@@ -6,7 +6,7 @@
     </div>
     <div class="legend-item">
       <span class="legend-color-data-up" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Neerwaartse trend</span>
+      <span class="legend-label">Dalende trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-down" :style="{ border: '1px solid #000000' }"></span>
