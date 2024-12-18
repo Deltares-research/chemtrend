@@ -2,12 +2,12 @@
   <v-responsive>
     <v-app>
       <v-main>
-        <navigation-bar @toggle-drawer="toggleDrawer" />
+        <navigation-bar @toggle-drawer="toggleDrawer" data-v-step="0" />
         <div class="d-flex flex-column content">
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
-            <navigation-drawer-tabs />
+            <navigation-drawer-tabs data-v-step="3" />
           </v-navigation-drawer>
-          <map-component v-model:bottomPanel="bottomPanel" v-model:mapPanel="mapPanel" :class="toggleMapPanel ()" />
+          <map-component v-model:bottomPanel="bottomPanel" v-model:mapPanel="mapPanel" :class="toggleMapPanel ()" data-v-step="2" />
           <bottom-panel
             :class="toggleBottomPanel()"
             :drawer="drawer"
@@ -17,7 +17,8 @@
       </div>
       </v-main>
     </v-app>
-  </v-responsive>'
+    <TourManager ref="tourManager" />
+  </v-responsive>
 </template>
 
 <script>
@@ -25,6 +26,7 @@ import NavigationBar from '@/components/NavigationBar'
 import MapComponent from '@/components/MapComponent.vue'
 import NavigationDrawerTabs from '@/components/NavigationDrawerTabs.vue'
 import BottomPanel from '@/components/BottomPanel'
+import TourManager from '@/components/TourManager.vue'
 
 export default {
   name: 'App',
@@ -32,7 +34,8 @@ export default {
     NavigationBar,
     MapComponent,
     NavigationDrawerTabs,
-    BottomPanel
+    BottomPanel,
+    TourManager
   },
   data () {
     return {
@@ -46,6 +49,49 @@ export default {
     toggleDrawer () {
       this.drawer = !this.drawer
     },
+    startGlobalTour () {
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="0"]',
+        content: 'Welkom op het CHEMtrend platform.',
+        params: { placement: 'bottom' }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="1"]',
+        content: 'Selecteer een stof.',
+        params: {
+          placement: 'right'
+        }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="2"]',
+        content: 'Klik op een locatie.',
+        params: {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, -500]
+              }
+            }
+          ]
+        }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="3"]',
+        content: 'Selecteer een regio.',
+        params: {
+          placement: 'right'
+        }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="4"]',
+        content: 'Kijk hier voor meer informatie.',
+        params: {
+          placement: 'bottom'
+        }
+      })
+    },
     toggleMapPanel () {
       if (!this.mapPanel) {
         return 'h-0'
@@ -58,6 +104,9 @@ export default {
       }
       return this.mapPanel ? 'h-60' : 'h-100-48'
     }
+  },
+  mounted () {
+    this.startGlobalTour()
   }
 }
 </script>
