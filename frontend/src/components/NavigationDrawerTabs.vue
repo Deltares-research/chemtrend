@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import SubstanceTab from '@/components/SubstanceTab.vue'
+import SubstanceTab from '@/components/tabs/SubstanceTab.vue'
 import InformationTab from '@/components/tabs/InformationTab.vue'
 
 export default {
