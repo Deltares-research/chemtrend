@@ -11,12 +11,38 @@
               {{ writeNumberTrends() }}
             </v-toolbar-title>
           </template>
-          <span>Er mogen maximaal 10 trends tegelijkertijd openstaan.</span>
+          <span>Er mogen maximaal 10 trends tegelijkertijd openstaan</span>
         </v-tooltip>
         <v-spacer></v-spacer>
-        <v-btn icon="mdi-delete-outline" @click.stop="CLEAR_TRENDS()"></v-btn>
-        <v-btn @click="$emit('update:mapPanel', !mapPanel )" flat :icon="mapPanel ? 'mdi-earth-off' : 'mdi-earth'"></v-btn>
-        <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
+        <v-tooltip text="Alle geselecteerde locaties wissen" location="top">
+          <template #activator="{ props }">
+            <v-btn
+              icon="mdi-delete-outline"
+              @click.stop="CLEAR_TRENDS()"
+              v-bind="props">
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip  :text="mapPanel ? 'Verberg kaart' : 'Kaart weergeven'" location="top">
+          <template #activator="{ props }">
+            <v-btn
+              @click="$emit('update:mapPanel', !mapPanel )"
+              flat
+              :icon="mapPanel ? 'mdi-earth-off' : 'mdi-earth'"
+              v-bind="props">
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="bottomPanel ? 'Paneel uitvouwen' : 'Paneel samenvouwen'" location="top">
+          <template #activator="{ props }">
+            <v-btn
+              @click="$emit('update:bottomPanel', !bottomPanel )"
+              flat
+              :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"
+              v-bind="props">
+            </v-btn>
+        </template>
+      </v-tooltip>
       </v-toolbar>
       <v-card height="100%" class="bottom-panel" :max-height="mapPanel ? '50vh' : '83vh'">
         <v-card-text class="bottom-panel ma-0 pa-0">
