@@ -28,12 +28,12 @@
             <v-col
             v-for="graph in row"
             :key="graph.name">
-            <graph-wrapper
-            :id="graph.name"
-            :trend="graph"
-            :graphType="graph.region_type || 'locations'"
-            :currentLocation="trend.currentLocation"
-            />
+              <graph-wrapper
+              :id="graph.name"
+              :trend="graph"
+              :graphType="graph.region_type || 'locations'"
+              :currentLocation="trend.currentLocation"
+              />
           </v-col>
         </v-row>
         <v-alert
@@ -106,8 +106,11 @@ export default {
       const rows = []
       const trendData = trend.trendData || []
       const regions = _.get(this.$route, 'query.region', '').split(',')
+      const regionNames = this.regions.map(region => region.name)
       const data = trendData.filter(d => {
         return regions.includes(d.region_type) || !_.has(d, 'region_type')
+      }).sort((a, b) => {
+        return regionNames.indexOf(a.region_type) - regionNames.indexOf(b.region_type)
       })
       if (data) {
         for (let i = 0; i < data.length; i += 2) {
