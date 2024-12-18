@@ -13,7 +13,7 @@
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
-    <div class="point-layer-legend-container">
+    <div :class="(mapPanel ? 'point-layer-legend-container' : 'd-none')">
       <point-layer-legend />
     </div>
   </div>
@@ -40,6 +40,11 @@ const initialData = {
 }
 
 export default {
+  props: {
+    mapPanel: {
+      type: Boolean
+    }
+  },
   data () {
     return {
       mapboxToken: process.env.VUE_APP_MAPBOX_TOKEN,
