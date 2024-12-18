@@ -18,6 +18,7 @@
           item-title="substance_description"
           :return-object="true"
           v-model="substance"
+          data-v-step="1"
         ></v-autocomplete>
       </v-row>
       <v-row>

@@ -4,7 +4,7 @@
       <v-tab value="substances">
         <v-icon>mdi-flask</v-icon>
       </v-tab>
-      <v-tab value="information">
+      <v-tab value="information" data-v-step="4">
         <v-icon>mdi-information</v-icon>
       </v-tab>
     </v-tabs>

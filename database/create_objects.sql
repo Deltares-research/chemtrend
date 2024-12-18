@@ -282,12 +282,11 @@ select ($$
         select *
         from chemtrend.trend_region
         where substance_id = '%3$s'
-        and (
-            (regio_id in (select region_id from chemtrend.region(%1$s,%2$s)))
-            or
-            (regio_id in (select regio_id from public.locatie_regio lr
+        and regio_id in (
+            (select region_id from chemtrend.region(%1$s,%2$s))
+            union all
+            (select regio_id from public.locatie_regio lr
                           join chemtrend.location(%1$s,%2$s) loc on loc.meetpunt_id=lr.meetpunt_id)
-            )
         )
     )
     , tr_trends as (

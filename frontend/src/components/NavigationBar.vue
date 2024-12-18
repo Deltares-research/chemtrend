@@ -3,7 +3,13 @@
     <template v-slot:prepend>
         <v-app-bar-nav-icon  @click="$emit('toggle-drawer')"></v-app-bar-nav-icon>
     </template>
-
+    <v-btn
+      icon
+      class="tour-button"
+      @click="startTour"
+    >
+      <v-icon>mdi-flag-outline</v-icon>
+    </v-btn>
     <v-app-bar-title>
       <a href="/">CHEMtrend</a>
     </v-app-bar-title>
@@ -21,6 +27,16 @@ export default {
     return {
       deltaresImgPath: deltaresLogo,
       rwsImgPath: rwsLogo
+    }
+  },
+  methods: {
+    startTour () {
+      const tourManager = this.$root.$refs.tourManager
+      if (tourManager) {
+        tourManager.startTour()
+      } else {
+        console.error('TourManager not found. Ensure it is registered as a ref in App.vue.')
+      }
     }
   }
 }
