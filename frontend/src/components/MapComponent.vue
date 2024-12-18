@@ -13,6 +13,9 @@
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
+    <div class="point-layer-legend-container">
+      <point-layer-legend />
+    </div>
   </div>
 </template>
 
@@ -21,6 +24,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
+import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
 const initialData = {
   type: 'FeatureCollection',
@@ -66,7 +70,8 @@ export default {
     MapboxMap,
     MapboxNavigationControl,
     MapboxPopup,
-    DataTable
+    DataTable,
+    PointLayerLegend
   },
   watch: {
     '$route.query.substance' (val, oldVal) {
@@ -340,4 +345,9 @@ export default {
   height: 100%;
 }
 
+.point-layer-legend-container {
+  position: absolute;
+  top: 59px;
+  right: 34px;
+}
 </style>

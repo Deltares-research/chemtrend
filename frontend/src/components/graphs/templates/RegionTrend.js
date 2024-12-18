@@ -43,16 +43,23 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       }
     },
     yAxis: {},
-    xAxis: { type: 'time' },
+    xAxis: { 
+      type: 'time',
+      axisLabel: {
+        formatter: '{yyyy}',
+        showMinLabel: true,
+        showMaxLabel: true
+      }
+     },
     series: trendData.locations.map(loc => {
       const color = loc.color || 'green'
       let lineStyle = {
         color: loc.color || 'green',
         opacity: 0.2
       }
-      let name = 'Dalende trend'
+      let name = 'Stijgende trend'
       if (color === 'green') {
-        name = 'Stijgende trend'
+        name = 'Dalende trend'
       }
       if (color === 'grey') {
         name = 'Geen Trend'
