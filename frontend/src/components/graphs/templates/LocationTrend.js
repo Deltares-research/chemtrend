@@ -63,7 +63,12 @@ export function LocationTemplate (trendData, selectedColor) {
       itemWidth: 70
     },
     xAxis: {
-      type: 'time'
+      type: 'time',
+      axisLabel: {
+        formatter: '{yyyy}',
+        showMinLabel: true,
+        showMaxLabel: true
+      }
     },
     yAxis: {
       type: 'value'

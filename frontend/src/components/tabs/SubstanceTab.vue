@@ -34,9 +34,6 @@
         <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
         </v-btn>
       </v-row>
-        <v-row class="align-end">
-          <point-layer-legend style="margin-bottom: 20px;" />
-        </v-row>
     </v-col>
   </div>
 </template>
@@ -44,13 +41,9 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import _ from 'lodash'
-import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
 export default {
   name: 'SubstanceTab',
-  components: {
-    PointLayerLegend
-  },
   methods: {
     ...mapMutations(['ZOOM_TO']),
     ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations'])

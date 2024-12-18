@@ -92,7 +92,7 @@ from (
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
-    , tr.rapportagegrens point_filled
+    , case when tr.rapportagegrens = true then false else true end point_filled
     , tr.waarde_meting as y_value_meting
     , tr.lowline_y as y_value_lowess
     , tr.ats_y y_value_theil_sen
@@ -255,6 +255,7 @@ select ($$
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
+        , json_agg(point_filled order by x_value) point_filled
         from tr_detail
         group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
     )

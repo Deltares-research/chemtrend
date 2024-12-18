@@ -2,25 +2,20 @@
   <div class="map-legend">
     <div class="legend-item">
       <span class="legend-color-data-unselected" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Stof niet geselecteerd</span>
+      <span class="legend-label">Stof niet geselecteerd / Geen data beschikbaar</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-up" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Stijgende trend</span>
+      <span class="legend-label">Dalende trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-down" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Neerwaartse trend</span>
+      <span class="legend-label">Stijgende trend</span>
     </div>
     <div class="legend-item">
       <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Geen duidelijke trend</span>
+      <span class="legend-label">Geen significante trend</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-color-no-data" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Geen meetdata beschikbaar</span>
-    </div>
-
   </div>
 </template>
 
@@ -34,7 +29,7 @@ export default {
 .map-legend {
   position: relative;
   top: 15px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255);
   padding: 10px;
   margin-inline: 15px;
   border-radius: 5px;
@@ -77,14 +72,6 @@ export default {
   height: 10px;
   margin-right: 10px;
   background-color: grey;
-  border-radius: 50%;
-}
-
-.legend-color-no-data {
-  width: 10px;
-  height: 10px;
-  margin-right: 10px;
-  background-color: #000000;
   border-radius: 50%;
 }
 

@@ -7,15 +7,12 @@
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
             <navigation-drawer-tabs data-v-step="3" />
           </v-navigation-drawer>
-          <map-component
-            v-model:bottomPanel="bottomPanel"
-            :class="bottomPanel ? 'h-40' : 'h-100-48'"
-            data-v-step="2"
-          />
+          <map-component v-model:bottomPanel="bottomPanel" v-model:mapPanel="mapPanel" :class="toggleMapPanel ()" data-v-step="2" />
           <bottom-panel
-            :class="bottomPanel ? 'h-60' : 'h-48'"
+            :class="toggleBottomPanel()"
             :drawer="drawer"
             v-model:bottomPanel="bottomPanel"
+            v-model:mapPanel="mapPanel"
           />
       </div>
       </v-main>
@@ -44,7 +41,8 @@ export default {
     return {
       drawer: true,
       tab: null,
-      bottomPanel: false
+      bottomPanel: false,
+      mapPanel: true
     }
   },
   methods: {
@@ -93,6 +91,18 @@ export default {
           placement: 'bottom'
         }
       })
+    },
+    toggleMapPanel () {
+      if (!this.mapPanel) {
+        return 'h-0'
+      }
+      return this.bottomPanel ? 'h-40' : 'h-100-48'
+    },
+    toggleBottomPanel () {
+      if (!this.bottomPanel) {
+        return 'h-48'
+      }
+      return this.mapPanel ? 'h-60' : 'h-100-48'
     }
   },
   mounted () {
