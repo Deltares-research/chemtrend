@@ -4,7 +4,7 @@
       <v-main>
         <navigation-bar @toggle-drawer="toggleDrawer" data-v-step="0" />
         <div class="d-flex flex-column content">
-          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360" data-v-step="1">
+          <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
             <navigation-drawer-tabs data-v-step="3" />
           </v-navigation-drawer>
           <map-component
@@ -61,15 +61,7 @@ export default {
         target: '[data-v-step="1"]',
         content: 'Selecteer een stof.',
         params: {
-          placement: 'right',
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [-300, 0]
-              }
-            }
-          ]
+          placement: 'right'
         }
       })
       this.$refs.tourManager.addStep({
@@ -91,15 +83,7 @@ export default {
         target: '[data-v-step="3"]',
         content: 'Selecteer een regio.',
         params: {
-          placement: 'right',
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 0]
-              }
-            }
-          ]
+          placement: 'right'
         }
       })
     }
