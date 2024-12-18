@@ -1,11 +1,13 @@
 import { createStore } from 'vuex'
 import _ from 'lodash'
+import { toRaw } from 'vue'
 
 export default createStore({
   state: {
     substances: [],
     trends: [],
     regions: [],
+    panelTrigger: false,
     selectedColor: '#2de0e0',
     zoomTo: ''
   },
@@ -20,6 +22,9 @@ export default createStore({
     },
     trends (state) {
       return state.trends
+    },
+    panelTrigger (state) {
+      return state.panelTrigger
     },
     regions (state) {
       return state.regions
@@ -79,6 +84,7 @@ export default createStore({
           t.state = 'closed'
         }
       })
+      state.panelTrigger = !state.panelTrigger
     },
     REMOVE_TREND (state, name) {
       state.trends = state.trends.filter(t => t.name !== name)
@@ -113,13 +119,20 @@ export default createStore({
         })
     },
     addTrend (store, { x, y, substanceId, name, currentLocation }) {
-      const existingTrend = store.state.trends.find(t => t.name === name) || []
-      if (existingTrend.length > 0) {
+      const existingTrend = store.state.trends.find(t => {
+        return toRaw(t).name === name
+      })
+      if (existingTrend !== undefined) {
         store.commit('SET_TREND_STATE', name)
-        if (!existingTrend[0].loading) {
+        if (!existingTrend.loading) {
           return
         }
       }
+
+      if (store.state.trends.length >= 10) {
+        return
+      }
+
       const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
       const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
       store.commit('ADD_LOADING_TREND', { name, loading: true })

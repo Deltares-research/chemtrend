@@ -70,6 +70,15 @@ export default {
     trends () {
       this.panels = [0]
     },
+    panelTrigger () {
+      let newPanels = this.trends.map((trend, index) => {
+        return trend.state === 'open' ? index : -1
+      }).filter(i => i >= 0)
+      if (newPanels === undefined || newPanels.length === 0) {
+        newPanels = [0]
+      }
+      this.panels = newPanels
+    },
     panels () {
       // TODO: clean up if statements
       if (!this.panels) {
@@ -95,7 +104,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['trends', 'regions'])
+    ...mapGetters(['panelTrigger', 'trends', 'regions'])
   },
   components: {
     GraphWrapper
