@@ -14,7 +14,28 @@
           <span>Er mogen maximaal 10 trends tegelijkertijd openstaan.</span>
         </v-tooltip>
         <v-spacer></v-spacer>
-        <v-btn icon="mdi-delete-outline" @click.stop="CLEAR_TRENDS()"></v-btn>
+
+        <v-dialog max-width="500">
+          <template v-slot:activator="{ props: activatorProps }">
+            <v-btn icon="mdi-delete-outline" v-bind="activatorProps"></v-btn>
+          </template>
+
+          <template v-slot:default="{ isActive }">
+            <v-card title="Verwijder alle trends">
+              <v-card-text>
+                Weet u zeker dat u alle open trends wilt verwijderen?
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text="Verwijder trends" @click.stop="CLEAR_TRENDS()" variant="flat" color="red"></v-btn>
+                <v-btn text="Annuleren" @click="isActive.value = false"></v-btn>
+              </v-card-actions>
+            </v-card>
+          </template>
+        </v-dialog>
+
+        <!-- <v-btn icon="mdi-delete-outline" @click.stop="CLEAR_TRENDS()"></v-btn> -->
         <v-btn @click="$emit('update:mapPanel', !mapPanel )" flat :icon="mapPanel ? 'mdi-earth-off' : 'mdi-earth'"></v-btn>
         <v-btn @click="$emit('update:bottomPanel', !bottomPanel )" flat :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"></v-btn>
       </v-toolbar>
