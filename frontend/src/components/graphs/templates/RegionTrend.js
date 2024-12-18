@@ -50,9 +50,9 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
         color: loc.color || 'green',
         opacity: 0.2
       }
-      let name = 'Dalende trend'
+      let name = 'Stijgende trend'
       if (color === 'green') {
-        name = 'Stijgende trend'
+        name = 'Dalende trend'
       }
       if (color === 'grey') {
         name = 'Geen Trend'
