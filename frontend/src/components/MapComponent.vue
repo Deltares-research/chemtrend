@@ -276,6 +276,7 @@ export default {
             query: newQuery
           })
           this.checkSelection('locations')
+          this.updateRegion(e.lngLat.lat, e.lngLat.lng)
         })
       })
     },
