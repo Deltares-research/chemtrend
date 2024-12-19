@@ -133,6 +133,14 @@ create table public.trend_locatie (
 -- add index to locatie table
 create index ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_2022) include (geom);
 
+-- extra indexes:
+create index if not exists ix_locatie_regio on public.locatie_regio(meetpunt_id, regio_id);
+create index if not exists ix_regio_type on public.regio_type(regio_type, regio_type_id);
+create index if not exists ix_regio on public.regio(regio_type_id,regio_id, regio_omschrijving);
+create index if not exists ix_trend_locatie on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id);
+create index if not exists ix_trend_regio on public.trend_regio(regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id);
+
+
 -- grant access
 GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
 alter table public.trend_locatie owner to waterkwaliteit_readonly;
