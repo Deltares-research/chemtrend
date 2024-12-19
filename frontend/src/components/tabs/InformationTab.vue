@@ -21,7 +21,7 @@
               </p>
               <h3 class="mt-4 font-italic">Herkomst data</h3>
               <p>
-                Voor het vullen van de CHEMtrend database is gebruik gemaakt van de meetdata voor van chemische stoffen zoals beschikbaar uit de LEW en beschikbaar gemaakt via het waterkwaliteitsportaal. Dit betreft data voor MNLSO-meetlocaties in de regionale wateren. Aanvullend is voor de Rijkswateren meetdata toegevoegd dat ook op te vragen via <a href="https://waterinfo.rws.nl" target="_blank">waterinfo.rws.nl</a>. De CHEMtrend database wordt jaarlijks bijgewerkt met recente monitoringsdata uit genoemde onderliggende databases.
+                Voor het vullen van de CHEMtrend database is gebruik gemaakt van de meetdata van chemische stoffen zoals beschikbaar uit de LEW en beschikbaar gemaakt via het waterkwaliteitsportaal. Dit betreft data voor MNLSO-meetlocaties in de regionale wateren. Aanvullend is voor de Rijkswateren meetdata toegevoegd dat ook op te vragen via <a href="https://waterinfo.rws.nl" target="_blank">waterinfo.rws.nl</a>. De CHEMtrend database wordt jaarlijks bijgewerkt met recente monitoringsdata uit genoemde onderliggende databases.
               </p>
               <h3 class="mt-4 font-italic">Trendbepaling</h3>
               <p>
