@@ -42,7 +42,7 @@
               <p class="mt-3">
                 Meer informatie over de gepresenteerde data en trendberekening is terug te vinden in de volgende rapportage:               </p>
               <ul>
-                <li>Trends in waterkwaliteit (<a :href="pdfLink" target="_blank">hier downloaden</a>) </li>
+                <li>Trends in waterkwaliteit (<a href="https://publications.deltares.nl/11210346_011_0001.pdf" target="_blank">hier downloaden</a>) </li>
               </ul>
               <h3 class="mt-4 font-italic">Gebruik</h3>
               <p>
