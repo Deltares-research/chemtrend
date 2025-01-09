@@ -17,6 +17,7 @@
       </div>
       </v-main>
     </v-app>
+    <disclaimer v-if="showDisclaimer"/>
     <TourManager ref="tourManager" />
   </v-responsive>
 </template>
@@ -27,6 +28,8 @@ import MapComponent from '@/components/MapComponent.vue'
 import NavigationDrawerTabs from '@/components/NavigationDrawerTabs.vue'
 import BottomPanel from '@/components/BottomPanel'
 import TourManager from '@/components/TourManager.vue'
+import Disclaimer from '@/components/Disclaimer.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'App',
@@ -35,7 +38,8 @@ export default {
     MapComponent,
     NavigationDrawerTabs,
     BottomPanel,
-    TourManager
+    TourManager,
+    Disclaimer
   },
   data () {
     return {
@@ -45,7 +49,14 @@ export default {
       mapPanel: true
     }
   },
+  computed: {
+    ...mapGetters(['disclaimerAcknowledged']),
+    showDisclaimer () {
+      return !this.disclaimerAcknowledged
+    }
+  },
   methods: {
+    ...mapActions(['loadDisclaimerAcknowledgment']),
     toggleDrawer () {
       this.drawer = !this.drawer
     },
@@ -104,6 +115,9 @@ export default {
       }
       return this.mapPanel ? 'h-60' : 'h-100-48'
     }
+  },
+  created () {
+    this.loadDisclaimerAcknowledgment()
   },
   mounted () {
     this.startGlobalTour()
