@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import TrendView from '@/views/TrendView'
+import Disclaimer from '@/components/Disclaimer.vue'
 
 const routes = [
   {
     path: '/trends',
     name: 'trends',
     component: TrendView
+  },
+  {
+    path: '/terms-of-use',
+    name: 'disclaimer',
+    component: Disclaimer
   },
   // TODO: restructure the routing, create a default home view
   {

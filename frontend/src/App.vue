@@ -52,7 +52,7 @@ export default {
   computed: {
     ...mapGetters(['disclaimerAcknowledged']),
     showDisclaimer () {
-      return !this.disclaimerAcknowledged
+      return !this.disclaimerAcknowledged || this.$route.name === 'disclaimer'
     }
   },
   methods: {

@@ -66,6 +66,9 @@
           </v-card>
         </v-dialog>
       </v-row>
+      <v-row justify="center">
+        <a href="/terms-of-use" class="ma-6">Gebruiksvoorwaarden</a>
+      </v-row>
     </v-col>
   </div>
 </template>

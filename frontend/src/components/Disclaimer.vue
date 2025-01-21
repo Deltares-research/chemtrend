@@ -72,7 +72,7 @@
           </p>
           <ol class="mt-4" type="a">
             <li>
-              “Deze data, hierna “Data”, zijn verkregen vanuit de website <a href="https://chemtrend.netlify.app/trends" target="_blank">https://chemtrend.netlify.app/trends</a> welke tot doel heeft om met het oog op de taakuitvoering van waterbeheerders, waterschappen en provincies, op één plek de beschikbare publieke meetdata betreffende de aanwezigheid van vele chemische stoffen in het oppervlaktewater in Nederland te tonen alsmede de ontwikkeling van de aanwezigheid van deze stoffen in de tijd in de vorm van trendgrafieken. Het gebruik van de Data is onderworpen aan de voorwaarden die u kunt vinden op deze website: [link van gebruiksvoorwaarden op de website]. Door gebruik van deze Data verklaart u kennis te hebben genomen van deze voorwaarden en daarmee akkoord te gaan”.
+              “Deze data, hierna “Data”, zijn verkregen vanuit de website <a href="https://chemtrend.netlify.app/trends" target="_blank">https://chemtrend.netlify.app/trends</a> welke tot doel heeft om met het oog op de taakuitvoering van waterbeheerders, waterschappen en provincies, op één plek de beschikbare publieke meetdata betreffende de aanwezigheid van vele chemische stoffen in het oppervlaktewater in Nederland te tonen alsmede de ontwikkeling van de aanwezigheid van deze stoffen in de tijd in de vorm van trendgrafieken. Het gebruik van de Data is onderworpen aan de voorwaarden die u kunt vinden op deze website: <a href="/terms-of-use" target="_blank">https://chemtrend.netlify.app/terms-of-use</a>. Door gebruik van deze Data verklaart u kennis te hebben genomen van deze voorwaarden en daarmee akkoord te gaan”.
             </li>
             <li>
               b. Indien de Data afkomstig is van Informatiehuis Water – Waterkwaliteitsportaal, dan dient Gebruiker te voldoen aan de voorwaarden opgenomen op <a href="https://www.waterkwaliteitsportaal.nl/disclaimer-en-bronvermelding" target="_blank">https://www.waterkwaliteitsportaal.nl/disclaimer-en-bronvermelding</a>. Per januari 2025 kan de tekst die u vermeld in uw publicatie zijn: ‘Deze publicatie gebruikt waterdata beschikbaar gesteld door het Informatiehuis Water. De eigendomsrechten van de gebruikte data en de verantwoordelijkheid voor de kwaliteit daarvan ligt bij de waterbeheerders.’. Raadpleeg altijd de link voor de laatste versie van de disclaimer en bronvermelding tekst. Indien de Data afkomstig is van Rijkswaterstaat, dan dient Gebruiker te voldoen aan de voorwaarden opgenomen op <a href="https://waterinfo.rws.nl/" target="_blank">https://waterinfo.rws.nl/</a>. Per januari 2025 kan de tekst die u vermeld in uw publicatie zijn: ‘Bron en intellectuele eigendomsrechten: Rijkswaterstaat. Op de data is de Creative Common zero verklaring (CC0) van toepassing.’
@@ -156,6 +156,7 @@ export default {
     ...mapActions(['saveDisclaimerAcknowledgment', 'loadDisclaimerAcknowledgment']),
     acknowledgeDisclaimer () {
       this.saveDisclaimerAcknowledgment(true)
+      this.$router.push('/trends')
     }
   }
 }
