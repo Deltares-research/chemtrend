@@ -9,7 +9,8 @@ export default createStore({
     regions: [],
     panelTrigger: false,
     selectedColor: '#2de0e0',
-    zoomTo: ''
+    zoomTo: '',
+    disclaimerAcknowledged: false
   },
   getters: {
     substances (state) {
@@ -31,6 +32,9 @@ export default createStore({
     },
     selectedColor (state) {
       return state.selectedColor
+    },
+    disclaimerAcknowledged (state) {
+      return state.disclaimerAcknowledged
     }
   },
   mutations: {
@@ -95,6 +99,9 @@ export default createStore({
     },
     ZOOM_TO (state, zoomLayerName) {
       state.zoomTo = zoomLayerName
+    },
+    SET_DISCLAIMER_ACKNOWLEDGED (state, value) {
+      state.disclaimerAcknowledged = value
     }
   },
   actions: {
@@ -176,6 +183,14 @@ export default createStore({
           // Both requests failed to be retrieved.
           store.commit('ADD_ERROR_TREND', { name, message: 'Zowel de locatie als de regiotrend kunnen niet worden berekend.' })
         })
+    },
+    saveDisclaimerAcknowledgment (store, value) {
+      localStorage.setItem('disclaimerAcknowledged', value)
+      store.commit('SET_DISCLAIMER_ACKNOWLEDGED', value)
+    },
+    loadDisclaimerAcknowledgment (store) {
+      const value = localStorage.getItem('disclaimerAcknowledged') === 'true'
+      store.commit('SET_DISCLAIMER_ACKNOWLEDGED', value)
     }
   },
   modules: {

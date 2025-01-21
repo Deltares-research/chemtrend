@@ -14,8 +14,12 @@
       <a href="/">CHEMtrend</a>
     </v-app-bar-title>
     <v-spacer></v-spacer>
-    <img :src=rwsImgPath alt="Rijkswaterstaat Logo" height="40" />
-    <img :src=deltaresImgPath alt="Deltares Logo" height="40" />
+    <a :href="rwsLink" target="_blank">
+      <img :src=rwsImgPath alt="Rijkswaterstaat Logo" height="40" />
+    </a>
+    <a :href="deltaresLink" target="_blank">
+      <img :src="deltaresImgPath" alt="Deltares Logo" height="40" />
+    </a>
   </v-app-bar>
 </template>
 
@@ -26,7 +30,9 @@ export default {
   data () {
     return {
       deltaresImgPath: deltaresLogo,
-      rwsImgPath: rwsLogo
+      deltaresLink: 'https://www.deltares.nl/over-ons',
+      rwsImgPath: rwsLogo,
+      rwsLink: 'https://www.rijkswaterstaat.nl/over-ons'
     }
   },
   methods: {
