@@ -7,6 +7,10 @@
           CHEMtrend is een applicatie waarin op basis van meetgegevens langjarige trends in de kwaliteit van Nederlandse oppervlaktewateren worden getoond. Hiermee kan voor een uitgebreide lijst van chemische stoffen een landelijk beeld verkregen worden en de ontwikkeling van de waterkwaliteit inzichtelijk gemaakt worden zowel in de Rijkswateren als in de regionale watersystemen.
         </p>
 
+        <p class="mt-4">
+          Voor vragen kunt u contact met ons opnemen via <a href="mailto:chemtrend@deltares.nl">chemtrend@deltares.nl</a>.
+        </p>
+
         <v-row justify="center">
           <v-btn color="primary" class="ma-6" @click="dialog = true">Meer informatie</v-btn>
         </v-row>
