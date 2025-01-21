@@ -1,7 +1,7 @@
 <template>
-    <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-dialog v-model="dialog" persistent max-width="800px">
       <v-card>
-        <v-card-text>
+        <v-card-text class="ma-4">
           <h2 class="mt-4 font-italic">Gebruiksvoorwaarden</h2>
           <p>
             Deze overeenkomst (hierna ‘Gebruiksvoorwaarden’) regelt de voorwaarden voor gebruik van de website en daarop beschikbare meetdata en trendgrafieken.
