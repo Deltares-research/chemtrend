@@ -305,7 +305,9 @@ export default {
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
         const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
-        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
+        const periodId = parseInt(_.get(this.$route, 'query.period', 0))
+        const periodName = _.get(this.$store.state, 'periods', []).find(p => p.id === periodId).name
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location} (${periodName})`
 
         if (substanceId) {
           this.addTrend({ x, y, substanceId, name, currentLocation: location })
