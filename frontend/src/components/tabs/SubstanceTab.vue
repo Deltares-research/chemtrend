@@ -8,6 +8,7 @@
         <v-slide-group
           show-arrows
           v-model="period"
+          class="mb-5 mt-2"
           >
           <v-slide-group-item
             v-for="p in periods"
@@ -16,7 +17,7 @@
           >
             <v-btn
               :color="isSelected ? 'primary' : undefined"
-              class="ma-2"
+              class="ma-1"
               rounded
               @click="toggle"
             >
