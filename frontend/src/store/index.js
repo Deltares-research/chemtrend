@@ -4,6 +4,7 @@ import { toRaw } from 'vue'
 
 export default createStore({
   state: {
+    periods: [],
     substances: [],
     trends: [],
     regions: [],
@@ -13,6 +14,9 @@ export default createStore({
     disclaimerAcknowledged: false
   },
   getters: {
+    periods (state) {
+      return state.periods
+    },
     substances (state) {
       return state.substances
     },
@@ -38,6 +42,9 @@ export default createStore({
     }
   },
   mutations: {
+    SET_PERIODS (state, data) {
+      state.periods = data
+    },
     SET_SUBSTANCES (state, data) {
       state.substances = data
     },
@@ -105,6 +112,21 @@ export default createStore({
     }
   },
   actions: {
+    loadPeriods (store) {
+      // TODO: actually use the URL and not hardcoded stuff
+      // const url = `${process.env.VUE_APP_SERVER_URL}/periods/`
+      // fetch(url)
+      //   .then(res => {
+      //     return res.json()
+      //   })
+      //   .then(response => {
+      //     store.commit('SET_PERIODS', response)
+      //   })
+      store.commit('SET_PERIODS', [
+        { id: 0, name: 'Alles' },
+        { id: 1, name: 'Vanaf 2009' }
+      ])
+    },
     loadSubstances (store) {
       const url = `${process.env.VUE_APP_SERVER_URL}/substances/`
       fetch(url)

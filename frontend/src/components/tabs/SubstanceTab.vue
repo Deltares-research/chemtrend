@@ -2,7 +2,31 @@
   <div class="content-wrapper">
     <v-col>
       <v-row>
-        <h1>1. Chemische stoffen </h1>
+        <h1>1. Trendperiode</h1>
+      </v-row>
+      <v-row>
+        <v-slide-group
+          show-arrows
+          v-model="period"
+          >
+          <v-slide-group-item
+            v-for="p in periods"
+            :key="p.id"
+            v-slot="{ isSelected, toggle }"
+          >
+            <v-btn
+              :color="isSelected ? 'primary' : undefined"
+              class="ma-2"
+              rounded
+              @click="toggle"
+            >
+              {{ p.name }}
+            </v-btn>
+          </v-slide-group-item>
+        </v-slide-group>
+      </v-row>
+      <v-row>
+        <h1>2. Chemische stoffen </h1>
       </v-row>
       <v-row v-model:selectedSubstance="selectedSubstance">
         <span :class="selectedSubstance ? 'd-none' : 'text-info'">
@@ -22,7 +46,7 @@
         ></v-autocomplete>
       </v-row>
       <v-row>
-        <h1>2. Regio's </h1>
+        <h1>3. Regio's </h1>
       </v-row>
       <v-row
         v-for="reg in regions"
@@ -56,10 +80,23 @@ export default {
   name: 'SubstanceTab',
   methods: {
     ...mapMutations(['ZOOM_TO']),
-    ...mapActions(['loadSubstances', 'loadRegions', 'loadFilteredLocations'])
+    ...mapActions(['loadPeriods', 'loadSubstances', 'loadRegions', 'loadFilteredLocations'])
   },
   computed: {
-    ...mapGetters(['substances', 'regions']),
+    ...mapGetters(['periods', 'substances', 'regions']),
+    period: {
+      get () {
+        const pId = parseInt(_.get(this.$route, 'query.period', -1), 10) // Ensure it's an integer
+        return pId === -1 ? this.periods[0].id : pId
+      },
+      set (periodId) {
+        const newQuery = {
+          ...this.$route.query,
+          period: periodId
+        }
+        this.$router.push({ query: newQuery })
+      }
+    },
     substance: {
       get () {
         const subId = parseInt(_.get(this.$route, 'query.substance'), 10) // Ensure it's an integer
@@ -89,6 +126,7 @@ export default {
     }
   },
   created () {
+    this.loadPeriods()
     this.loadSubstances()
     this.loadRegions()
   }
