@@ -198,7 +198,14 @@ export default {
           data: initialData
         },
         paint: {
-          'circle-color': ['get', 'color'],
+          'circle-color': [
+            'match',
+            ['get', 'color'],
+            'red', '#c26a77',
+            'green', '#94cbec',
+            'grey', '#dddddd',
+            /* other */ '#ffffff'
+          ],
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
           'circle-radius': 5

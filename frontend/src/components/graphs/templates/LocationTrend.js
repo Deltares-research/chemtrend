@@ -21,6 +21,19 @@ export function LocationTemplate (trendData, selectedColor) {
       }
     })
   }
+  const rawColor = trendData.color || 'green'
+  let color = rawColor
+  switch (rawColor) {
+    case 'green':
+      color = '#94cbec'
+      break
+    case 'red':
+      color = '#c26a77'
+      break
+    case 'grey':
+      color = '#dddddd'
+      break
+  }
 
   return {
     title: {
@@ -113,7 +126,7 @@ export function LocationTemplate (trendData, selectedColor) {
         type: 'line',
         data: zip(trendData.x_value, trendData.y_value_lowess),
         lineStyle: {
-          color: trendData.color
+          color: color
         },
         symbol: 'none',
         itemStyle: { color: 'transparent' }
