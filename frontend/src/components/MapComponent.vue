@@ -79,6 +79,9 @@ export default {
     PointLayerLegend
   },
   watch: {
+    '$route.query.period' (val, oldVal) {
+      this.checkSelection('locations')
+    },
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
       this.checkSelection('locations')
