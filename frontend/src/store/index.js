@@ -123,7 +123,7 @@ export default createStore({
       //     store.commit('SET_PERIODS', response)
       //   })
       store.commit('SET_PERIODS', [
-        { id: 0, name: 'Alles' },
+        { id: 0, name: 'Alle trends' },
         { id: 1, name: 'Vanaf 2009' }
       ])
     },

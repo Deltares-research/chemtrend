@@ -80,7 +80,8 @@ export default {
   },
   watch: {
     '$route.query.period' (val, oldVal) {
-      this.checkSelection('locations')
+      // this.checkSelection('locations')
+      // TODO here update the locations on the map (if substance is selected)
     },
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
@@ -227,6 +228,7 @@ export default {
 
     updateFilteredLocations () {
       if (_.get(this.$route, 'query.substance') && this.map.getSource('filtered-locations')) {
+        console.log('update filtered locations', this.map.getSource('filtered-locations'))
         this.map.getSource('filtered-locations')
           .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
       }
