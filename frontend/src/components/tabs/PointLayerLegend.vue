@@ -55,7 +55,7 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: green;
+  background-color: #94c9e7;
   border-radius: 50%;
 }
 
@@ -63,7 +63,7 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: red;
+  background-color: #c16c75;
   border-radius: 50%;
 }
 
@@ -71,7 +71,7 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: grey;
+  background-color: #dddddd;
   border-radius: 50%;
 }
 
