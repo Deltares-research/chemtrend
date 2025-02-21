@@ -68,7 +68,8 @@ export default {
       popupItems: [],
       map: null,
       mapLocation: null,
-      regionsGeojson: {}
+      regionsGeojson: {},
+      locationsLayerIds: []
     }
   },
   components: {
@@ -102,8 +103,23 @@ export default {
   methods: {
     ...mapActions(['addTrend']),
     initializeData () {
+      this.map.loadImage('./img/icons/grey_circle.png', (error, image) => {
+        if (error) throw error
+        this.map.addImage('grey_circle', image)
+      })
+      this.map.loadImage('./img/icons/green_diamond.png', (error, image) => {
+        if (error) throw error
+        this.map.addImage('green_diamond', image)
+      })
+      this.map.loadImage('./img/icons/red_triangle.png', (error, image) => {
+        if (error) throw error
+        this.map.addImage('red_triangle', image)
+      })
       this.addLocations()
-      this.addFilteredLocations()
+      // this.addFilteredLocations()
+      this.locationsLayerIds.push(this.addFilteredLayer('grey', 'grey_circle', '#dddddd'))
+      this.locationsLayerIds.push(this.addFilteredLayer('red', 'red_triangle', '#c26a77'))
+      this.locationsLayerIds.push(this.addFilteredLayer('green', 'green_diamond', '#94cbec'))
       this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
@@ -189,6 +205,27 @@ export default {
         ]
       )
     },
+    addFilteredLayer (trendStyle, shape, fillColor) {
+      const layerId = `filtered-locations-${trendStyle}`
+      this.map.addLayer({
+        id: layerId,
+        type: 'symbol',
+        source: {
+          type: 'geojson',
+          data: initialData
+        },
+        layout: {
+          'icon-image': shape,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        },
+        paint: {
+          'icon-color': fillColor
+        },
+        filter: ['==', 'color', trendStyle]
+      })
+      return layerId
+    },
     addFilteredLocations () {
       this.map.addLayer({
         id: 'filtered-locations',
@@ -230,10 +267,19 @@ export default {
     },
 
     updateFilteredLocations () {
-      if (_.get(this.$route, 'query.substance') && this.map.getSource('filtered-locations')) {
-        this.map.getSource('filtered-locations')
-          .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
-      }
+      const url = `${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          this.locationsLayerIds.forEach(layerId => {
+            if (_.get(this.$route, 'query.substance') && this.map.getSource(layerId)) {
+              this.map.getSource(layerId)
+                .setData(response)
+            }
+          })
+        })
     },
     updateRegion (lat, lng) {
       const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
@@ -295,9 +341,12 @@ export default {
       // TODO: check layers and their names, to make it consistent so you can just use shape here
       let layer = shape
       if (shape === 'locations') {
-        layer = 'filtered-locations'
+        // layer = 'filtered-locations'
+        layer = this.locationsLayerIds
+      } else {
+        layer = [layer]
       }
-      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [layer] })
+      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: layer })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
