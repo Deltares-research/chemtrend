@@ -240,9 +240,9 @@ $ff$ language plpgsql;
 -- view that lists all trend periods:
 drop view if exists chemtrend.trend_period;
 create or replace view chemtrend.trend_period as
-select 0::int as trend_period, 'Alle data' as trend_period_description
+select 0::int as id, 'Alle data' as name
 union all
-select 1::int as trend_period, 'Vanaf 2009' as trend_period_description
+select 1::int as id, 'Vanaf 2009' as name
 ;
 
 -- function that returns trend data based on a given location
