@@ -164,6 +164,7 @@ select
     , tr.trend_label
     , rt.regio_type as region_type
     , tr.color
+    , 0::int as trend_period    -- TO DO
 from (
     -- deel 1:
     select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color
@@ -284,18 +285,20 @@ $ff$ language plpgsql;
 -- example: select * from chemtrend.trend(5.431838035583496,52.486543564119955,333,1);
 
 -- function that returns trend data based on a given location
-drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int);
-create or replace function chemtrend.trend_region(x decimal, y decimal, substance_id int)
+drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int, trend_period int);
+create or replace function chemtrend.trend_region(x decimal, y decimal, substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare sid text = substance_id;
+declare tp text = case trend_period when null then 0 else trend_period end;
 begin
 select ($$
     with tr_detail as (
         select *
         from chemtrend.trend_region
         where substance_id = '%3$s'
+        and trend_period = '%4$s'
         and regio_id in (
             (select region_id from chemtrend.region(%1$s,%2$s))
             union all
@@ -318,12 +321,12 @@ select ($$
     select json_agg(trg.*) as graph
     from tr_graph trg
     $$) into q;
-q := format(q, x, y, sid);
+q := format(q, x, y, sid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend_region(5.019, 52.325,517);
--- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333);
+-- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333,0);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
