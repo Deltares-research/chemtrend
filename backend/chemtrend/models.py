@@ -9,8 +9,8 @@ class Substance(BaseModel):
     cas: str
 
 class Period(BaseModel):
-    trend_period: int
-    trend_period_description: str
+    id: int
+    name: str
 
 # class Location(BaseModel):
 #     location_code: str
