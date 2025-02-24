@@ -65,6 +65,17 @@ select *
 from voorbeelddata.trend_region_subset_zonder_locatie
 ;
 
+-- create example data for trend periods
+drop table if exists voorbeelddata.trend_data_periode;
+select * into voorbeelddata.trend_data_periode from trend_locatie where meetpunt_id=22193 and parameter_id=333;
+alter table voorbeelddata.trend_data_periode add trend_periode int;
+insert into voorbeelddata.trend_data_periode
+    select *, 1 as trend_periode
+    from trend_locatie where meetpunt_id=22193 and parameter_id=333;
+update voorbeelddata.trend_data_periode set trend_periode = 0 where trend_periode is null;
+delete from voorbeelddata.trend_data_periode where left(datum::varchar,4)::int<2009 and trend_periode=1;
+update voorbeelddata.trend_data_periode set p_value_trend=p_value_trend*1.2, ats_y=ats_y*1.2 where trend_periode=1;
+
 -- grant access
 GRANT ALL ON all tables in schema voorbeelddata TO waterkwaliteit_readonly;
 alter schema voorbeelddata owner to waterkwaliteit_readonly;
