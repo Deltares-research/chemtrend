@@ -113,19 +113,15 @@ export default createStore({
   },
   actions: {
     loadPeriods (store) {
-      // TODO: actually use the URL and not hardcoded stuff
-      // const url = `${process.env.VUE_APP_SERVER_URL}/periods/`
-      // fetch(url)
-      //   .then(res => {
-      //     return res.json()
-      //   })
-      //   .then(response => {
-      //     store.commit('SET_PERIODS', response)
-      //   })
-      store.commit('SET_PERIODS', [
-        { id: 0, name: 'Alle trends' },
-        { id: 1, name: 'Vanaf 2009' }
-      ])
+      const url = `${process.env.VUE_APP_SERVER_URL}/periods/`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          console.log(response)
+          store.commit('SET_PERIODS', response)
+        })
     },
     loadSubstances (store) {
       const url = `${process.env.VUE_APP_SERVER_URL}/substances/`

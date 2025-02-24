@@ -87,8 +87,8 @@ export default {
     ...mapGetters(['periods', 'substances', 'regions']),
     period: {
       get () {
-        const pId = parseInt(_.get(this.$route, 'query.period', -1), 10) // Ensure it's an integer
-        return pId === -1 ? this.periods[0].id : pId
+        const defaultPeriodId = _.get(this.periods[0], 'id', 0)
+        return parseInt(_.get(this.$route, 'query.period', defaultPeriodId), 10) // Ensure it's an integer
       },
       set (periodId) {
         const newQuery = {
