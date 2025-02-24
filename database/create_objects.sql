@@ -106,8 +106,12 @@ from (
         when -1 then 'green'
         else ''
     end as color
+    , trend_period -- TO DO
     -- select *
-    from public.trend_locatie tr
+    from (select *, 0::int as trend_period from public.trend_locatie
+            union all
+            select * from voorbeelddata.trend_data_periode
+          ) tr
     join chemtrend.substance s on s.substance_id=tr.parameter_id
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
@@ -233,14 +237,23 @@ return query execute q;
 end
 $ff$ language plpgsql;
 
+-- view that lists all trend periods:
+drop view if exists chemtrend.trend_period;
+create or replace view chemtrend.trend_period as
+select 0::int as trend_period, 'Alle data' as trend_period_description
+union all
+select 1::int as trend_period, 'Vanaf 2009' as trend_period_description
+;
 
 -- function that returns trend data based on a given location
-drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
-create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
+-- drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
+drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int, trend_period int);
+create or replace function chemtrend.trend(x decimal, y decimal, substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare sid text = substance_id;
+declare tp text = case trend_period when null then 0 else trend_period end;
 begin
 select ($$
     with tr_detail as (
@@ -248,6 +261,7 @@ select ($$
         from chemtrend.trend
         where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
         and substance_id = '%3$s'
+        and trend_period = '%4$s'
     )
     , tr_graph as (
         select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
@@ -262,12 +276,12 @@ select ($$
     select json_agg(trg.*) as graph
     from tr_graph trg
     $$) into q;
-q := format(q, x, y, sid);
+q := format(q, x, y, sid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend(5.113007176643064,52.02272937705282,333);
-
+-- example: select * from chemtrend.trend(5.431838035583496,52.486543564119955,333,1);
 
 -- function that returns trend data based on a given location
 drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int);

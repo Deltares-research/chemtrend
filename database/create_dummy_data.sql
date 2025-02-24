@@ -75,6 +75,7 @@ insert into voorbeelddata.trend_data_periode
 update voorbeelddata.trend_data_periode set trend_periode = 0 where trend_periode is null;
 delete from voorbeelddata.trend_data_periode where left(datum::varchar,4)::int<2009 and trend_periode=1;
 update voorbeelddata.trend_data_periode set p_value_trend=p_value_trend*1.2, ats_y=ats_y*1.2 where trend_periode=1;
+delete from voorbeelddata.trend_data_periode where trend_periode=0;
 
 -- grant access
 GRANT ALL ON all tables in schema voorbeelddata TO waterkwaliteit_readonly;
