@@ -8,6 +8,9 @@ class Substance(BaseModel):
     substance_description: str
     cas: str
 
+class Period(BaseModel):
+    id: int
+    name: str
 
 # class Location(BaseModel):
 #     location_code: str
