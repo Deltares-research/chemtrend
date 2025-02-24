@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import FastAPI, Response
 from starlette.middleware.cors import CORSMiddleware
-from chemtrend.models import Substance
+from chemtrend.models import Substance, Period
 from chemtrend.database import metadata, database
 from chemtrend.mockup_data import test_subset_locations, test_waterbodies
 from sqlalchemy import Integer, cast, column, func, select
@@ -16,6 +16,7 @@ app.add_middleware(
 )
 
 substances = metadata.tables["chemtrend.substance"]
+periods = metadata.tables["chemtrend.trend_period"]
 locations = metadata.tables["chemtrend.location_geojson"]
 
 regions = [{
@@ -59,6 +60,14 @@ async def get_locations_for_substance(substance_id: int):
     await database.connect()
     result = await database.fetch_one(query)
     return Response(content=dict(result).get("geojson"), media_type="application/json")
+
+
+@app.get("/periods/", response_model=List[Period], tags=["Trend periods"])
+async def list_trend_periods():
+    """List all trend periods"""
+    query = periods.select()
+    await database.connect()
+    return await database.fetch_all(query)
 
 
 @app.get("/trends/", tags=["Trends"])
