@@ -9,6 +9,7 @@
           show-arrows
           v-model="period"
           class="mb-5 mt-2"
+          mandatory
           >
           <v-slide-group-item
             v-for="p in periods"
@@ -87,8 +88,7 @@ export default {
     ...mapGetters(['periods', 'substances', 'regions']),
     period: {
       get () {
-        const defaultPeriodId = _.get(this.periods[0], 'id', 0)
-        return parseInt(_.get(this.$route, 'query.period', defaultPeriodId), 10) // Ensure it's an integer
+        return parseInt(_.get(this.$route, 'query.period'), 10) // Ensure it's an integer
       },
       set (periodId) {
         const newQuery = {
@@ -123,6 +123,14 @@ export default {
           region: region.join(',')
         }
         this.$router.push({ query: newQuery })
+      }
+    }
+  },
+  watch: {
+    // when no period trend is set in the URL, adding it by default the first period returned from the backend
+    periods (newPeriods) {
+      if (newPeriods.length > 0 && !this.period) {
+        this.period = newPeriods[0].id
       }
     }
   },
