@@ -193,7 +193,7 @@ export default createStore({
           jsons = jsons.map(j => j.value)
           jsons = jsons.filter(j => j)
           if (jsons) {
-            store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
+            store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId, periodId })
           }
         })
         .catch(() => {

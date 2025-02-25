@@ -95,7 +95,8 @@ export default {
         ...this.$route.query, // Keep all existing query parameters, including 'substance'
         longitude: openTrend.coordinates[0],
         latitude: openTrend.coordinates[1],
-        substance: openTrend.substanceId
+        substance: openTrend.substanceId,
+        period: openTrend.periodId
       }
       this.$router.push({
         path: '/trends',
