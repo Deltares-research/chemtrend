@@ -119,7 +119,6 @@ export default createStore({
           return res.json()
         })
         .then(response => {
-          console.log(response)
           store.commit('SET_PERIODS', response)
         })
     },
@@ -143,7 +142,7 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    addTrend (store, { x, y, substanceId, name, currentLocation }) {
+    addTrend (store, { x, y, substanceId, name, currentLocation, periodId }) {
       const existingTrend = store.state.trends.find(t => {
         return toRaw(t).name === name
       })
@@ -158,8 +157,8 @@ export default createStore({
         return
       }
 
-      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
-      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
+      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}&trend_period=${periodId}`
+      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}&trend_period=${periodId}`
       store.commit('ADD_LOADING_TREND', { name, loading: true })
 
       Promise.allSettled([
