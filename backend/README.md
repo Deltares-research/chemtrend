@@ -1,5 +1,5 @@
 # Backend
-Python backend for Chemtrend
+Python backend for Chemtrend, compatible with both python 3.11 and 3.12 (some dependency issues with 3.13)
 
 # Run
 
