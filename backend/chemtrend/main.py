@@ -57,7 +57,9 @@ async def list_locations_all():
 # @app.get("/locations/{substance_id}", tags=["Locations"])
 async def get_locations_for_substance(substance_id: int, trend_period: int):
     """Retrieve all locations that have data for a given substance_id and trend period"""
-    query = f"select geojson from chemtrend.location_substance_geojson({substance_id}, {trend_period});"
+    # TODO: pass parameter trend_period to the query (uncomment the line below)
+    # query = f"select geojson from chemtrend.location_substance_geojson({substance_id}, {trend_period});"
+    query = f"select geojson from chemtrend.location_substance_geojson({substance_id});"
     await database.connect()
     result = await database.fetch_one(query)
     return Response(content=dict(result).get("geojson"), media_type="application/json")
