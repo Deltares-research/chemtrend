@@ -22,6 +22,7 @@ imp.p_value_trend::numeric,
 imp.theilsen_slope::numeric,
 imp.rg::bool as rapportagegrens,
 imp.ats_slope::numeric as ats_slope
+-- TO DO: trend_period toevoegen
 -- select count(*) --885279
 from import."03_data_trend_ats_info" imp
 join public.locatie l on l.meetpunt_code_2022=imp.meetpunt_code_2022
@@ -45,6 +46,7 @@ datum::date,
 lowess_p0,
 lowess_p25,
 lowess_p75
+-- TO DO: trend_period toevoegen
 -- select count(*)      -- 188843
 from import."05_data_trend_ats_waterbeheerder" imp
 join public.regio r on r.regio_type_id=4 and r.bron_id=imp.waterbeheerder_code::int --125968; rijkswateren vallen weg
@@ -66,6 +68,7 @@ datum::date,
 lowess_p0,
 lowess_p25,
 lowess_p75
+-- TO DO: trend_period toevoegen
 from (
     select * from import."06_data_trend_ats_stroomgebied"
     union all

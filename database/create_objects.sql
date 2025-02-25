@@ -46,29 +46,32 @@ select l.location_code, tl.parameter_id as substance_id, s.substance_code
         when -1 then 'green'
     end as color
 , l.geom
+, trend_period
 from (
-    select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
+    select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
     from public.trend_locatie tr
-    group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
+    group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
 ;
 
 -- functions that returns locations per substance
-drop function if exists chemtrend.location_substance_geojson(substance_id int);
-create or replace function chemtrend.location_substance_geojson( substance_id int)
+drop function if exists chemtrend.location_substance_geojson(substance_id int, trend_period int);
+create or replace function chemtrend.location_substance_geojson(substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare scid int = substance_id;
+declare tp int = trend_period;
 begin
 select ($$
     select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location_substance)::json)) as geojson
     from chemtrend.location_substance
     where substance_id = %1$s
+    and trend_period = %2$s
     $$) into q;
-q := format(q, scid);
+q := format(q, scid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
@@ -106,9 +109,9 @@ from (
         when -1 then 'green'
         else ''
     end as color
-    , trend_period -- TO DO
+    , trend_period
     -- select *
-    from (select *, 0::int as trend_period from public.trend_locatie
+    from (select * from public.trend_locatie
             union all
             select * from voorbeelddata.trend_data_periode
           ) tr
@@ -164,16 +167,16 @@ select
     , tr.trend_label
     , rt.regio_type as region_type
     , tr.color
-    , 0::int as trend_period    -- TO DO
+    , tr.trend_period
 from (
     -- deel 1:
-    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, trend_period
     from public.trend_regio
     union all
     -- deel 2:
@@ -183,6 +186,7 @@ from (
         when 0 then 'grey'
         when -1 then 'green'
     end as color
+    , trend_period
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
