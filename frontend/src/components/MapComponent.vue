@@ -107,9 +107,9 @@ export default {
         if (error) throw error
         this.map.addImage('grey_circle', image)
       })
-      this.map.loadImage('./img/icons/green_diamond.png', (error, image) => {
+      this.map.loadImage('./img/icons/green_triangle.png', (error, image) => {
         if (error) throw error
-        this.map.addImage('green_diamond', image)
+        this.map.addImage('green_triangle', image)
       })
       this.map.loadImage('./img/icons/red_triangle.png', (error, image) => {
         if (error) throw error
@@ -119,7 +119,7 @@ export default {
       // this.addFilteredLocations()
       this.locationsLayerIds.push(this.addFilteredLayer('grey', 'grey_circle', '#dddddd'))
       this.locationsLayerIds.push(this.addFilteredLayer('red', 'red_triangle', '#c26a77'))
-      this.locationsLayerIds.push(this.addFilteredLayer('green', 'green_diamond', '#94cbec'))
+      this.locationsLayerIds.push(this.addFilteredLayer('green', 'green_triangle', '#94cbec'))
       this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
