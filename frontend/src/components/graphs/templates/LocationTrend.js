@@ -1,3 +1,5 @@
+import { visualizationComponents } from '@/utils/colors'
+import _ from 'lodash'
 
 export function LocationTemplate (trendData, selectedColor) {
   const zip = (a1, a2) => a1.map((x, i) => [x, a2[i]])
@@ -21,19 +23,7 @@ export function LocationTemplate (trendData, selectedColor) {
       }
     })
   }
-  const rawColor = trendData.color || 'green'
-  let color = rawColor
-  switch (rawColor) {
-    case 'green':
-      color = '#94cbec'
-      break
-    case 'red':
-      color = '#c26a77'
-      break
-    case 'grey':
-      color = '#dddddd'
-      break
-  }
+  const color = _.get(visualizationComponents[trendData.trend_direction], 'color', visualizationComponents.upwards.color)
 
   return {
     title: {
