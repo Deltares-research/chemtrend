@@ -23,7 +23,7 @@ export function LocationTemplate (trendData, selectedColor) {
       }
     })
   }
-  const color = _.get(visualizationComponents[trendData.trend_direction], 'color', visualizationComponents.upwards.color)
+  const color = _.get(visualizationComponents[trendData.trend_direction], 'color', visualizationComponents.downwards.color)
 
   return {
     title: {
