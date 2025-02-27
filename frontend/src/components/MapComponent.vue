@@ -39,6 +39,22 @@ const initialData = {
   ]
 }
 
+// order is important, because the last object will show on top of the map
+const visualizationComponents = {
+  inconclusive: {
+    color: '#dddddd',
+    shape: 'inconclusive_circle'
+  },
+  upwards: {
+    color: '#c26a77',
+    shape: 'upwards_triangle'
+  },
+  downwards: {
+    color: '#94cbec',
+    shape: 'downwards_triangle'
+  }
+}
+
 export default {
   props: {
     mapPanel: {
@@ -103,28 +119,27 @@ export default {
   methods: {
     ...mapActions(['addTrend']),
     initializeData () {
-      this.map.loadImage('./img/icons/grey_circle.png', (error, image) => {
-        if (error) throw error
-        this.map.addImage('grey_circle', image)
-      })
-      this.map.loadImage('./img/icons/green_triangle.png', (error, image) => {
-        if (error) throw error
-        this.map.addImage('green_triangle', image)
-      })
-      this.map.loadImage('./img/icons/red_triangle.png', (error, image) => {
-        if (error) throw error
-        this.map.addImage('red_triangle', image)
-      })
+      this.loadMapSymbols()
       this.addLocations()
-      // this.addFilteredLocations()
-      this.locationsLayerIds.push(this.addFilteredLayer('grey', 'grey_circle', '#dddddd'))
-      this.locationsLayerIds.push(this.addFilteredLayer('red', 'red_triangle', '#c26a77'))
-      this.locationsLayerIds.push(this.addFilteredLayer('green', 'green_triangle', '#94cbec'))
+      this.addFilteredLayers()
       this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
       this.updateFilteredLocations()
       this.initializeMapWithLatLon()
+    },
+    addFilteredLayers () {
+      Object.keys(visualizationComponents).forEach(direction => {
+        this.locationsLayerIds.push(this.addFilteredLayer(direction, visualizationComponents[direction].shape))
+      })
+    },
+    loadMapSymbols () {
+      Object.values(visualizationComponents).map(c => c.shape).forEach(shape => {
+        this.map.loadImage(`./img/icons/${shape}.png`, (error, image) => {
+          if (error) throw error
+          this.map.addImage(shape, image)
+        })
+      })
     },
     addLocations () {
       const name = 'locations'
@@ -205,8 +220,8 @@ export default {
         ]
       )
     },
-    addFilteredLayer (trendStyle, shape, fillColor) {
-      const layerId = `filtered-locations-${trendStyle}`
+    addFilteredLayer (trendDirection, shape) {
+      const layerId = `filtered-locations-${trendDirection}`
       this.map.addLayer({
         id: layerId,
         type: 'symbol',
@@ -219,35 +234,9 @@ export default {
           'icon-allow-overlap': true,
           'icon-ignore-placement': true
         },
-        paint: {
-          'icon-color': fillColor
-        },
-        filter: ['==', 'color', trendStyle]
+        filter: ['==', 'trend_direction', trendDirection]
       })
       return layerId
-    },
-    addFilteredLocations () {
-      this.map.addLayer({
-        id: 'filtered-locations',
-        type: 'circle',
-        source: {
-          type: 'geojson',
-          data: initialData
-        },
-        paint: {
-          'circle-color': [
-            'match',
-            ['get', 'color'],
-            'red', '#c26a77',
-            'green', '#94cbec',
-            'grey', '#dddddd',
-            /* other */ '#ffffff'
-          ],
-          'circle-stroke-color': '#000000',
-          'circle-stroke-width': 1,
-          'circle-radius': 5
-        }
-      })
     },
     addSelectionLayers () {
       this.map.addLayer({
@@ -267,7 +256,8 @@ export default {
     },
 
     updateFilteredLocations () {
-      const url = `${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`
+      const substanceId = this.$route.query.substance || ''
+      const url = `${process.env.VUE_APP_SERVER_URL}/locations/${substanceId}`
       fetch(url)
         .then(res => {
           return res.json()
