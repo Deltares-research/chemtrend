@@ -14,7 +14,7 @@
       </MapboxPopup>
     </mapbox-map>
     <div :class="(mapPanel ? 'point-layer-legend-container' : 'd-none')">
-      <point-layer-legend />
+      <point-layer-legend @legend-click="handleLegendClick" />
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
 import PointLayerLegend from '@/components/tabs/PointLayerLegend'
+import { visualizationComponents } from '@/utils/colors'
 
 const initialData = {
   type: 'FeatureCollection',
@@ -37,22 +38,6 @@ const initialData = {
       }
     }
   ]
-}
-
-// order is important, because the last object will show on top of the map
-const visualizationComponents = {
-  inconclusive: {
-    color: '#dddddd',
-    shape: 'inconclusive_circle'
-  },
-  upwards: {
-    color: '#c26a77',
-    shape: 'upwards_triangle'
-  },
-  downwards: {
-    color: '#94cbec',
-    shape: 'downwards_triangle'
-  }
 }
 
 export default {
@@ -127,6 +112,14 @@ export default {
       this.addSelectionLayers()
       this.updateFilteredLocations()
       this.initializeMapWithLatLon()
+    },
+    handleLegendClick (layerId) {
+      const visibility = this.map.getLayoutProperty(layerId, 'visibility') || 'visible'
+      if (visibility === 'visible') {
+        this.map.setLayoutProperty(layerId, 'visibility', 'none')
+      } else {
+        this.map.setLayoutProperty(layerId, 'visibility', 'visible')
+      }
     },
     addFilteredLayers () {
       Object.keys(visualizationComponents).forEach(direction => {
