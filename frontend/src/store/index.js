@@ -122,10 +122,6 @@ export default createStore({
           return res.json()
         })
         .then(response => {
-          const colorsForColorBlindness = ['#dccd7d', '#7e2954', '#5da899', '#2e2585']
-          response.forEach((region, index) => {
-            region.color = colorsForColorBlindness[index % colorsForColorBlindness.length]
-          })
           store.commit('SET_REGIONS', response)
         })
     },
