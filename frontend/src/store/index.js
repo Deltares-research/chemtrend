@@ -4,6 +4,7 @@ import { toRaw } from 'vue'
 
 export default createStore({
   state: {
+    periods: [],
     substances: [],
     trends: [],
     regions: [],
@@ -13,6 +14,9 @@ export default createStore({
     disclaimerAcknowledged: false
   },
   getters: {
+    periods (state) {
+      return state.periods
+    },
     substances (state) {
       return state.substances
     },
@@ -38,6 +42,9 @@ export default createStore({
     }
   },
   mutations: {
+    SET_PERIODS (state, data) {
+      state.periods = data
+    },
     SET_SUBSTANCES (state, data) {
       state.substances = data
     },
@@ -105,6 +112,16 @@ export default createStore({
     }
   },
   actions: {
+    loadPeriods (store) {
+      const url = `${process.env.VUE_APP_SERVER_URL}/periods/`
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          store.commit('SET_PERIODS', response)
+        })
+    },
     loadSubstances (store) {
       const url = `${process.env.VUE_APP_SERVER_URL}/substances/`
       fetch(url)
@@ -125,7 +142,7 @@ export default createStore({
           store.commit('SET_REGIONS', response)
         })
     },
-    addTrend (store, { x, y, substanceId, name, currentLocation }) {
+    addTrend (store, { x, y, substanceId, name, currentLocation, periodId }) {
       const existingTrend = store.state.trends.find(t => {
         return toRaw(t).name === name
       })
@@ -140,8 +157,8 @@ export default createStore({
         return
       }
 
-      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}`
-      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}`
+      const urlTrends = `${process.env.VUE_APP_SERVER_URL}/trends/?x=${x}&y=${y}&substance_id=${substanceId}&trend_period=${periodId}`
+      const urlRegions = `${process.env.VUE_APP_SERVER_URL}/trends_regions/?x=${x}&y=${y}&substance_id=${substanceId}&trend_period=${periodId}`
       store.commit('ADD_LOADING_TREND', { name, loading: true })
 
       Promise.allSettled([
@@ -176,7 +193,7 @@ export default createStore({
           jsons = jsons.map(j => j.value)
           jsons = jsons.filter(j => j)
           if (jsons) {
-            store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId })
+            store.commit('ADD_TREND', { name, trendData: jsons.flat(), coordinates: [x, y], currentLocation, substanceId, periodId })
           }
         })
         .catch(() => {
