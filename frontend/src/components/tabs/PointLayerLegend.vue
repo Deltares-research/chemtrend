@@ -1,27 +1,46 @@
 <template>
   <div class="map-legend">
-    <div class="legend-item">
+    <div class="legend-item" @click="handleClick('locations')">
       <span class="legend-color-data-unselected" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Stof niet geselecteerd / Geen data beschikbaar</span>
+      <span :class="getLabelClass('locations')" class="legend-label">Stof niet geselecteerd / Geen data beschikbaar</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-color-data-up" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Dalende trend</span>
+    <div class="legend-item" @click="handleClick('filtered-locations-downwards')">
+      <img src="./img/icons/downwards_triangle.png" alt="blue downwards triangle" class="legend-triangle" />
+      <span :class="getLabelClass('filtered-locations-downwards')" class="legend-label">Dalende trend</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-color-data-down" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Stijgende trend</span>
+    <div class="legend-item" @click="handleClick('filtered-locations-upwards')">
+      <img src="./img/icons/upwards_triangle.png" alt="red  upwards triangle" class="legend-triangle" />
+      <span :class="getLabelClass('filtered-locations-upwards')" class="legend-label">Stijgende trend</span>
     </div>
-    <div class="legend-item">
+    <div class="legend-item" @click="handleClick('filtered-locations-inconclusive')">
       <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
-      <span class="legend-label">Geen significante trend</span>
+      <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >Geen significante trend</span>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'LocationsLegend'
+  name: 'LocationsLegend',
+  data () {
+    return {
+      visibility: {
+        locations: true,
+        'filtered-locations-downwards': true,
+        'filtered-locations-upwards': true,
+        'filtered-locations-inconclusive': true
+      }
+    }
+  },
+  methods: {
+    handleClick (type) {
+      this.$emit('legend-click', type)
+      this.visibility[type] = !this.visibility[type]
+    },
+    getLabelClass (type) {
+      return this.visibility[type] ? '' : 'greyed-out'
+    }
+  }
 }
 </script>
 
@@ -42,41 +61,43 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
+  cursor: pointer;
 }
+
+.legend-item:hover {
+  background-color: #f0f0f0; /* Add hover effect */
+}
+
 .legend-color-data-unselected {
   width: 10px;
   height: 10px;
   margin-right: 10px;
   background-color: white;
   border-radius: 50%;
+  margin-left: 3px;
 }
 
-.legend-color-data-up {
-  width: 10px;
-  height: 10px;
-  margin-right: 10px;
-  background-color: green;
-  border-radius: 50%;
-}
-
-.legend-color-data-down {
-  width: 10px;
-  height: 10px;
-  margin-right: 10px;
-  background-color: red;
-  border-radius: 50%;
+.legend-triangle {
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
 }
 
 .legend-color-data-neutral {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: grey;
+  background-color: #dddddd;
   border-radius: 50%;
+  margin-left: 3px;
 }
 
 .legend-label {
   font-size: 12px;
   color: #333;
+}
+
+.greyed-out {
+  color: #999;
 }
 </style>

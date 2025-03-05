@@ -52,16 +52,28 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       }
      },
     series: trendData.locations.map(loc => {
-      const color = loc.color || 'green'
+      const rawColor = loc.color || 'green'
+      let color = rawColor
+      switch (rawColor) {
+        case 'green':
+          color = '#94cbec'
+          break
+        case 'red':
+          color = '#c26a77'
+          break
+        case 'grey':
+          color = '#dddddd'
+          break
+        }
       let lineStyle = {
-        color: loc.color || 'green',
+        color: color || 'green',
         opacity: 0.2
       }
       let name = 'Stijgende trend'
-      if (color === 'green') {
+      if (rawColor === 'green') {
         name = 'Dalende trend'
       }
-      if (color === 'grey') {
+      if (rawColor === 'grey') {
         name = 'Geen Trend'
       }
 

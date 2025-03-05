@@ -9,7 +9,7 @@ export default createStore({
     trends: [],
     regions: [],
     panelTrigger: false,
-    selectedColor: '#2de0e0',
+    selectedColor: '#9f4a96',
     zoomTo: '',
     disclaimerAcknowledged: false
   },

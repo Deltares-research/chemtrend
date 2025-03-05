@@ -1,3 +1,5 @@
+import { visualizationComponents } from '@/utils/colors'
+import _ from 'lodash'
 
 export function LocationTemplate (trendData, selectedColor) {
   const zip = (a1, a2) => a1.map((x, i) => [x, a2[i]])
@@ -21,6 +23,7 @@ export function LocationTemplate (trendData, selectedColor) {
       }
     })
   }
+  const color = _.get(visualizationComponents[trendData.trend_direction], 'color', visualizationComponents.downwards.color)
 
   return {
     title: {
@@ -113,7 +116,7 @@ export function LocationTemplate (trendData, selectedColor) {
         type: 'line',
         data: zip(trendData.x_value, trendData.y_value_lowess),
         lineStyle: {
-          color: trendData.color
+          color: color
         },
         symbol: 'none',
         itemStyle: { color: 'transparent' }

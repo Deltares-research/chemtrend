@@ -46,6 +46,11 @@ select l.location_code, tl.parameter_id as substance_id, s.substance_code
         when -1 then 'green'
     end as color
 , l.geom
+, case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
 , trend_period
 from (
     select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
@@ -109,6 +114,11 @@ from (
         when -1 then 'green'
         else ''
     end as color
+    , case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
     , trend_period
     -- select *
     from (select * from public.trend_locatie
@@ -167,16 +177,17 @@ select
     , tr.trend_label
     , rt.regio_type as region_type
     , tr.color
+    , tr.trend_direction
     , tr.trend_period
 from (
     -- deel 1:
-    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, trend_period
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, trend_period
+    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, trend_period
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
     -- deel 2:
@@ -186,6 +197,11 @@ from (
         when 0 then 'grey'
         when -1 then 'green'
     end as color
+    , case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
     , trend_period
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
@@ -269,14 +285,14 @@ select ($$
         and trend_period = '%4$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
+        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         , json_agg(point_filled order by x_value) point_filled
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
+        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
@@ -311,14 +327,14 @@ select ($$
         )
     )
     , tr_trends as (
-        select region_type, title, trend_label, color
+        select region_type, title, trend_label, color, trend_direction
         , json_agg(x_value order by x_value) as x_value
         , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
-        group by region_type, regio_id, trend_label, title, color
+        group by region_type, regio_id, trend_label, title, color, trend_direction
     )
     , tr_graph as (
-        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.x_value, tr.y_value_lowess) as x)) as locations
+        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.trend_direction, tr.x_value, tr.y_value_lowess) as x)) as locations
         from tr_trends tr
         group by region_type, title
     )
