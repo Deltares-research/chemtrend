@@ -20,6 +20,15 @@ create index ix_geom_rd on public.regio using gist(geom_rd);
 
 insert into public.regio_type (regio_type_id, regio_type) VALUES (1,'Nederland'), (2, 'Provincie'), (3,'Stroomgebied'), (4,'Waterschap'), (5,'Waterlichaam');
 
+-- TO DO: polygoon NL bijwerken (nu tijdelijk: bbox van alle punten)
+insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
+select 0 as bron_id, 1 as regio_type_id, 'Nederland' as regio_omschrijving, st_transform(geom_rd, 4326) as geom, geom_rd
+from (
+    select st_setsrid(st_extent(geom),28992) as geom_rd
+    from public.locatie
+    where st_isempty(geom)=false
+) q;
+
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select "FID" as bron_id, 2 as region_type_id, "Provincien" as region_description, geometry as geom, st_transform(geometry, 28992) as geom_rd
 from public.provincies
@@ -54,6 +63,8 @@ insert into public.locatie_regio (meetpunt_id, regio_id)
 select l.meetpunt_id, r.regio_id
 from public.locatie l
 join public.regio r on 1=1 and st_within(l.geom, r.geom_rd) and st_isempty(l.geom)=false
+--     uitgezonderd regio NL (want aparte query)
+    and r.regio_type_id>1
 ;
 -- 3. correctie: meetpunten op grensgebied of onder beheer van RWS:
 drop table if exists temp.correctie_locatie_regio;
@@ -84,6 +95,12 @@ and st_isempty(l.geom)=false
 ;
 insert into public.locatie_regio (meetpunt_id, regio_id)
 select meetpunt_id, regio_id from temp.aanvulling_loc_reg;
+
+-- koppel alle meetpunten aan regio NL
+insert into public.locatie_regio (meetpunt_id, regio_id)
+select l.meetpunt_id, r.regio_id
+from public.locatie l join public.regio r on 1=1 and r.regio_type_id=1
+where st_isempty(l.geom)=false;
 
 -- view to use for regional data
 drop view public.locatie_regio_info;

@@ -20,17 +20,20 @@ periods = metadata.tables["chemtrend.trend_period"]
 locations = metadata.tables["chemtrend.location_geojson"]
 
 regions = [{
-        "name": "Waterlichaam",
-        "color": "#a8a00a"
-    }, {
         "name": "Waterschap",
-        "color": "#a8610a"
+        "color": "#dccd7d"
+    }, {
+        "name": "Waterlichaam",
+        "color": "#7e2954"
     }, {
         "name": "Provincie",
-        "color": "#0a79a8"
+        "color": "#5da899"
     }, {
         "name": "Stroomgebied",
-        "color": "#830aa8"
+        "color": "#2e2585"
+    }, {
+        "name": "Nederland",
+        "color": "#2f485b"
     }]
 
 # asyncio.run(setup_connection())
