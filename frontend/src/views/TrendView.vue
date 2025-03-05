@@ -5,7 +5,7 @@
       v-model="panels"
       variant="accordion"
       density="compact"
-      multiple="true"
+      multiple
     >
       <v-expansion-panel
         v-for="trend in trends" :key="trend.name"
@@ -95,7 +95,8 @@ export default {
         ...this.$route.query, // Keep all existing query parameters, including 'substance'
         longitude: openTrend.coordinates[0],
         latitude: openTrend.coordinates[1],
-        substance: openTrend.substanceId
+        substance: openTrend.substanceId,
+        period: openTrend.periodId
       }
       this.$router.push({
         path: '/trends',

@@ -79,6 +79,10 @@ export default {
     PointLayerLegend
   },
   watch: {
+    '$route.query.period' (val, oldVal) {
+      this.updateFilteredLocations()
+      this.checkSelection('locations')
+    },
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
       this.checkSelection('locations')
@@ -223,22 +227,31 @@ export default {
     },
 
     updateFilteredLocations () {
-      if (_.get(this.$route, 'query.substance') && this.map.getSource('filtered-locations')) {
-        this.map.getSource('filtered-locations')
-          .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
+      const substance = _.get(this.$route, 'query.substance')
+      if (substance && this.map.getSource('filtered-locations')) {
+        let url = `${process.env.VUE_APP_SERVER_URL}/locations/${substance}`
+        const period = _.get(this.$route, 'query.period')
+        if (period) {
+          url += `?trend_period=${period}`
+        }
+        this.map.getSource('filtered-locations').setData(url)
       }
     },
     updateRegion (lat, lng) {
-      const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
-      if (this.map.getSource('selected-regions')) {
-        this.map.getSource('selected-regions')
-          .setData(url)
+      let url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
+      const period = _.get(this.$route, 'query.period')
+      if (period) {
+        url += `&trend_period=${period}`
       }
       fetch(url)
         .then(res => {
           return res.json()
         })
         .then(response => {
+          if (this.map.getSource('selected-regions')) {
+            this.map.getSource('selected-regions')
+              .setData(response)
+          }
           this.regionsGeojson = response
         })
     },
@@ -290,7 +303,10 @@ export default {
       if (shape === 'locations') {
         layer = 'filtered-locations'
       }
-      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [layer] })
+      // changing the data from a period to another causes the projection to change
+      // to be safe, we recompute every time
+      const projectedCoordinates = this.map.project([this.mapLocation.lngLat.lng, this.mapLocation.lngLat.lat])
+      const features = this.map.queryRenderedFeatures(projectedCoordinates, { layers: [layer] })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
@@ -302,10 +318,12 @@ export default {
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
         const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
-        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
+        const periodId = parseInt(_.get(this.$route, 'query.period', 0))
+        const periodName = _.get(this.$store.state, 'periods', []).find(p => p.id === periodId).name
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location} (${periodName})`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId, name, currentLocation: location })
+          this.addTrend({ x, y, substanceId, name, currentLocation: location, periodId })
           this.$emit('update:bottomPanel', true)
         }
       })
