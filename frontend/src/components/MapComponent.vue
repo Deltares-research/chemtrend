@@ -254,7 +254,7 @@ export default {
 
     updateFilteredLocations () {
       const substanceId = this.$route.query.substance || ''
-      const url = `${process.env.VUE_APP_SERVER_URL}/locations/${substanceId}`
+      let url = `${process.env.VUE_APP_SERVER_URL}/locations/${substanceId}`
       const period = _.get(this.$route, 'query.period')
       if (period) {
         url += `?trend_period=${period}`
