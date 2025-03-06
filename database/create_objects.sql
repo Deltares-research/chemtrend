@@ -17,14 +17,14 @@ drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
 select
     l.meetpunt_id,
-    l.meetpunt_code_2022 as location_code,
+    l.meetpunt_code_2023 as location_code,
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
-    st_transform(l.geom, 4326) as geom
+    st_transform(l.geometry, 4326) as geom
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
-where st_isempty(l.geom)=false;
+where st_isempty(l.geometry)=false;
 
 -- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
@@ -191,7 +191,7 @@ from (
     from public.trend_regio
     union all
     -- deel 2:
-    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
+    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2023 as trend_label
     , case tl.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
