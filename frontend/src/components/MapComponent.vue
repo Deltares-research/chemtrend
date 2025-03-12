@@ -344,7 +344,7 @@ export default {
       // changing the data from a period to another causes the projection to change
       // to be safe, we recompute every time
       const projectedCoordinates = this.map.project([this.mapLocation.lngLat.lng, this.mapLocation.lngLat.lat])
-      const features = this.map.queryRenderedFeatures(projectedCoordinates, { layers: [layer] })
+      const features = this.map.queryRenderedFeatures(projectedCoordinates, { layers: layer })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
