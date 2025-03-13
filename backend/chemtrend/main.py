@@ -20,11 +20,11 @@ periods = metadata.tables["chemtrend.trend_period"]
 locations = metadata.tables["chemtrend.location_geojson"]
 
 regions = [{
-        "name": "Waterschap",
-        "color": "#dccd7d"
-    }, {
         "name": "Waterlichaam",
         "color": "#7e2954"
+    }, {
+        "name": "Waterschap",
+        "color": "#dccd7d"
     }, {
         "name": "Provincie",
         "color": "#5da899"
