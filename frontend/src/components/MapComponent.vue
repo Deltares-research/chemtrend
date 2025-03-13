@@ -127,7 +127,15 @@ export default {
     },
     addFilteredLayers () {
       Object.keys(visualizationComponents).forEach(direction => {
-        this.locationsLayerIds.push(this.addFilteredLayer(direction, visualizationComponents[direction].shape))
+        const layerId = this.addFilteredLayer(direction, visualizationComponents[direction].shape)
+        this.map.on('mouseenter', layerId, () => {
+          this.map.getCanvas().style.cursor = 'pointer'
+        })
+
+        this.map.on('mouseleave', layerId, () => {
+          this.map.getCanvas().style.cursor = ''
+        })
+        this.locationsLayerIds.push(layerId)
       })
     },
     loadMapSymbols () {
