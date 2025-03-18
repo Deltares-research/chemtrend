@@ -32,6 +32,9 @@ regions = [{
         "name": "Stroomgebied",
         "color": "#2e2585"
     }, {
+        "name": "Rijkswater",
+        "color": "#337538"
+    }, {
         "name": "Nederland",
         "color": "#2f485b"
     }]

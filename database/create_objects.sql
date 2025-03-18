@@ -184,7 +184,7 @@ from (
     select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
+    select regio_id, parameter_id, datum, lowess_p50 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
     select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period

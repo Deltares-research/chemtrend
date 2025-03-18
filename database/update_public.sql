@@ -18,7 +18,14 @@ create table if not exists public.regio (
 create index ix_geom on public.regio using gist(geom);
 create index ix_geom_rd on public.regio using gist(geom_rd);
 
-insert into public.regio_type (regio_type_id, regio_type) VALUES (1,'Nederland'), (2, 'Provincie'), (3,'Stroomgebied'), (4,'Waterschap'), (5,'Waterlichaam');
+insert into public.regio_type (regio_type_id, regio_type)
+VALUES (1,'Nederland')
+     , (2, 'Provincie')
+     , (3,'Stroomgebied')
+     , (4,'Waterschap')
+     , (5,'Waterlichaam')
+     , (6, 'Rijkswater')
+;
 
 -- niveau Nederland in regio-tabel
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
@@ -38,12 +45,25 @@ where st_isempty(geometry)=false
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select waterbeheerder_id as bron_id, 4 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
 from public.waterbeheerder
-where (st_isempty(geometry)=false or (waterbeheerder_code='80' and waterbeheerder_omschrijving='Rijkswaterstaat'))
+where (st_isempty(geometry)=false and waterbeheerder_code<>'80')
 ;
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select db_id_extern as bron_id, 5 as region_type_id, waterlichaam_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
 from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
+;
+insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
+select waterbeheerder_id as bron_id, 6 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(mp.geometry, 4326) as geom, mp.geometry geom_rd
+from public.waterbeheerder wat
+join (
+    select wat.waterbeheerder_code, st_union(loc.geometry) as geometry
+    from public.locatie loc
+    join public.waterbeheerder wat on wat.waterbeheerder_id=loc.waterbeheerder_id
+    where wat.waterbeheerder_code = '80'    -- between '80' and '95'
+    and st_isempty(loc.geometry)=false and loc.x_rd>0
+    group by wat.waterbeheerder_code
+) mp on 1=1
+where wat.waterbeheerder_code='80' and wat.waterbeheerder_omschrijving='Rijkswaterstaat'
 ;
 
 --------- LOCATIES KOPPELEN AAN REGIO -----------
@@ -81,9 +101,9 @@ select l.meetpunt_id, l.meetpunt_code_2023, w.waterbeheerder_id, w.waterbeheerde
 into temp.correctie_locatie_regio
 from public.locatie l
 join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
-join public.regio wr on wr.bron_id=w.waterbeheerder_id and wr.regio_type_id=4
+join public.regio wr on wr.bron_id=w.waterbeheerder_id and wr.regio_type_id in (4,6)
 join public.locatie_regio lr on lr.meetpunt_id=l.meetpunt_id
-join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id=4
+join public.regio r on r.regio_id=lr.regio_id and r.regio_type_id in (4,6)
 where r.bron_id<>w.waterbeheerder_id;
 -- (update obv temp tabel)
 update public.locatie_regio lr set regio_id=x.new_regio_id
@@ -94,9 +114,9 @@ drop table if exists temp.aanvulling_loc_reg;
 select l.meetpunt_id, l.waterbeheerder_id, r2b.regio_id
 into temp.aanvulling_loc_reg
 from public.locatie l
-left join public.locatie_regio_info lr on lr.meetpunt_id=l.meetpunt_id and lr.regio_type_id=4
+left join public.locatie_regio_info lr on lr.meetpunt_id=l.meetpunt_id and lr.regio_type_id in (4,6)
 join public.waterbeheerder w on l.waterbeheerder_id = w.waterbeheerder_id
-join public.regio r2b on r2b.regio_type_id=4 and r2b.bron_id=l.waterbeheerder_id
+join public.regio r2b on r2b.regio_type_id in (4,6) and r2b.bron_id=l.waterbeheerder_id
 where lr.meetpunt_id is null
 and st_isempty(l.geometry)=false
 ;
@@ -111,6 +131,7 @@ where st_isempty(l.geometry)=false;
 
 
 -- trend data
+drop table if exists public.trend_regio cascade;
 create table public.trend_regio (
     trend_regio_id serial primary key,
     regio_id int references public.regio (regio_id),
@@ -125,7 +146,7 @@ create table public.trend_regio (
     trend_period int
 );
 
--- drop table public.trend_locatie cascade;
+drop table public.trend_locatie cascade;
 create table public.trend_locatie (
     trend_locatie serial primary key,
     meetpunt_id int references public.locatie(meetpunt_id),
@@ -148,7 +169,7 @@ create table public.trend_locatie (
 );
 
 -- add index to locatie table
-create index ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_2023) include (geometry);
+create index if not exists ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_2023) include (geometry);
 
 -- extra indexes:
 create index if not exists ix_locatie_regio on public.locatie_regio(meetpunt_id, regio_id);

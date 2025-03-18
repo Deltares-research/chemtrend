@@ -40,7 +40,7 @@ join public.kwaliteitsoordeel k on k.kwaliteitsoordeel_code=coalesce(imp.kwalite
 
 --  trend_regio: waterbeheerder
 truncate table public.trend_regio;
-insert into public.trend_regio (regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, datum, lowess_p0, lowess_p25, lowess_p75, trend_period)
+insert into public.trend_regio (regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, datum, lowess_p25, lowess_p50, lowess_p75, trend_period)
 select
 r.regio_id,
 p.parameter_id,
@@ -48,8 +48,8 @@ e.eenheid_id,
 h.hoedanigheid_id,
 c.compartiment_id,
 datum::date,
-lowess_p0::decimal,
 lowess_p25::decimal,
+lowess_p0::decimal as lowess_p50,
 lowess_p75::decimal,
 trend_period
 -- select count(*)      -- 544438
@@ -57,7 +57,8 @@ from (  select *, 0 as trend_period from import."05_data_trend_ats_waterbeheerde
         union all
         select *, 1 as trend_period from import."05B_data_trend_ats_waterbeheerder_vanaf_2009"
 ) imp
-join public.regio r on r.regio_type_id=4 and r.bron_id=imp.waterbeheerder_code::int -- 325721; rijkswateren vallen weg
+join public.waterbeheerder wb on wb.waterbeheerder_code=imp.waterbeheerder_code
+join public.regio r on r.bron_id=wb.waterbeheerder_id and r.regio_type_id in (4,6)
 join public.parameter p on p.parameter_code=imp.parameter_code
 join public.eenheid e on e.eenheid_code=imp.eenheid_code
 join public.hoedanigheid h on h.hoedanigheid_code=imp.hoedanigheid_code
@@ -65,7 +66,7 @@ join public.compartiment c on c.compartiment_code=imp.compartiment_code
 ;
 
 --  trend_regio: overig (provincie, waterlichaam, stroomgebied, landelijk)
-insert into public.trend_regio (regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, datum, lowess_p0, lowess_p25, lowess_p75, trend_period)
+insert into public.trend_regio (regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, datum, lowess_p25, lowess_p50, lowess_p75, trend_period)
 select
 imp.regio_id,
 p.parameter_id,
@@ -73,8 +74,8 @@ e.eenheid_id,
 h.hoedanigheid_id,
 c.compartiment_id,
 datum::date,
-lowess_p0::decimal,
 lowess_p25::decimal,
+lowess_p0::decimal as lowess_p50,
 lowess_p75::decimal,
 trend_period
 -- select count(*)      -- 1941120
