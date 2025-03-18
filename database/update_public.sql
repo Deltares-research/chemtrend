@@ -56,14 +56,13 @@ insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom
 select waterbeheerder_id as bron_id, 6 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(mp.geometry, 4326) as geom, mp.geometry geom_rd
 from public.waterbeheerder wat
 join (
-    select wat.waterbeheerder_code, st_union(loc.geometry) as geometry
+    select wat.waterbeheerder_code, st_concavehull(st_union(loc.geometry) , 1) as geometry
     from public.locatie loc
     join public.waterbeheerder wat on wat.waterbeheerder_id=loc.waterbeheerder_id
     where wat.waterbeheerder_code = '80'    -- between '80' and '95'
-    and st_isempty(loc.geometry)=false and loc.x_rd>0
+    and st_isempty(loc.geometry)=false and loc.x_rd>0 and loc.x_rd<300000
     group by wat.waterbeheerder_code
-) mp on 1=1
-where wat.waterbeheerder_code='80' and wat.waterbeheerder_omschrijving='Rijkswaterstaat'
+) mp on mp.waterbeheerder_code=wat.waterbeheerder_code
 ;
 
 --------- LOCATIES KOPPELEN AAN REGIO -----------
