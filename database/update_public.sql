@@ -29,8 +29,8 @@ VALUES (1,'Nederland')
 
 -- niveau Nederland in regio-tabel
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
-select 0 as bron_id, 1 as regio_type_id, 'Nederland' as regio_omschrijving, st_transform(geometry, 4326) as geom, geometry as geom_rd
-from public.nationaal_level_polygoon;
+select 0 as bron_id, 1 as regio_type_id, 'Nederland' as regio_omschrijving, st_transform(geom, 4326) as geom, geom as geom_rd
+from import.nederland_eez;
 
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select "FID" as bron_id, 2 as region_type_id, "Provincien" as region_description, geometry as geom, st_transform(geometry, 28992) as geom_rd
@@ -53,16 +53,17 @@ from public."KRW_waterlichaam"
 where st_isempty(geometry)=false
 ;
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
-select waterbeheerder_id as bron_id, 6 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(mp.geometry, 4326) as geom, mp.geometry geom_rd
-from public.waterbeheerder wat
-join (
-    select wat.waterbeheerder_code, st_concavehull(st_union(loc.geometry) , 1) as geometry
-    from public.locatie loc
-    join public.waterbeheerder wat on wat.waterbeheerder_id=loc.waterbeheerder_id
-    where wat.waterbeheerder_code = '80'    -- between '80' and '95'
-    and st_isempty(loc.geometry)=false and loc.x_rd>0 and loc.x_rd<300000
-    group by wat.waterbeheerder_code
-) mp on mp.waterbeheerder_code=wat.waterbeheerder_code
+select waterbeheerder_id as bron_id, 6 as region_type_id, waterbeheerder_omschrijving as region_description
+, st_transform(q.geom,4326) as geom, q.geom as geom_rd
+from (
+    select st_union(geom) geom
+    from (
+        select st_transform(geom, 28992) geom  from import.eez
+        union all
+        select geom from import.rws
+    ) s
+) q
+, (select * from public.waterbeheerder where waterbeheerder_code='80') wat
 ;
 
 --------- LOCATIES KOPPELEN AAN REGIO -----------
