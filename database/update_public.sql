@@ -21,7 +21,7 @@ create index ix_geom_rd on public.regio using gist(geom_rd);
 insert into public.regio_type (regio_type_id, regio_type)
 VALUES (1,'Nederland')
      , (2, 'Provincie')
-     , (3,'Stroomgebied')
+     , (3,'Deelstroomgebied')
      , (4,'Waterschap')
      , (5,'Waterlichaam')
      , (6, 'Rijkswater')

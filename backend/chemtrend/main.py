@@ -29,7 +29,7 @@ regions = [{
         "name": "Provincie",
         "color": "#5da899"
     }, {
-        "name": "Stroomgebied",
+        "name": "Deelstroomgebied",
         "color": "#2e2585"
     }, {
         "name": "Rijkswater",
