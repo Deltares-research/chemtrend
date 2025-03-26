@@ -2,14 +2,17 @@
 export const visualizationComponents = {
   inconclusive: {
     color: '#dddddd',
-    shape: 'inconclusive_circle'
+    shape: 'inconclusive_circle',
+    name: 'Geen Trend'
   },
   upwards: {
     color: '#c26a77',
-    shape: 'upwards_triangle'
+    shape: 'upwards_triangle',
+    name: 'Stijgende trend'
   },
   downwards: {
     color: '#94cbec',
-    shape: 'downwards_triangle'
+    shape: 'downwards_triangle',
+    name: 'Dalende trend'
   }
 }
