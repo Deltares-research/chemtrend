@@ -41,6 +41,7 @@ insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom
 select "OBJECTID" as bron_id, 3 as region_type_id, "NAAM" as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
 from public.deelstroomgebieden
 where st_isempty(geometry)=false
+and ("COUNTRY" = 'NL' or "COUNTRY" is null)
 ;
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select waterbeheerder_id as bron_id, 4 as region_type_id, waterbeheerder_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd

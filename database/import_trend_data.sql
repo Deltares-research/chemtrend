@@ -102,6 +102,7 @@ join public.parameter p on p.parameter_code=imp.parameter_code
 join public.eenheid e on e.eenheid_code=imp.eenheid_code
 join public.hoedanigheid h on h.hoedanigheid_code=imp.hoedanigheid_code
 join public.compartiment c on c.compartiment_code=imp.compartiment_code
+join public.regio r on r.regio_id=imp.regio_id  -- stroomgebied BE/DE weglaten
 ;
 
 -- TIJDELIJKE FIX: data <2009 weglaten
