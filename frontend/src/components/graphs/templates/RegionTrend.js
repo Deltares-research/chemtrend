@@ -58,7 +58,7 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
         color: color,
         opacity: 0.2
       }
-      const name = _.get(visualizationComponents[loc.trend_direction], 'name', visualizationComponents.downwards.name)
+      let name = _.get(visualizationComponents[loc.trend_direction], 'name', visualizationComponents.downwards.name)
 
       if (loc.trend_label === currentLocation) {
         lineStyle = {
