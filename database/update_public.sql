@@ -48,6 +48,7 @@ select waterbeheerder_id as bron_id, 4 as region_type_id, waterbeheerder_omschri
 from public.waterbeheerder
 where (st_isempty(geometry)=false and waterbeheerder_code<>'80')
 ;
+update public.regio set geom=st_force2d(geom), geom_rd=st_force2d(geom_rd) where regio_type_id=4; -- only x & y (remove z=0)
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select db_id_extern as bron_id, 5 as region_type_id, waterlichaam_omschrijving as region_description, st_transform(geometry, 4326) as geom, geometry geom_rd
 from public."KRW_waterlichaam"
