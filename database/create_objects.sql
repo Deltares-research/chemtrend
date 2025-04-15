@@ -17,7 +17,7 @@ drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
 select
     l.meetpunt_id,
-    l.meetpunt_code_2023 as location_code,
+    l.meetpunt_code_nieuw as location_code,
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geometry, 4326) as geom
@@ -191,7 +191,7 @@ from (
     from public.trend_regio
     union all
     -- deel 2:
-    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2023 as trend_label
+    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_nieuw as trend_label
     , case tl.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'

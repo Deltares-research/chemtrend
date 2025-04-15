@@ -27,6 +27,7 @@ VALUES (1,'Nederland')
      , (6, 'Rijkswater')
 ;
 
+
 -- niveau Nederland in regio-tabel
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select 0 as bron_id, 1 as regio_type_id, 'Nederland' as regio_omschrijving, st_transform(geom, 4326) as geom, geom as geom_rd
@@ -75,7 +76,7 @@ create table public.locatie_regio (
 -- view to use for regional data
 drop view if exists public.locatie_regio_info;
 create or replace view public.locatie_regio_info as
-select r.regio_id, r.regio_omschrijving, rt.regio_type, l.meetpunt_id, l.meetpunt_code_2023 as meetpunt_code, rt.regio_type_id
+select r.regio_id, r.regio_omschrijving, rt.regio_type, l.meetpunt_id, l.meetpunt_code_nieuw as meetpunt_code, rt.regio_type_id
 from public.regio r
 join public.regio_type rt on r.regio_type_id = rt.regio_type_id
 join public.locatie_regio lr on r.regio_id = lr.regio_id
@@ -93,7 +94,7 @@ join public.regio r on 1=1 and st_within(l.geometry, r.geom_rd) and st_isempty(l
 -- 3. correctie: meetpunten op grensgebied of onder beheer van RWS:
 drop table if exists temp.correctie_locatie_regio;
 -- (vul temp tabel)
-select l.meetpunt_id, l.meetpunt_code_2023, w.waterbeheerder_id, w.waterbeheerder_code, w.waterbeheerder_omschrijving, r.regio_id, r.bron_id, r.regio_omschrijving
+select l.meetpunt_id, l.meetpunt_code_nieuw, w.waterbeheerder_id, w.waterbeheerder_code, w.waterbeheerder_omschrijving, r.regio_id, r.bron_id, r.regio_omschrijving
 , wr.regio_id as new_regio_id
 into temp.correctie_locatie_regio
 from public.locatie l
@@ -166,7 +167,7 @@ create table public.trend_locatie (
 );
 
 -- add index to locatie table
-create index if not exists ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_2023) include (geometry);
+create index if not exists ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_nieuw) include (geometry);
 
 -- extra indexes:
 create index if not exists ix_locatie_regio on public.locatie_regio(meetpunt_id, regio_id);
