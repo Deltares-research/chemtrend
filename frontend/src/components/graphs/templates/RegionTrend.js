@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { visualizationComponents } from '@/utils/colors'
 
 /* eslint-disable */
 export function RegionTemplate (trendData, titleColor, selectedColor, currentLocation) {
@@ -52,18 +53,12 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       }
      },
     series: trendData.locations.map(loc => {
-      const color = loc.color || 'green'
+      const color = _.get(visualizationComponents[loc.trend_direction], 'color', visualizationComponents.downwards.color)
       let lineStyle = {
-        color: loc.color || 'green',
-        opacity: 0.2
+        color: color,
+        opacity: 0.4
       }
-      let name = 'Stijgende trend'
-      if (color === 'green') {
-        name = 'Dalende trend'
-      }
-      if (color === 'grey') {
-        name = 'Geen Trend'
-      }
+      let name = _.get(visualizationComponents[loc.trend_direction], 'name', visualizationComponents.downwards.name)
 
       if (loc.trend_label === currentLocation) {
         lineStyle = {

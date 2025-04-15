@@ -17,14 +17,14 @@ drop view if exists chemtrend.location cascade;
 create or replace view chemtrend.location as
 select
     l.meetpunt_id,
-    l.meetpunt_code_2022 as location_code,
+    l.meetpunt_code_2023 as location_code,
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
-    st_transform(l.geom, 4326) as geom
+    st_transform(l.geometry, 4326) as geom
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
-where st_isempty(l.geom)=false;
+where st_isempty(l.geometry)=false;
 
 -- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
@@ -46,29 +46,37 @@ select l.location_code, tl.parameter_id as substance_id, s.substance_code
         when -1 then 'green'
     end as color
 , l.geom
+, case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
+, trend_period
 from (
-    select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
+    select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
     from public.trend_locatie tr
-    group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie
+    group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
 ;
 
 -- functions that returns locations per substance
-drop function if exists chemtrend.location_substance_geojson(substance_id int);
-create or replace function chemtrend.location_substance_geojson( substance_id int)
+drop function if exists chemtrend.location_substance_geojson(substance_id int, trend_period int);
+create or replace function chemtrend.location_substance_geojson(substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare scid int = substance_id;
+declare tp int = trend_period;
 begin
 select ($$
     select json_build_object('type', 'FeatureCollection', 'features', json_agg(ST_AsGeoJSON(location_substance)::json)) as geojson
     from chemtrend.location_substance
     where substance_id = %1$s
+    and trend_period = %2$s
     $$) into q;
-q := format(q, scid);
+q := format(q, scid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
@@ -106,8 +114,17 @@ from (
         when -1 then 'green'
         else ''
     end as color
+    , case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
+    , trend_period
     -- select *
-    from public.trend_locatie tr
+    from (select * from public.trend_locatie
+            union all
+            select * from voorbeelddata.trend_data_periode
+          ) tr
     join chemtrend.substance s on s.substance_id=tr.parameter_id
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
@@ -160,24 +177,32 @@ select
     , tr.trend_label
     , rt.regio_type as region_type
     , tr.color
+    , tr.trend_direction
+    , tr.trend_period
 from (
     -- deel 1:
-    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p0 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p50 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
     from public.trend_regio
     union all
     -- deel 2:
-    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2022 as trend_label
+    select r.regio_id, tl.parameter_id, datum, tl.lowline_y as y_value_lowess, l.meetpunt_code_2023 as trend_label
     , case tl.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
         when -1 then 'green'
     end as color
+    , case trend_conclusie
+        when 1 then 'upwards'
+        when 0 then 'inconclusive'
+        when -1 then 'downwards'
+    end as trend_direction
+    , trend_period
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
@@ -233,14 +258,23 @@ return query execute q;
 end
 $ff$ language plpgsql;
 
+-- view that lists all trend periods:
+drop view if exists chemtrend.trend_period;
+create or replace view chemtrend.trend_period as
+select 0::int as id, 'Alle data' as name
+union all
+select 1::int as id, 'Vanaf 2009' as name
+;
 
 -- function that returns trend data based on a given location
-drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
-create or replace function chemtrend.trend(x decimal, y decimal, substance_id int)
+-- drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
+drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int, trend_period int);
+create or replace function chemtrend.trend(x decimal, y decimal, substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare sid text = substance_id;
+declare tp text = case trend_period when null then 0 else trend_period end;
 begin
 select ($$
     with tr_detail as (
@@ -248,40 +282,43 @@ select ($$
         from chemtrend.trend
         where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
         and substance_id = '%3$s'
+        and trend_period = '%4$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
+        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         , json_agg(point_filled order by x_value) point_filled
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color
+        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
     $$) into q;
-q := format(q, x, y, sid);
+q := format(q, x, y, sid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend(5.113007176643064,52.02272937705282,333);
-
+-- example: select * from chemtrend.trend(5.431838035583496,52.486543564119955,333,1);
 
 -- function that returns trend data based on a given location
-drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int);
-create or replace function chemtrend.trend_region(x decimal, y decimal, substance_id int)
+drop function if exists chemtrend.trend_region(x decimal, y decimal, substance_id int, trend_period int);
+create or replace function chemtrend.trend_region(x decimal, y decimal, substance_id int, trend_period int)
     returns table (geojson json) as
 $ff$
 declare q text;
 declare sid text = substance_id;
+declare tp text = case trend_period when null then 0 else trend_period end;
 begin
 select ($$
     with tr_detail as (
         select *
         from chemtrend.trend_region
         where substance_id = '%3$s'
+        and trend_period = '%4$s'
         and regio_id in (
             (select region_id from chemtrend.region(%1$s,%2$s))
             union all
@@ -290,26 +327,26 @@ select ($$
         )
     )
     , tr_trends as (
-        select region_type, title, trend_label, color
+        select region_type, title, trend_label, color, trend_direction
         , json_agg(x_value order by x_value) as x_value
         , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
-        group by region_type, regio_id, trend_label, title, color
+        group by region_type, regio_id, trend_label, title, color, trend_direction
     )
     , tr_graph as (
-        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.x_value, tr.y_value_lowess) as x)) as locations
+        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.trend_direction, tr.x_value, tr.y_value_lowess) as x)) as locations
         from tr_trends tr
         group by region_type, title
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
     $$) into q;
-q := format(q, x, y, sid);
+q := format(q, x, y, sid, tp);
 return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend_region(5.019, 52.325,517);
--- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333);
+-- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333,0);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;

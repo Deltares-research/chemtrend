@@ -14,7 +14,7 @@
       </MapboxPopup>
     </mapbox-map>
     <div :class="(mapPanel ? 'point-layer-legend-container' : 'd-none')">
-      <point-layer-legend />
+      <point-layer-legend @legend-click="handleLegendClick" />
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
 import PointLayerLegend from '@/components/tabs/PointLayerLegend'
+import { visualizationComponents } from '@/utils/colors'
 
 const initialData = {
   type: 'FeatureCollection',
@@ -68,7 +69,8 @@ export default {
       popupItems: [],
       map: null,
       mapLocation: null,
-      regionsGeojson: {}
+      regionsGeojson: {},
+      locationsLayerIds: []
     }
   },
   components: {
@@ -79,6 +81,10 @@ export default {
     PointLayerLegend
   },
   watch: {
+    '$route.query.period' (val, oldVal) {
+      this.updateFilteredLocations()
+      this.checkSelection('locations')
+    },
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
       this.checkSelection('locations')
@@ -102,13 +108,43 @@ export default {
   methods: {
     ...mapActions(['addTrend']),
     initializeData () {
+      this.loadMapSymbols()
       this.addLocations()
-      this.addFilteredLocations()
+      this.addFilteredLayers()
       this.addRegions()
       this.interactionMap()
       this.addSelectionLayers()
       this.updateFilteredLocations()
       this.initializeMapWithLatLon()
+    },
+    handleLegendClick (layerId) {
+      const visibility = this.map.getLayoutProperty(layerId, 'visibility') || 'visible'
+      if (visibility === 'visible') {
+        this.map.setLayoutProperty(layerId, 'visibility', 'none')
+      } else {
+        this.map.setLayoutProperty(layerId, 'visibility', 'visible')
+      }
+    },
+    addFilteredLayers () {
+      Object.keys(visualizationComponents).forEach(direction => {
+        const layerId = this.addFilteredLayer(direction, visualizationComponents[direction].shape)
+        this.map.on('mouseenter', layerId, () => {
+          this.map.getCanvas().style.cursor = 'pointer'
+        })
+
+        this.map.on('mouseleave', layerId, () => {
+          this.map.getCanvas().style.cursor = ''
+        })
+        this.locationsLayerIds.push(layerId)
+      })
+    },
+    loadMapSymbols () {
+      Object.values(visualizationComponents).map(c => c.shape).forEach(shape => {
+        this.map.loadImage(`./img/icons/${shape}.png`, (error, image) => {
+          if (error) throw error
+          this.map.addImage(shape, image)
+        })
+      })
     },
     addLocations () {
       const name = 'locations'
@@ -189,21 +225,23 @@ export default {
         ]
       )
     },
-    addFilteredLocations () {
+    addFilteredLayer (trendDirection, shape) {
+      const layerId = `filtered-locations-${trendDirection}`
       this.map.addLayer({
-        id: 'filtered-locations',
-        type: 'circle',
+        id: layerId,
+        type: 'symbol',
         source: {
           type: 'geojson',
           data: initialData
         },
-        paint: {
-          'circle-color': ['get', 'color'],
-          'circle-stroke-color': '#000000',
-          'circle-stroke-width': 1,
-          'circle-radius': 5
-        }
+        layout: {
+          'icon-image': shape,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        },
+        filter: ['==', 'trend_direction', trendDirection]
       })
+      return layerId
     },
     addSelectionLayers () {
       this.map.addLayer({
@@ -223,22 +261,40 @@ export default {
     },
 
     updateFilteredLocations () {
-      if (_.get(this.$route, 'query.substance') && this.map.getSource('filtered-locations')) {
-        this.map.getSource('filtered-locations')
-          .setData(`${process.env.VUE_APP_SERVER_URL}/locations/${this.$route.query.substance}`)
-      }
-    },
-    updateRegion (lat, lng) {
-      const url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
-      if (this.map.getSource('selected-regions')) {
-        this.map.getSource('selected-regions')
-          .setData(url)
+      const substanceId = this.$route.query.substance || ''
+      let url = `${process.env.VUE_APP_SERVER_URL}/locations/${substanceId}`
+      const period = _.get(this.$route, 'query.period')
+      if (period) {
+        url += `?trend_period=${period}`
       }
       fetch(url)
         .then(res => {
           return res.json()
         })
         .then(response => {
+          this.locationsLayerIds.forEach(layerId => {
+            if (_.get(this.$route, 'query.substance') && this.map.getSource(layerId)) {
+              this.map.getSource(layerId)
+                .setData(response)
+            }
+          })
+        })
+    },
+    updateRegion (lat, lng) {
+      let url = `${process.env.VUE_APP_SERVER_URL}/regions/?x=${lng}&y=${lat}`
+      const period = _.get(this.$route, 'query.period')
+      if (period) {
+        url += `&trend_period=${period}`
+      }
+      fetch(url)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          if (this.map.getSource('selected-regions')) {
+            this.map.getSource('selected-regions')
+              .setData(response)
+          }
           this.regionsGeojson = response
         })
     },
@@ -288,9 +344,15 @@ export default {
       // TODO: check layers and their names, to make it consistent so you can just use shape here
       let layer = shape
       if (shape === 'locations') {
-        layer = 'filtered-locations'
+        // layer = 'filtered-locations'
+        layer = this.locationsLayerIds
+      } else {
+        layer = [layer]
       }
-      const features = this.map.queryRenderedFeatures(this.mapLocation.point, { layers: [layer] })
+      // changing the data from a period to another causes the projection to change
+      // to be safe, we recompute every time
+      const projectedCoordinates = this.map.project([this.mapLocation.lngLat.lng, this.mapLocation.lngLat.lat])
+      const features = this.map.queryRenderedFeatures(projectedCoordinates, { layers: layer })
       this.map.getSource(`selected-${shape}`)
         .setData({
           type: 'FeatureCollection',
@@ -302,10 +364,12 @@ export default {
         const y = feature._geometry.coordinates[1]
         const substanceId = parseInt(_.get(this.$route, 'query.substance'))
         const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
-        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location}`
+        const periodId = parseInt(_.get(this.$route, 'query.period', 0))
+        const periodName = _.get(this.$store.state, 'periods', []).find(p => p.id === periodId).name
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location} (${periodName})`
 
         if (substanceId) {
-          this.addTrend({ x, y, substanceId, name, currentLocation: location })
+          this.addTrend({ x, y, substanceId, name, currentLocation: location, periodId })
           this.$emit('update:bottomPanel', true)
         }
       })
