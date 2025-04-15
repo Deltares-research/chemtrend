@@ -57,9 +57,14 @@ where st_isempty(geometry)=false
 ;
 insert into public.regio (bron_id, regio_type_id, regio_omschrijving, geom, geom_rd)
 select waterbeheerder_id as bron_id, 6 as region_type_id, waterbeheerder_omschrijving as region_description
-, st_transform(q.geom,4326) as geom, q.geom as geom_rd
+, q.geom as geom, st_transform(q.geom,28992) as geom_rd
 from (
-    select st_union(geom) geom from import.krw_oppwl
+    select st_union(x.geom) as geom
+    from (
+        select geom from import.eez
+        union
+        select st_transform(st_union(geom),4326) geom from import.krw_oppwl
+    ) x
 ) q
 , (select * from public.waterbeheerder where waterbeheerder_code='80') wat
 ;
