@@ -11,7 +11,8 @@ export default createStore({
     panelTrigger: false,
     selectedColor: '#9f4a96',
     zoomTo: '',
-    disclaimerAcknowledged: false
+    disclaimerAcknowledged: false,
+    invisibleLayers: []
   },
   getters: {
     periods (state) {
@@ -109,6 +110,14 @@ export default createStore({
     },
     SET_DISCLAIMER_ACKNOWLEDGED (state, value) {
       state.disclaimerAcknowledged = value
+    },
+    TOOGLE_VISIBLE_LAYERS (state, layer) {
+      const index = state.invisibleLayers.indexOf(layer)
+      if (index === -1) {
+        state.invisibleLayers.push(layer)
+      } else {
+        state.invisibleLayers.splice(index, 1)
+      }
     }
   },
   actions: {
