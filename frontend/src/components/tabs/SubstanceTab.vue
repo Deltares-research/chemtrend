@@ -10,6 +10,7 @@
           v-model="period"
           class="mb-5 mt-2"
           mandatory
+          data-v-step="1"
           >
           <v-slide-group-item
             v-for="p in periods"
@@ -44,7 +45,7 @@
           item-title="substance_description"
           :return-object="true"
           v-model="substance"
-          data-v-step="1"
+          data-v-step="2"
         ></v-autocomplete>
       </v-row>
       <v-row>
@@ -52,7 +53,8 @@
       </v-row>
       <v-row
         v-for="reg in regions"
-        :key="reg.name">
+        :key="reg.name"
+        data-v-step="4">
         <v-switch
           v-model="region"
           :label="reg.name"
@@ -69,7 +71,7 @@
         <h1>  4. Kaartselectie </h1>
       </v-row>
       <v-row class="mb-3">
-        <point-layer-legend @legend-click="handleLegendClick" />
+        <point-layer-legend data-v-step="5" @legend-click="handleLegendClick" />
       </v-row>
     </v-col>
   </div>

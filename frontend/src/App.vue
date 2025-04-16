@@ -5,9 +5,9 @@
         <navigation-bar @toggle-drawer="toggleDrawer" data-v-step="0" />
         <div class="d-flex flex-column content">
           <v-navigation-drawer v-model="drawer" persistent temporary disable-route-watcher :scrim="false" width="360">
-            <navigation-drawer-tabs data-v-step="3" />
+            <navigation-drawer-tabs />
           </v-navigation-drawer>
-          <map-component v-model:bottomPanel="bottomPanel" v-model:mapPanel="mapPanel" :class="toggleMapPanel ()" data-v-step="2" />
+          <map-component v-model:bottomPanel="bottomPanel" v-model:mapPanel="mapPanel" :class="toggleMapPanel ()" data-v-step="3" />
           <bottom-panel
             :class="toggleBottomPanel()"
             :drawer="drawer"
@@ -68,13 +68,18 @@ export default {
       })
       this.$refs.tourManager.addStep({
         target: '[data-v-step="1"]',
+        content: 'Selecteer een trendperiod.',
+        params: { placement: 'right' }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="2"]',
         content: 'Selecteer een stof.',
         params: {
           placement: 'right'
         }
       })
       this.$refs.tourManager.addStep({
-        target: '[data-v-step="2"]',
+        target: '[data-v-step="3"]',
         content: 'Klik op een locatie.',
         params: {
           placement: 'top',
@@ -89,14 +94,21 @@ export default {
         }
       })
       this.$refs.tourManager.addStep({
-        target: '[data-v-step="3"]',
+        target: '[data-v-step="4"]',
         content: 'Selecteer een regio.',
         params: {
           placement: 'right'
         }
       })
       this.$refs.tourManager.addStep({
-        target: '[data-v-step="4"]',
+        target: '[data-v-step="5"]',
+        content: 'Selecteer in de legenda wat er op de kaart wordt weergegeven.',
+        params: {
+          placement: 'right'
+        }
+      })
+      this.$refs.tourManager.addStep({
+        target: '[data-v-step="6"]',
         content: 'Kijk hier voor meer informatie.',
         params: {
           placement: 'bottom'
