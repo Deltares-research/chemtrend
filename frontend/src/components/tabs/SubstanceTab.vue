@@ -65,6 +65,12 @@
         <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
         </v-btn>
       </v-row>
+      <v-row>
+        <h1>  4. Kaartselectie </h1>
+      </v-row>
+      <v-row class="mb-3">
+        <point-layer-legend @legend-click="handleLegendClick" />
+      </v-row>
     </v-col>
   </div>
 </template>
@@ -72,6 +78,7 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import _ from 'lodash'
+import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
 export default {
   data () {
@@ -79,10 +86,16 @@ export default {
       selectedSubstance: false
     }
   },
+  components: {
+    PointLayerLegend
+  },
   name: 'SubstanceTab',
   methods: {
-    ...mapMutations(['ZOOM_TO']),
-    ...mapActions(['loadPeriods', 'loadSubstances', 'loadRegions', 'loadFilteredLocations'])
+    ...mapMutations(['ZOOM_TO', 'TOOGLE_VISIBLE_LAYERS']),
+    ...mapActions(['loadPeriods', 'loadSubstances', 'loadRegions', 'loadFilteredLocations']),
+    handleLegendClick (layerId) {
+      this.TOOGLE_VISIBLE_LAYERS(layerId)
+    }
   },
   computed: {
     ...mapGetters(['periods', 'substances', 'regions']),
