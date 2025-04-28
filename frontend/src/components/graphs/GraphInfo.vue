@@ -9,13 +9,15 @@
     </template>
     <template v-slot:default="{ isActive }">
     <v-card>
-        <v-card-title class="text-h4">Informatie over de trendgrafieken</v-card-title>
+        <v-card-title class="text-h4" >Informatie over de trendgrafieken</v-card-title>
         <v-card-text>
-          <v-row class="mb-2">
-            <v-img
-              src="../../assets/graph_explaination.png"
-            ></v-img>
-          </v-row>
+            <v-row class="pb-10 pt-5" justify="center">
+              <v-img
+                src="../../assets/graph_explaination.png"
+                aspect-ratio="16/9"
+                max-width="85%"
+              ></v-img>
+            </v-row>
           <v-row v-for="(step, index) in infoSteps" :key="index" no-gutters class="mb-5">
             <v-col no-gutters cols="auto">
               <v-icon
