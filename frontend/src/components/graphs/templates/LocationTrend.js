@@ -69,7 +69,7 @@ export function LocationTemplate (trendData, selectedColor) {
     xAxis: {
       type: 'time',
       axisLabel: {
-        formatter: '{yyyy}',
+        formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
         showMaxLabel: true
       }
@@ -106,7 +106,7 @@ export function LocationTemplate (trendData, selectedColor) {
           symbol: ['none', 'none'],
           tooltip: {
             show: true,
-            formatter: params => `${params.data.name}  ${params.data.yAxis}`
+            formatter: params => `${params.data.xAxis}  ${params.data.yAxis}`
           }
         }
       },
