@@ -61,17 +61,24 @@
           :value="reg.name"
           :color="reg.color"
           hide-details
-          multiple
-        ></v-switch>
+          multiple></v-switch>
         <v-spacer/>
-        <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
-        </v-btn>
+        <v-tooltip text="Zoom naar deze regio" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-magnify"
+              flat size="x-small"
+              :readonly="!region.includes(reg.name)"
+              @click.stop="ZOOM_TO(reg.name)"
+              v-bind="props"></v-btn>
+          </template>
+        </v-tooltip>
       </v-row>
       <v-row>
         <h1>  4. Kaartselectie </h1>
       </v-row>
       <v-row class="mb-3">
-        <point-layer-legend data-v-step="5" @legend-click="handleLegendClick" />
+        <point-layer-legend data-v-step="5" @legend-click="handleLegendClick"></point-layer-legend>
       </v-row>
     </v-col>
   </div>
