@@ -147,6 +147,13 @@ export default {
       if (newPeriods.length > 0 && !this.period) {
         this.period = newPeriods[0].id
       }
+    },
+    '$route.query.substance' (newSubstance) {
+      if (newSubstance) {
+        this.selectedSubstance = true
+      } else {
+        this.selectedSubstance = false
+      }
     }
   },
   created () {
