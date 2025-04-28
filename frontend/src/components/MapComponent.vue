@@ -92,17 +92,9 @@ export default {
         this.zoomToRegion(val)
       }
     },
-    '$store.state.invisibleLayers': {
-      handler (invisibleLayers) {
-        (this.locationsLayerIds.concat('locations')).forEach(id => {
-          if (invisibleLayers.indexOf(id) > -1) {
-            this.map.setLayoutProperty(id, 'visibility', 'none')
-          } else {
-            this.map.setLayoutProperty(id, 'visibility', 'visible')
-          }
-        })
-      },
-      deep: true
+    '$store.state.invisibleLayer' (layer) {
+      const visibility = this.map.getLayoutProperty(layer, 'visibility')
+      this.map.setLayoutProperty(layer, 'visibility', (visibility === 'visible' || !visibility) ? 'none' : 'visible')
     }
   },
   mounted () {

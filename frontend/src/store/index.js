@@ -12,7 +12,7 @@ export default createStore({
     selectedColor: '#9f4a96',
     zoomTo: '',
     disclaimerAcknowledged: false,
-    invisibleLayers: []
+    invisibleLayer: null
   },
   getters: {
     periods (state) {
@@ -112,12 +112,8 @@ export default createStore({
       state.disclaimerAcknowledged = value
     },
     TOOGLE_VISIBLE_LAYERS (state, layer) {
-      const index = state.invisibleLayers.indexOf(layer)
-      if (index === -1) {
-        state.invisibleLayers.push(layer)
-      } else {
-        state.invisibleLayers.splice(index, 1)
-      }
+      state.invisibleLayer = null // ensures that change is taken into account in the map component
+      state.invisibleLayer = layer
     }
   },
   actions: {
