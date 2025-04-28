@@ -15,8 +15,12 @@
         </v-tooltip>
         <v-spacer></v-spacer>
         <v-dialog max-width="500">
-          <template v-slot:activator="{ props: activatorProps }">
-            <v-btn icon="mdi-delete-outline" v-bind="activatorProps"></v-btn>
+          <template v-slot:activator="{ props: dialog }">
+            <v-tooltip text="Verwijder alle trends" location="top">
+              <template v-slot:activator="{ props: tooltip }">
+                <v-btn icon="mdi-delete-outline" v-bind="mergeProps(dialog, tooltip)"></v-btn>
+              </template>
+            </v-tooltip>
           </template>
 
           <template v-slot:default="{ isActive }">
@@ -33,6 +37,7 @@
             </v-card>
           </template>
         </v-dialog>
+
         <v-tooltip  :text="mapPanel ? 'Verberg kaart' : 'Kaart weergeven'" location="top">
           <template #activator="{ props }">
             <v-btn
@@ -51,8 +56,8 @@
               :icon="bottomPanel ? 'mdi-arrow-expand-down' : 'mdi-arrow-expand-up'"
               v-bind="props">
             </v-btn>
-        </template>
-      </v-tooltip>
+          </template>
+        </v-tooltip>
       </v-toolbar>
       <v-card height="100%" class="bottom-panel" :max-height="mapPanel ? '50vh' : '83vh'">
         <v-card-text class="bottom-panel ma-0 pa-0">
@@ -68,6 +73,7 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
+import { mergeProps } from 'vue'
 
 export default {
   props: {
@@ -105,6 +111,7 @@ export default {
   },
   methods: {
     ...mapMutations(['CLEAR_TRENDS']),
+    mergeProps,
     writeNumberTrends () {
       return 'Trendresultaten ' + this.trends.length + '/10'
     }
