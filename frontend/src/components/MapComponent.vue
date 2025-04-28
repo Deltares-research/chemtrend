@@ -92,9 +92,12 @@ export default {
         this.zoomToRegion(val)
       }
     },
-    '$store.state.invisibleLayer' (layer) {
-      const visibility = this.map.getLayoutProperty(layer, 'visibility')
-      this.map.setLayoutProperty(layer, 'visibility', (visibility === 'visible' || !visibility) ? 'none' : 'visible')
+    '$store.state.invisibleLayer': {
+      handler (layer) {
+        const visibility = this.map.getLayoutProperty(layer, 'visibility')
+        this.map.setLayoutProperty(layer, 'visibility', (visibility === 'visible' || !visibility) ? 'none' : 'visible')
+      },
+      deep: true
     }
   },
   mounted () {
