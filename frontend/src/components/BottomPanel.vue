@@ -14,6 +14,9 @@
           <span>Er mogen maximaal 10 trends tegelijkertijd openstaan</span>
         </v-tooltip>
         <v-spacer></v-spacer>
+
+        <graph-info></graph-info>
+
         <v-dialog max-width="500">
           <template v-slot:activator="{ props: dialog }">
             <v-tooltip text="Verwijder alle trends" location="top">
@@ -22,7 +25,6 @@
               </template>
             </v-tooltip>
           </template>
-
           <template v-slot:default="{ isActive }">
             <v-card title="Verwijder alle trends">
               <v-card-text>
@@ -74,8 +76,12 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import { mergeProps } from 'vue'
+import GraphInfo from './graphs/GraphInfo'
 
 export default {
+  components: {
+    GraphInfo
+  },
   props: {
     drawer: {
       type: Boolean
