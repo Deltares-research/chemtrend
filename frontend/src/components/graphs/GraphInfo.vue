@@ -49,7 +49,8 @@
 </template>
 
 <script>
-import { mapGetters, mergeProps } from 'vuex'
+import { mapGetters } from 'vuex'
+import { mergeProps } from 'vue'
 import _ from 'lodash'
 
 const locationWarning = 'Let op: Er is geen locatie geselecteerd op de kaart, dus er worden geen grafieken weergegeven. Selecteer een stof aan de linkerkant van het scherm en klik op een locatie op de kaart om de bijbehorende grafieken te zien.'
