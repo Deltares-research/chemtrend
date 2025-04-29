@@ -34,7 +34,8 @@ export function LocationTemplate (trendData, selectedColor) {
         fontSize: 17
       },
       subtextStyle: {
-        fontSize: 12
+        fontSize: 12,
+        lineHeight: 18
       }
     },
     animation: false,
