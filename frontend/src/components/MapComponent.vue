@@ -153,7 +153,7 @@ export default {
           'circle-color': 'white',
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
-          'circle-radius': 5
+          'circle-radius': 4
         }
       }).on('load', () => {
         this.checkSelection(name)
@@ -249,7 +249,7 @@ export default {
           'circle-color': 'rgba(239, 239, 240, 0)',
           'circle-stroke-color': this.selectedColor,
           'circle-stroke-width': 3,
-          'circle-radius': 4
+          'circle-radius': 5
         }
       })
     },
