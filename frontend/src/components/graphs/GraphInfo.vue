@@ -30,6 +30,7 @@
               <v-col class="text-h6 ml-1 align-self-center">{{ step.title }}</v-col>
               <v-col cols="12">
                 <p v-for="(line, lineNumber) in step.description.split('\n')" :key="lineNumber">{{ line }}</p>
+                <p v-if="get(step, 'warningShow', false)" class="text-info">{{ get(step, 'warning', '') }}</p>
               </v-col>
             </v-row>
           </v-card-text>
@@ -45,16 +46,17 @@
 
 <script>
 import { mergeProps } from 'vue'
+import _ from 'lodash'
 
 export default {
   watch: {
-    mapComponentDimensions: {
-      handler (newValue) {
-        console.log(newValue)
-      }
-    },
-    deep: true,
-    eager: true
+    '$route.query.region': {
+      handler (newVal) {
+        this.infoSteps[4].warningShow = (_.isNil(newVal) || newVal === '')
+        this.infoSteps[5].warningShow = (_.isNil(newVal) || newVal === '')
+      },
+      eager: true
+    }
   },
   data () {
     return {
@@ -69,28 +71,32 @@ export default {
         2: {
           title: 'Titel meetlocatie',
           description: 'Titel bevat het stof en de locatiecode.\n' +
-            'Trendresultaat: significantie volgens de Seasonal Mann Kendall trendtest\n' +
-            'Trendhelling: helling over 10 jaar volgens de Theil-Sen hellingschatter'
+            'Trendresultaat: significantie volgens de Seasonal Mann Kendall trendtest.\n' +
+            'Trendhelling: helling over 10 jaar volgens de Theil-Sen hellingschatter.'
         },
         3: {
           title: 'Functieknoppen grafiek',
-          description: 'Zoom: Zoom in op te tonen periode (tijd-as)\n' +
-            'Zoom reset: Ga terug naar vorige zoomniveau\n' +
-            'Restore: Zoom uit naar volledige reeks\n' +
-            'Save as image: Sla de grafiek op (png-bestand)\n' +
-            'Data view: Bekijk de meetwaardentabel'
+          description: 'Zoom: Zoom in op te tonen periode (tijd-as).\n' +
+            'Zoom reset: Ga terug naar vorige zoomniveau.\n' +
+            'Restore: Zoom uit naar volledige reeks.\n' +
+            'Save as image: Sla de grafiek op (png-bestand).\n' +
+            'Data view: Bekijk de meetwaardentabel.'
         },
         4: {
           title: 'Legenda regio grafiek',
-          description: 'Trend van andere locaties binnen regio\n' +
-            'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: grijs\n' +
-            'Trend van geselecteerde locatie (pers)\n' +
-            '25-, 50-, en 75-percentielen van trendlijnen binnen de geselecteerde regio'
+          description: 'Trend van andere locaties binnen regio.\n' +
+            'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: grijs.\n' +
+            'Trend van geselecteerde locatie (paars).\n' +
+            '25-, 50-, en 75-percentielen van trendlijnen binnen de geselecteerde regio.',
+          warning: 'Let op: als er geen regio is geselecteerd, zet u de schakelaars voor een regio aan de linkerkant van het scherm aan.',
+          warningShow: true
         },
         5: {
           title: 'Titel regio',
           description: 'Titel bevat het stof en Regionaam.\n' +
-            'Kleur titel komt overeen met geselecteerde regio'
+            'Kleur titel komt overeen met geselecteerde regio.',
+          warning: 'Let op: als er geen regio is geselecteerd, zet u de schakelaars voor een regio aan de linkerkant van het scherm aan.',
+          warningShow: true
         },
         6: {
           title: 'Functieknoppen trendresultaten',
@@ -104,7 +110,10 @@ export default {
     }
   },
   methods: {
-    mergeProps
+    mergeProps,
+    get: function (object, path, defaultValue) {
+      return _.get(object, path, defaultValue)
+    }
   }
 }
 </script>
