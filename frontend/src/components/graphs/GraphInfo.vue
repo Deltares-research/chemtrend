@@ -12,13 +12,18 @@
       <v-card>
           <v-card-title class="text-h4" >Informatie over de trendgrafieken</v-card-title>
           <v-card-text>
-              <v-row class="pb-10 pt-5" justify="center">
-                <v-img
-                  src="../../assets/graph_explaination.png"
-                  aspect-ratio="16/9"
-                  max-width="85%"
-                ></v-img>
-              </v-row>
+            <v-row>
+              <v-col cols="12" v-for="(warning, i)  in activeWarnings" :key="i">
+                <p class="font-weight-bold text-info">{{ warning }}</p>
+              </v-col>
+            </v-row>
+            <v-row class="pb-10 pt-0" justify="center">
+              <v-img
+                src="../../assets/graph_explaination.png"
+                aspect-ratio="16/9"
+                max-width="85%"
+              ></v-img>
+            </v-row>
             <v-row v-for="(step, index) in infoSteps" :key="index" no-gutters class="mb-5">
               <v-col no-gutters cols="auto">
                 <v-icon
@@ -30,7 +35,6 @@
               <v-col class="text-h6 ml-1 align-self-center">{{ step.title }}</v-col>
               <v-col cols="12">
                 <p v-for="(line, lineNumber) in step.description.split('\n')" :key="lineNumber">{{ line }}</p>
-                <p v-if="get(step, 'warningShow', false)" class="text-info">{{ get(step, 'warning', '') }}</p>
               </v-col>
             </v-row>
           </v-card-text>
@@ -45,21 +49,29 @@
 </template>
 
 <script>
-import { mergeProps } from 'vue'
+import { mapGetters, mergeProps } from 'vuex'
 import _ from 'lodash'
 
+const locationWarning = 'Let op: Er is geen locatie geselecteerd op de kaart, dus er worden geen grafieken weergegeven. Selecteer een stof aan de linkerkant van het scherm en klik op een locatie op de kaart om de bijbehorende grafieken te zien.'
+const regionWarning = 'Let op: als er geen regio is geselecteerd, zet u de schakelaars voor een regio aan de linkerkant van het scherm aan. Meerdere regio\'s kunnen worden geselecteerd.'
+
 export default {
-  watch: {
-    '$route.query.region': {
-      handler (newVal) {
-        this.infoSteps[4].warningShow = (_.isNil(newVal) || newVal === '')
-        this.infoSteps[5].warningShow = (_.isNil(newVal) || newVal === '')
-      },
-      eager: true
+  computed: {
+    ...mapGetters(['trends']),
+    activeWarnings () {
+      const activeWarnings = []
+      if (_.isNil(this.trends) || this.trends.length === 0) {
+        activeWarnings.push(locationWarning)
+      }
+      if (_.isNil(this.$route.query.region) || this.$route.query.region === '') {
+        activeWarnings.push(regionWarning)
+      }
+      return activeWarnings
     }
   },
   data () {
     return {
+      warnings: [],
       infoSteps: {
         1: {
           title: 'Legenda meetlocatie grafiek',
@@ -87,33 +99,29 @@ export default {
           description: 'Trend van andere locaties binnen regio.\n' +
             'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: grijs.\n' +
             'Trend van geselecteerde locatie (paars).\n' +
-            '25-, 50-, en 75-percentielen van trendlijnen binnen de geselecteerde regio.',
-          warning: 'Let op: als er geen regio is geselecteerd, zet u de schakelaars voor een regio aan de linkerkant van het scherm aan.',
-          warningShow: true
+            '25-, 50-, en 75-percentielen van trendlijnen binnen de geselecteerde regio.'
         },
         5: {
           title: 'Titel regio',
           description: 'Titel bevat het stof en Regionaam.\n' +
-            'Kleur titel komt overeen met geselecteerde regio.',
-          warning: 'Let op: als er geen regio is geselecteerd, zet u de schakelaars voor een regio aan de linkerkant van het scherm aan.',
-          warningShow: true
+            'Kleur titel komt overeen met geselecteerde regio.'
         },
         6: {
           title: 'Functieknoppen trendresultaten',
-          description: 'lorel ipsum dolor sit amet, consectetur adipiscing elit.'
+          description: 'Verwijder alle trendgrafieken (max. is 10 zoekresultaten).\n' +
+            'Verberg/toon kaart en vergroot/verklein het grafieken paneel.\n' +
+            'Paneel uit-/samenvouwen om grafieken te verbergen/tonen.'
         },
         7: {
           title: 'Andere trendresultaten',
-          description: 'lorel ipsum dolor sit amet, consectetur adipiscing elit.'
+          description: 'Verwijder trendgrafiek.\n' +
+            'Trendgrafiek uit-/samenvouwen.'
         }
       }
     }
   },
   methods: {
-    mergeProps,
-    get: function (object, path, defaultValue) {
-      return _.get(object, path, defaultValue)
-    }
+    mergeProps
   }
 }
 </script>
