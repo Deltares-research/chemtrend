@@ -35,17 +35,16 @@
               <v-col class="text-h6 ml-1 align-self-center">{{ step.title }}</v-col>
               <v-col cols="12">
                 <v-row v-for="(item, itemIndex) in step.description" :key="itemIndex" no-gutters>
-                  <v-col cols="2" v-if="loadashGet(item, 'imageName')">
+                  <v-col class="image-width" v-if="loadashGet(item, 'imageName')">
                     <v-img
                       :src="`./infoSteps/${item.imageName}.png`"
                     ></v-img>
                   </v-col>
                   <v-col class="align-self-center">
-                    <v-icon v-if="loadashGet(item, 'iconName')" class="mb-2 mt-1">{{ item.iconName }}</v-icon>
+                    <v-icon v-for="(icon, iconIndex) in loadashGet(item, 'iconName', [])" :key="iconIndex" class="mb-2 mt-1">{{ icon }}</v-icon>
                     {{ item.text }}
                   </v-col>
                 </v-row>
-                <!-- <p v-for="(line, lineNumber) in step.description.split('\n')" :key="lineNumber">{{ line }}</p> -->
               </v-col>
             </v-row>
           </v-card-text>
@@ -96,31 +95,16 @@ export default {
               text: 'Trendlijnen voor gekozen trendperiode: Lowess methode (doorgetrokken lijn) en Theil Sen methode (gestippelde lijn).',
               imageName: 'trendlines'
             },
-            {
-              text: 'Lijnen zijn aan/uit te zetten door er op te klikken.',
-              imageName: ''
-            },
-            {
-              text: 'Waarde zichtbaar door over een meetpunt te bewegen.',
-              imageName: ''
-            }
+            { text: 'Lijnen zijn aan/uit te zetten door er op te klikken.' },
+            { text: 'Waarde zichtbaar door over een meetpunt te bewegen.' }
           ]
         },
         2: {
           title: 'Titel meetlocatie',
           description: [
-            {
-              text: 'Titel bevat het stof en de locatiecode.',
-              imageName: ''
-            },
-            {
-              text: 'Trendresultaat: significantie volgens de Seasonal Mann Kendall trendtest.',
-              imageName: ''
-            },
-            {
-              text: 'Trendhelling: helling over 10 jaar volgens de Theil-Sen hellingschatter.',
-              imageName: ''
-            }
+            { text: 'Titel bevat het stof en de locatiecode.' },
+            { text: 'Trendresultaat: significantie volgens de Seasonal Mann Kendall trendtest.' },
+            { text: 'Trendhelling: helling over 10 jaar volgens de Theil-Sen hellingschatter.' }
           ]
         },
         3: {
@@ -154,15 +138,15 @@ export default {
             { text: 'Trend van andere locaties binnen regio.' },
             {
               text: 'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: grijs.',
-              imageName: ''
+              imageName: 'trends'
             },
             {
               text: 'Trend van geselecteerde locatie (paars).',
-              imageName: ''
+              imageName: 'location_trend'
             },
             {
               text: '25-, 50-, en 75-percentielen van trendlijnen binnen de geselecteerde regio.',
-              imageName: ''
+              imageName: 'percentile_trends'
             }
           ]
         },
@@ -178,15 +162,15 @@ export default {
           description: [
             {
               text: 'Verwijder alle trendgrafieken (max. is 10 zoekresultaten).',
-              iconName: 'mdi-delete-outline'
+              iconName: ['mdi-delete-outline']
             },
             {
               text: 'Verberg/toon kaart en vergroot/verklein het grafieken paneel.',
-              iconName: 'mdi-earth'
+              iconName: ['mdi-earth', 'mdi-earth-off']
             },
             {
               text: 'Paneel uit-/samenvouwen om grafieken te verbergen/tonen.',
-              iconName: 'mdi-arrow-expand-up'
+              iconName: ['mdi-arrow-expand-up', 'mdi-arrow-expand-down']
             }
           ]
         },
@@ -195,11 +179,11 @@ export default {
           description: [
             {
               text: 'Verwijder trendgrafiek.',
-              iconName: 'mdi-delete'
+              iconName: ['mdi-delete']
             },
             {
               text: 'Trendgrafiek uit-/samenvouwen.',
-              iconName: 'mdi-chevron-up'
+              iconName: ['mdi-chevron-up', 'mdi-chevron-down']
             }
           ]
         }
@@ -214,3 +198,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+  .image-width {
+    max-width: 125px;;
+  }
+</style>
