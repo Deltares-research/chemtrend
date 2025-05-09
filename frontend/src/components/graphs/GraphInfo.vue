@@ -153,8 +153,10 @@ export default {
         5: {
           title: 'Titel regio',
           description: [
-            { text: 'Titel bevat het stof en Regionaam.' },
-            { text: 'Kleur titel komt overeen met geselecteerde regio.' }
+            {
+              text: 'Titel bevat het stof en Regionaam. Kleur titel komt overeen met geselecteerde regio.',
+              imageName: 'regional_color'
+            }
           ]
         },
         6: {
