@@ -47,7 +47,7 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
     xAxis: { 
       type: 'time',
       axisLabel: {
-        formatter: '{yyyy}',
+        formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
         showMaxLabel: true
       }

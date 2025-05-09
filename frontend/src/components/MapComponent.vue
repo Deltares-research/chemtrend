@@ -13,9 +13,6 @@
         <data-table :tableHeaders="popupHeaders" :tableItems="popupItems" @mb-close="popupItems=[]"></data-table>
       </MapboxPopup>
     </mapbox-map>
-    <div :class="(mapPanel ? 'point-layer-legend-container' : 'd-none')">
-      <point-layer-legend @legend-click="handleLegendClick" />
-    </div>
   </div>
 </template>
 
@@ -24,7 +21,6 @@ import { mapActions, mapGetters } from 'vuex'
 import { MapboxMap, MapboxNavigationControl, MapboxPopup } from '@studiometa/vue-mapbox-gl'
 import DataTable from '@/components/DataTable.vue'
 import _ from 'lodash'
-import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 import { visualizationComponents } from '@/utils/colors'
 
 const initialData = {
@@ -77,8 +73,7 @@ export default {
     MapboxMap,
     MapboxNavigationControl,
     MapboxPopup,
-    DataTable,
-    PointLayerLegend
+    DataTable
   },
   watch: {
     '$route.query.period' (val, oldVal) {
@@ -96,6 +91,13 @@ export default {
       if (val && this.mapLocation) {
         this.zoomToRegion(val)
       }
+    },
+    '$store.state.invisibleLayer': {
+      handler (layer) {
+        const visibility = this.map.getLayoutProperty(layer, 'visibility')
+        this.map.setLayoutProperty(layer, 'visibility', (visibility === 'visible' || !visibility) ? 'none' : 'visible')
+      },
+      deep: true
     }
   },
   mounted () {
@@ -116,14 +118,6 @@ export default {
       this.addSelectionLayers()
       this.updateFilteredLocations()
       this.initializeMapWithLatLon()
-    },
-    handleLegendClick (layerId) {
-      const visibility = this.map.getLayoutProperty(layerId, 'visibility') || 'visible'
-      if (visibility === 'visible') {
-        this.map.setLayoutProperty(layerId, 'visibility', 'none')
-      } else {
-        this.map.setLayoutProperty(layerId, 'visibility', 'visible')
-      }
     },
     addFilteredLayers () {
       Object.keys(visualizationComponents).forEach(direction => {
@@ -159,7 +153,7 @@ export default {
           'circle-color': 'white',
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
-          'circle-radius': 5
+          'circle-radius': 4
         }
       }).on('load', () => {
         this.checkSelection(name)
@@ -255,7 +249,7 @@ export default {
           'circle-color': 'rgba(239, 239, 240, 0)',
           'circle-stroke-color': this.selectedColor,
           'circle-stroke-width': 3,
-          'circle-radius': 4
+          'circle-radius': 5
         }
       })
     },
@@ -344,7 +338,6 @@ export default {
       // TODO: check layers and their names, to make it consistent so you can just use shape here
       let layer = shape
       if (shape === 'locations') {
-        // layer = 'filtered-locations'
         layer = this.locationsLayerIds
       } else {
         layer = [layer]
