@@ -11,7 +11,8 @@ export default createStore({
     panelTrigger: false,
     selectedColor: '#9f4a96',
     zoomTo: '',
-    disclaimerAcknowledged: false
+    disclaimerAcknowledged: false,
+    invisibleLayer: null
   },
   getters: {
     periods (state) {
@@ -109,6 +110,10 @@ export default createStore({
     },
     SET_DISCLAIMER_ACKNOWLEDGED (state, value) {
       state.disclaimerAcknowledged = value
+    },
+    TOOGLE_VISIBLE_LAYERS (state, layer) {
+      state.invisibleLayer = null // ensures that change is taken into account in the map component
+      state.invisibleLayer = layer
     }
   },
   actions: {

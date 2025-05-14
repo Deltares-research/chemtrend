@@ -10,6 +10,7 @@
           v-model="period"
           class="mb-5 mt-2"
           mandatory
+          data-v-step="1"
           >
           <v-slide-group-item
             v-for="p in periods"
@@ -44,7 +45,7 @@
           item-title="substance_description"
           :return-object="true"
           v-model="substance"
-          data-v-step="1"
+          data-v-step="2"
         ></v-autocomplete>
       </v-row>
       <v-row>
@@ -52,18 +53,32 @@
       </v-row>
       <v-row
         v-for="reg in regions"
-        :key="reg.name">
+        :key="reg.name"
+        data-v-step="4">
         <v-switch
           v-model="region"
           :label="reg.name"
           :value="reg.name"
           :color="reg.color"
           hide-details
-          multiple
-        ></v-switch>
+          multiple></v-switch>
         <v-spacer/>
-        <v-btn icon="mdi-magnify" flat size="x-small" :readonly="!region.includes(reg.name)" @click.stop="ZOOM_TO(reg.name)">
-        </v-btn>
+        <v-tooltip text="Zoom naar deze regio" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-magnify"
+              flat size="x-small"
+              :readonly="!region.includes(reg.name)"
+              @click.stop="ZOOM_TO(reg.name)"
+              v-bind="props"></v-btn>
+          </template>
+        </v-tooltip>
+      </v-row>
+      <v-row>
+        <h1>  4. Kaartselectie </h1>
+      </v-row>
+      <v-row class="mb-3">
+        <point-layer-legend data-v-step="5" @legend-click="handleLegendClick"></point-layer-legend>
       </v-row>
     </v-col>
   </div>
@@ -72,6 +87,7 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import _ from 'lodash'
+import PointLayerLegend from '@/components/tabs/PointLayerLegend'
 
 export default {
   data () {
@@ -79,10 +95,16 @@ export default {
       selectedSubstance: false
     }
   },
+  components: {
+    PointLayerLegend
+  },
   name: 'SubstanceTab',
   methods: {
-    ...mapMutations(['ZOOM_TO']),
-    ...mapActions(['loadPeriods', 'loadSubstances', 'loadRegions', 'loadFilteredLocations'])
+    ...mapMutations(['ZOOM_TO', 'TOOGLE_VISIBLE_LAYERS']),
+    ...mapActions(['loadPeriods', 'loadSubstances', 'loadRegions', 'loadFilteredLocations']),
+    handleLegendClick (layerId) {
+      this.TOOGLE_VISIBLE_LAYERS(layerId)
+    }
   },
   computed: {
     ...mapGetters(['periods', 'substances', 'regions']),
@@ -131,6 +153,13 @@ export default {
     periods (newPeriods) {
       if (newPeriods.length > 0 && !this.period) {
         this.period = newPeriods[0].id
+      }
+    },
+    '$route.query.substance' (newSubstance) {
+      if (newSubstance) {
+        this.selectedSubstance = true
+      } else {
+        this.selectedSubstance = false
       }
     }
   },
