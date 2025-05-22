@@ -57,7 +57,6 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
      },
     series: trendData.locations.map(loc => {
       const color = _.get(visualizationComponents[loc.trend_direction], 'color', visualizationComponents.downwards.color)
-      console.log('my trendData: ', trendData)
       let lineStyle = {
         color: color,
         opacity: 0.4

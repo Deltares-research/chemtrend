@@ -10,7 +10,7 @@
     </v-tabs>
 
     <v-card-text>
-      <v-tabs-window v-model="tab">
+      <v-tabs-window v-model="tab" class="overflow-visible">
 
         <v-tabs-window-item value="substances" class="tab-content">
           <substance-tab />
