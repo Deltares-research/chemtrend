@@ -19,7 +19,7 @@
             </v-row>
             <v-row class="pb-10 pt-0" justify="center">
               <v-img
-                src="../../assets/graph_explaination.png"
+                src="../../assets/graph_explanation.png"
                 aspect-ratio="16/9"
                 max-width="85%"
               ></v-img>
