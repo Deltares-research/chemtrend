@@ -76,7 +76,8 @@ export function LocationTemplate (trendData, selectedColor) {
       }
     },
     yAxis: {
-      type: 'value'
+      type: 'value',
+      name: `[${trendData.unit}]`
     },
     series: [
       {
