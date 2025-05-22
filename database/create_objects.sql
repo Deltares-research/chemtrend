@@ -180,16 +180,16 @@ select
     , tr.color
     , tr.trend_direction
     , tr.trend_period
---     , tr.
+    , tr.unit
 from (
     -- deel 1:
-    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
+    select regio_id, parameter_id, datum, lowess_p25 as y_value_lowess, 'p25'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period, null::varchar unit
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p50 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
+    select regio_id, parameter_id, datum, lowess_p50 as y_value_lowess, 'p50'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period, null::varchar unit
     from public.trend_regio
     union all
-    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period
+    select regio_id, parameter_id, datum, lowess_p75 as y_value_lowess, 'p75'::varchar as trend_label, 'black' as color, 'other' trend_direction, trend_period, null::varchar unit
     from public.trend_regio
     union all
     -- deel 2:
@@ -205,10 +205,12 @@ from (
         when -1 then 'downwards'
     end as trend_direction
     , trend_period
+    , eh.eenheid_code as unit
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
     join public.regio r on r.regio_id=lr.regio_id
+    join public.eenheid eh on eh.eenheid_id=tl.eenheid_id
 ) tr
 join chemtrend.substance s on s.substance_id=tr.parameter_id
 join public.regio r on r.regio_id=tr.regio_id
@@ -329,14 +331,14 @@ select ($$
         )
     )
     , tr_trends as (
-        select region_type, title, trend_label, color, trend_direction
+        select region_type, title, min(unit) as unit, trend_label, color, trend_direction
         , json_agg(x_value order by x_value) as x_value
         , json_agg(y_value_lowess order by x_value) as y_value_lowess
         from tr_detail
         group by region_type, regio_id, trend_label, title, color, trend_direction
     )
     , tr_graph as (
-        select region_type, title, json_agg((select x from (select tr.trend_label, tr.color, tr.trend_direction, tr.x_value, tr.y_value_lowess) as x)) as locations
+        select region_type, title, min(unit) unit, json_agg((select x from (select tr.trend_label, tr.color, tr.trend_direction, tr.x_value, tr.y_value_lowess) as x)) as locations
         from tr_trends tr
         group by region_type, title
     )
