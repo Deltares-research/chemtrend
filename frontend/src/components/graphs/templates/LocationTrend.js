@@ -42,7 +42,7 @@ export function LocationTemplate (trendData, selectedColor) {
     grid: {
       bottom: 60,
       right: 40,
-      left: 30,
+      left: 40,
       top: 50
     },
     tooltip: {

@@ -25,7 +25,7 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
     grid: {
       bottom: 60,
       right: 40,
-      left: 30,
+      left: 40,
       top: 30
     },
     tooltip: {
