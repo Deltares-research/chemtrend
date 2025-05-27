@@ -96,7 +96,7 @@ from (
     , 'Trendresultaat: '
           || case tr.trend_conclusie when -1 then 'trend neerwaarts' when 0 then 'geen trend' when 1 then 'trend opwaarts' else '' end
           || ' (p=' || round(tr.p_value_trend,4) || ')' as subtitle_1
-    , 'Trendhelling: ' || round(tr.ats_slope * 365 * 10,4) || ' ' || e.eenheid_code || ' per decennium' as subtitle_2
+    , 'Trendhelling: ' || round(tr.ats_slope * 365 * 10,4) || ' ' || replace(e.eenheid_code, 'ug/l', 'μg/l') || ' per decennium' as subtitle_2
     , 'datum' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
@@ -120,7 +120,7 @@ from (
         when -1 then 'downwards'
     end as trend_direction
     , trend_period
-    , e.eenheid_code as unit
+    , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit
     -- select *
     from (select * from public.trend_locatie
             union all
@@ -205,7 +205,7 @@ from (
         when -1 then 'downwards'
     end as trend_direction
     , trend_period
-    , eh.eenheid_code as unit
+    , replace(eh.eenheid_code, 'ug/l', 'μg/l') as unit
     from public.trend_locatie tl
     join public.locatie l on l.meetpunt_id=tl.meetpunt_id
     join public.locatie_regio lr on lr.meetpunt_id=tl.meetpunt_id
