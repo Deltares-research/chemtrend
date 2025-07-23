@@ -122,10 +122,7 @@ from (
     , trend_period
     , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit
     -- select *
-    from (select * from public.trend_locatie
-            union all
-            select * from voorbeelddata.trend_data_periode
-          ) tr
+    from (select * from public.trend_locatie) tr
     join chemtrend.substance s on s.substance_id=tr.parameter_id
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
