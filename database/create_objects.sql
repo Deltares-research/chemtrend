@@ -56,6 +56,7 @@ from (
     select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
     from public.trend_locatie tr
     group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
+--     TO DO: add measurement data here for 'notrend' data
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
@@ -278,7 +279,12 @@ declare sid text = substance_id;
 declare tp text = case trend_period when null then 0 else trend_period end;
 begin
 select ($$
-    with tr_detail as (
+    with tr_base as (
+        select * from chemtrend.trend
+        union all
+        select * from chemtrend.measurement
+    )
+    , tr_detail as (
         select *
         from chemtrend.trend
         where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
