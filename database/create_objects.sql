@@ -2,8 +2,9 @@ drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
 -- measurement data without trend data
-drop table if exists chemtrend.measurement_without_trend;
-select met.meetpunt_id, met.limietsymbool, met.waarden, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
+-- TO DO: consider whether this can be done without a table
+drop table if exists chemtrend.measurement_without_trend cascade;
+select met.meetpunt_id, met.limietsymbool, met.waarden, met.datum, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
 into chemtrend.measurement_without_trend
 from public.metingen met
 join public._metingen_zonder_trend mzt on mzt.meting_id=met.meting_id
@@ -25,6 +26,7 @@ SELECT p.parameter_id           AS substance_id,
        p."CAS" as cas
 FROM public.parameter p
          join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
+-- TO DO: ook parameters toevoegen voor meetdata waarvoor uberhaupt geen trends zijn? (voorlopig niet)
 where p."CAS" <> 'NVT'
 ;
 
@@ -37,6 +39,7 @@ select
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geometry, 4326) as geom
+-- into chemtrend.location
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 where st_isempty(l.geometry)=false
@@ -44,7 +47,7 @@ and (
 --     meetpunt has trends or location data (or both, but not no data)
     l.meetpunt_id in (select distinct meetpunt_id from public.trend_locatie)
     or
-    l.meetpunt_id in (select meetpunt_id from chemtrend.measurement_without_trend)
+    l.meetpunt_id in (select meetpunt_id from chemtrend.location_without_trend)
     )
 ;
 
@@ -60,7 +63,7 @@ select tr.meetpunt_id,l.location_code
      , '' as subtitle_2
      , 'datum' as x_label
      , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label -- TO DO: check occurence of multiple hoedanigheid (& compartiment?)
-     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
+     , tr.datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
      , case when tr.limietsymbool is null then true else false end as point_filled -- TO DO: check how to derive rapportagegrens from the raw data
      , tr.waarden as y_value_meting
      , null::decimal as y_value_lowess
