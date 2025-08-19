@@ -193,43 +193,6 @@ from public.metingen met
 where td.meetpunt_id is null  -- no trends for combination of location&parameter
 ;
 
--- create view with raw measurement data
-drop view if exists chemtrend.measurement cascade;
-create or replace view chemtrend.measurement as
-select tr.meetpunt_id,l.location_code
-     , s.substance_id, s.substance_code, s.substance_description
-     , 'meting' as category
-     , s.substance_description || ' ' || l.location_code as title
-     , 'Metingen zonder trend' as subtitle_1
-     , '' as subtitle_2
-     , 'datum' as x_label
-     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label -- TO DO: check occurence of multiple hoedanigheid (& compartiment?)
-     , datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
-     , case when tr.limietsymbool is null then true else false end as point_filled -- TO DO: check how to derive rapportagegrens from the raw data
-     , tr.waarden as y_value_meting
-     , null::decimal as y_value_lowess
-     , null::decimal y_value_theil_sen
-     , 'MKN' as h1_label
-     , null::numeric as h1_value -- TO DO
-     , 'MAC' as h2_label
-     , null::numeric as h2_value -- TO DO
-     , null as color
-     , 'notrend' as trend_direction
-     , 0 trend_period -- TO DO: duplicate raw measurement data per trend_period?
-     , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit -- TO DO: check occurence of other units
--- select *
-from (
-         -- all measurement data without trends for the combination location&parameter
-         select met.*
-         from public.metingen met
-                  join public._metingen_zonder_trend mzt on mzt.meting_id=met.meting_id
-     ) tr
-     join chemtrend.substance s on s.substance_id=tr.parameter_id
-     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
-     join public.eenheid e on e.eenheid_id=tr.eenheid_id
-     join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
-;
-
 -- indexes tbv meetdata
 create index ix_test1 on public.metingen(parameter_id, meetpunt_id);
 create index ix_test2 on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id);
