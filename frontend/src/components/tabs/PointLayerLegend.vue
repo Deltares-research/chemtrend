@@ -16,10 +16,15 @@
       <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
       <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >Geen significante trend</span>
     </div>
+    <div class="legend-item" @click="handleClick('filtered-locations-notrend')">
+      <span class="legend-color-notrend" :style="{ border: '1px solid #000000' }"></span>
+      <span :class="getLabelClass('filtered-locations-notrend')" class="legend-label" >Te weinig gegevens voor een trend</span>
+    </div>
   </div>
 </template>
 
 <script>
+import { visualizationComponents } from '../../utils/colors.js'
 export default {
   name: 'LocationsLegend',
   data () {
@@ -28,9 +33,15 @@ export default {
         locations: true,
         'filtered-locations-downwards': true,
         'filtered-locations-upwards': true,
-        'filtered-locations-inconclusive': true
+        'filtered-locations-inconclusive': true,
+        'filtered-locations-notrend': true
       }
     }
+  },
+  mounted () {
+    const legend = this.$el.closest('.map-legend') || this.$el
+    legend.style.setProperty('--inconclusive-color', visualizationComponents.inconclusive.color)
+    legend.style.setProperty('--notrend-color', visualizationComponents.notrend.color)
   },
   methods: {
     handleClick (type) {
@@ -87,8 +98,16 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: #dddddd;
+  background-color: var(--inconclusive-color, #dddddd);
   border-radius: 50%;
+  margin-left: 3px;
+}
+
+.legend-color-notrend {
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  background-color: var(--notrend-color);
   margin-left: 3px;
 }
 
