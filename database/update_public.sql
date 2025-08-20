@@ -171,6 +171,36 @@ create table public.trend_locatie (
     trend_period int
 );
 
+-- toevoegingen t.b.v. meetdata
+alter table public.metingen add meting_id serial;
+
+
+-- determine measurement data without trend
+-- all measurement data without trends for the combination location&parameter
+select met.meting_id
+into public._metingen_zonder_trend
+from public.metingen met
+         join (
+    -- used parameters
+    select distinct parameter_id from public.trend_locatie
+) as tp on tp.parameter_id=met.parameter_id -- parameter must occur (=scope of trend calculations)
+         left join (
+    -- all trend data: locations & parameters
+    select meetpunt_id, parameter_id, count(*) aantal
+    from public.trend_locatie tl
+    group by meetpunt_id, parameter_id
+) td on td.parameter_id=met.parameter_id and td.meetpunt_id=met.meetpunt_id
+where td.meetpunt_id is null  -- no trends for combination of location&parameter
+;
+
+-- indexes tbv meetdata
+create index ix_test1 on public.metingen(parameter_id, meetpunt_id);
+create index ix_test2 on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id);
+create index ix_test3 on public.trend_locatie(parameter_id);
+create index ix_test4 on public.trend_locatie(parameter_id, meetpunt_id, eenheid_id, hoedanigheid_id);
+create index ix_test5 on public._metingen_zonder_trend(meting_id);
+create index ix_test6 on public.metingen(meting_id);
+
 -- add index to locatie table
 create index if not exists ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_nieuw) include (geometry);
 

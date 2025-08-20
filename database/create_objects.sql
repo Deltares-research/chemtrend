@@ -1,6 +1,23 @@
 drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
+-- measurement data without trend data
+-- TO DO: consider whether this can be done without a table
+drop table if exists chemtrend.measurement_without_trend cascade;
+select met.meetpunt_id, met.limietsymbool, met.waarden, met.datum, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
+into chemtrend.measurement_without_trend
+from public.metingen met
+join public._metingen_zonder_trend mzt on mzt.meting_id=met.meting_id
+;
+
+-- locations with measurement data without trend
+drop table if exists chemtrend.location_without_trend;
+select meetpunt_id
+into chemtrend.location_without_trend
+from chemtrend.measurement_without_trend
+group by meetpunt_id
+;
+
 -- substances
 create or replace view chemtrend.substance(substance_id, substance_code, substance_description, cas) as
 SELECT p.parameter_id           AS substance_id,
@@ -8,7 +25,8 @@ SELECT p.parameter_id           AS substance_id,
        p.parameter_omschrijving AS substance_description,
        p."CAS" as cas
 FROM public.parameter p
-join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
+         join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
+-- TO DO: ook parameters toevoegen voor meetdata waarvoor uberhaupt geen trends zijn? (voorlopig niet)
 where p."CAS" <> 'NVT'
 ;
 
@@ -21,10 +39,53 @@ select
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geometry, 4326) as geom
+-- into chemtrend.location
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
-join (select distinct meetpunt_id from public.trend_locatie) tlm on tlm.meetpunt_id=l.meetpunt_id
-where st_isempty(l.geometry)=false;
+where st_isempty(l.geometry)=false
+and (
+--     meetpunt has trends or location data (or both, but not no data)
+    l.meetpunt_id in (select distinct meetpunt_id from public.trend_locatie)
+    or
+    l.meetpunt_id in (select meetpunt_id from chemtrend.location_without_trend)
+    )
+;
+
+
+-- create view with raw measurement data
+drop view if exists chemtrend.measurement cascade;
+create or replace view chemtrend.measurement as
+select tr.meetpunt_id,l.location_code
+     , s.substance_id, s.substance_code, s.substance_description
+     , 'meting' as category
+     , s.substance_description || ' ' || l.location_code as title
+     , 'Metingen zonder trend' as subtitle_1
+     , '' as subtitle_2
+     , 'datum' as x_label
+     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label -- TO DO: check occurence of multiple hoedanigheid (& compartiment?)
+     , tr.datum x_value -- NB dit is een datum, niet het aantal dagen, ja een datum object onder de motorkap het aantal dagen sinds 1970-01-01
+     , case when tr.limietsymbool is null then true else false end as point_filled -- TO DO: check how to derive rapportagegrens from the raw data
+     , tr.waarden as y_value_meting
+     , null::decimal as y_value_lowess
+     , null::decimal y_value_theil_sen
+     , 'MKN' as h1_label
+     , null::numeric as h1_value -- TO DO
+     , 'MAC' as h2_label
+     , null::numeric as h2_value -- TO DO
+     , null as color
+     , 'notrend' as trend_direction
+     , 0 trend_period -- TO DO: duplicate raw measurement data per trend_period?
+     , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit -- TO DO: check occurence of other units
+-- select *
+from (
+         -- all measurement data without trends for the combination location&parameter
+        select * from chemtrend.measurement_without_trend
+     ) tr
+         join chemtrend.substance s on s.substance_id=tr.parameter_id
+         join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
+         join public.eenheid e on e.eenheid_id=tr.eenheid_id
+         join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+;
 
 -- view with locations as geojson
 drop view if exists chemtrend.location_geojson cascade;
@@ -44,19 +105,26 @@ select l.location_code, tl.parameter_id as substance_id, s.substance_code
         when 1 then 'red'
         when 0 then 'grey'
         when -1 then 'green'
+        else 'yellow'
     end as color
 , l.geom
 , case trend_conclusie
         when 1 then 'upwards'
         when 0 then 'inconclusive'
         when -1 then 'downwards'
+        else 'notrend'
     end as trend_direction
 , trend_period
 from (
     select tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
     from public.trend_locatie tr
     group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
---     TO DO: add measurement data here for 'notrend' data
+    union all
+    -- add measurement data here for 'notrend' locations
+    select m.meetpunt_id, m.parameter_id, null::int trend_conclusie, 0 trend_period
+    --     TO DO: separate measurement data without trend per trend_period
+    from chemtrend.measurement_without_trend m
+    group by m.meetpunt_id, m.parameter_id
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
