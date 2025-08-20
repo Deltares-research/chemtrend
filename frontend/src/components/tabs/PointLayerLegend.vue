@@ -38,9 +38,8 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     const legend = this.$el.closest('.map-legend') || this.$el
-    
     legend.style.setProperty('--inconclusive-color', visualizationComponents.inconclusive.color)
     legend.style.setProperty('--notrend-color', visualizationComponents.notrend.color)
   },

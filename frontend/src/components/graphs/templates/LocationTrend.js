@@ -113,27 +113,31 @@ export function LocationTemplate (trendData, selectedColor) {
         }
       },
       createLagerDanRapportagegrens(zippedMetingData, selectedColor, trendData),
-      trendData.trend_direction !== 'notrend' ? {
-        name: 'Lowess',
-        type: 'line',
-        data: zip(trendData.x_value, trendData.y_value_lowess),
-        lineStyle: {
-          color: color
-        },
-        symbol: 'none',
-        itemStyle: { color: 'transparent' }
-      } : {},
-      trendData.trend_direction !== 'notrend' ? {
-        name: 'Theil Sen',
-        type: 'line',
-        data: zip(trendData.x_value, trendData.y_value_theil_sen),
-        lineStyle: {
-          color: '#FFA500',
-          type: 'dashed'
-        },
-        symbol: 'none',
-        itemStyle: { color: 'transparent' }
-      }: {}
+      trendData.trend_direction !== 'notrend'
+        ? {
+            name: 'Lowess',
+            type: 'line',
+            data: zip(trendData.x_value, trendData.y_value_lowess),
+            lineStyle: {
+              color: color
+            },
+            symbol: 'none',
+            itemStyle: { color: 'transparent' }
+          }
+        : {},
+      trendData.trend_direction !== 'notrend'
+        ? {
+            name: 'Theil Sen',
+            type: 'line',
+            data: zip(trendData.x_value, trendData.y_value_theil_sen),
+            lineStyle: {
+              color: '#FFA500',
+              type: 'dashed'
+            },
+            symbol: 'none',
+            itemStyle: { color: 'transparent' }
+          }
+        : {}
     ]
   }
 }
