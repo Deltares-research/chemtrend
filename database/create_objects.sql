@@ -354,7 +354,7 @@ select ($$
     )
     , tr_detail as (
         select *
-        from chemtrend.trend
+        from tr_base
         where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
         and substance_id = '%3$s'
         and trend_period = '%4$s'
