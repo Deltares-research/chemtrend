@@ -118,11 +118,11 @@ from (
     group by tr.meetpunt_id, tr.parameter_id, tr.trend_conclusie, trend_period
     union all
     -- add measurement data here for 'notrend' locations
-    select m.meetpunt_id, m.parameter_id, null::int trend_conclusie, 0 trend_period
-    --     TO DO: separate measurement data without trend per trend_period
+    select m.meetpunt_id, m.parameter_id, null::int trend_conclusie, tp.id as trend_period
     from public.metingen m
-    where trend=false
-    group by m.meetpunt_id, m.parameter_id
+    join chemtrend.trend_period tp on tp.start <= m.datum
+    where m.trend=false
+    group by m.meetpunt_id, m.parameter_id, tp.id
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
 join chemtrend.substance s on s.substance_id=tl.parameter_id
