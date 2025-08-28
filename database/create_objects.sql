@@ -4,9 +4,9 @@ create schema if not exists chemtrend;
 -- view that lists all trend periods:
 drop view if exists chemtrend.trend_period;
 create or replace view chemtrend.trend_period as
-select 0::int as id, 'Alle data' as name
+select 0::int as id, 'Alle data' as name, '01-01-1900'::date as start
 union all
-select 1::int as id, 'Vanaf 2009' as name
+select 1::int as id, 'Vanaf 2009' as name, '01-01-2009'::date as start
 ;
 
 -- locations with measurement data without trend
@@ -70,17 +70,18 @@ select tr.meetpunt_id,l.location_code
      , null::numeric as h2_value -- TO DO
      , null as color
      , 'notrend' as trend_direction
-     , 0 trend_period -- TO DO: duplicate raw measurement data per trend_period?
+     , tp.id as trend_period
      , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit -- TO DO: check occurence of other units
 -- select *
 from (
          -- all measurement data without trends for the combination location&parameter
         select * from public.metingen where trend=false
      ) tr
-         join chemtrend.substance s on s.substance_id=tr.parameter_id
-         join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
-         join public.eenheid e on e.eenheid_id=tr.eenheid_id
-         join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+join chemtrend.substance s on s.substance_id=tr.parameter_id
+join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
+join public.eenheid e on e.eenheid_id=tr.eenheid_id
+join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+join chemtrend.trend_period tp on tp.start <= tr.datum
 ;
 
 -- view with locations as geojson
