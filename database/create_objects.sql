@@ -1,14 +1,13 @@
 drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
--- measurement data without trend data
-
--- drop view if exists chemtrend.measurement_without_trend cascade;
--- create or replace view chemtrend.measurement_without_trend as
--- select met.meetpunt_id, met.limietsymbool, met.waarden, met.datum, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
--- from public.metingen met
--- where met.trend=False
--- ;
+-- view that lists all trend periods:
+drop view if exists chemtrend.trend_period;
+create or replace view chemtrend.trend_period as
+select 0::int as id, 'Alle data' as name
+union all
+select 1::int as id, 'Vanaf 2009' as name
+;
 
 -- locations with measurement data without trend
 drop view if exists chemtrend.location_without_trend cascade;
@@ -325,14 +324,6 @@ q := format(q, x, y, srid_xy, srid_rd);
 return query execute q;
 end
 $ff$ language plpgsql;
-
--- view that lists all trend periods:
-drop view if exists chemtrend.trend_period;
-create or replace view chemtrend.trend_period as
-select 0::int as id, 'Alle data' as name
-union all
-select 1::int as id, 'Vanaf 2009' as name
-;
 
 -- function that returns trend data based on a given location
 -- drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
