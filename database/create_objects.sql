@@ -2,19 +2,20 @@ drop schema if exists chemtrend cascade;
 create schema if not exists chemtrend;
 
 -- measurement data without trend data
--- TO DO: consider whether this can be done without a table
-drop table if exists chemtrend.measurement_without_trend cascade;
-select met.meetpunt_id, met.limietsymbool, met.waarden, met.datum, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
-into chemtrend.measurement_without_trend
-from public.metingen met
-join public._metingen_zonder_trend mzt on mzt.meting_id=met.meting_id
-;
+
+-- drop view if exists chemtrend.measurement_without_trend cascade;
+-- create or replace view chemtrend.measurement_without_trend as
+-- select met.meetpunt_id, met.limietsymbool, met.waarden, met.datum, met.parameter_id, met.eenheid_id, met.hoedanigheid_id
+-- from public.metingen met
+-- where met.trend=False
+-- ;
 
 -- locations with measurement data without trend
-drop table if exists chemtrend.location_without_trend;
+drop view if exists chemtrend.location_without_trend cascade;
+create or replace view chemtrend.location_without_trend as
 select meetpunt_id
-into chemtrend.location_without_trend
-from chemtrend.measurement_without_trend
+from public.metingen
+where trend=false
 group by meetpunt_id
 ;
 
@@ -43,12 +44,8 @@ select
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 where st_isempty(l.geometry)=false
-and (
---     meetpunt has trends or location data (or both, but not no data)
-    l.meetpunt_id in (select distinct meetpunt_id from public.trend_locatie)
-    or
-    l.meetpunt_id in (select meetpunt_id from chemtrend.location_without_trend)
-    )
+-- gebruik alleen locaties waarbij tenminste een trend of meting (zonder trend) bij is
+ and l.trend_of_meting=true
 ;
 
 
@@ -79,7 +76,7 @@ select tr.meetpunt_id,l.location_code
 -- select *
 from (
          -- all measurement data without trends for the combination location&parameter
-        select * from chemtrend.measurement_without_trend
+        select * from public.metingen where trend=false
      ) tr
          join chemtrend.substance s on s.substance_id=tr.parameter_id
          join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
@@ -123,7 +120,8 @@ from (
     -- add measurement data here for 'notrend' locations
     select m.meetpunt_id, m.parameter_id, null::int trend_conclusie, 0 trend_period
     --     TO DO: separate measurement data without trend per trend_period
-    from chemtrend.measurement_without_trend m
+    from public.metingen m
+    where trend=false
     group by m.meetpunt_id, m.parameter_id
 ) tl
 join chemtrend.location l on l.meetpunt_id=tl.meetpunt_id
