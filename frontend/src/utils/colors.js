@@ -8,7 +8,7 @@ export const visualizationComponents = {
   inconclusive: {
     color: '#E7DD87',
     shape: 'inconclusive_square',
-    name: 'Geen trend'
+    name: 'Geen significante trend'
   },
   upwards: {
     color: '#c26a77',
