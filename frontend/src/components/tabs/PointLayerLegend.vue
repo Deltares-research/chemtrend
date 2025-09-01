@@ -6,19 +6,19 @@
     </div>
     <div class="legend-item" @click="handleClick('filtered-locations-downwards')">
       <img src="./img/icons/downwards_triangle.png" alt="blue downwards triangle" class="legend-triangle" />
-      <span :class="getLabelClass('filtered-locations-downwards')" class="legend-label">Dalende trend</span>
+      <span :class="getLabelClass('filtered-locations-downwards')" class="legend-label">{{ visualizationComponents.downwards.name }}</span>
     </div>
     <div class="legend-item" @click="handleClick('filtered-locations-upwards')">
       <img src="./img/icons/upwards_triangle.png" alt="red  upwards triangle" class="legend-triangle" />
-      <span :class="getLabelClass('filtered-locations-upwards')" class="legend-label">Stijgende trend</span>
+      <span :class="getLabelClass('filtered-locations-upwards')" class="legend-label">{{ visualizationComponents.upwards.name }}</span>
     </div>
     <div class="legend-item" @click="handleClick('filtered-locations-inconclusive')">
       <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
-      <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >Geen significante trend</span>
+      <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >{{ visualizationComponents.inconclusive.name }}</span>
     </div>
     <div class="legend-item" @click="handleClick('filtered-locations-notrend')">
       <span class="legend-color-notrend" :style="{ border: '1px solid #000000' }"></span>
-      <span :class="getLabelClass('filtered-locations-notrend')" class="legend-label" >Te weinig gegevens voor een trend</span>
+      <span :class="getLabelClass('filtered-locations-notrend')" class="legend-label" >{{ visualizationComponents.notrend.name }}</span>
     </div>
   </div>
 </template>
@@ -35,13 +35,14 @@ export default {
         'filtered-locations-upwards': true,
         'filtered-locations-inconclusive': true,
         'filtered-locations-notrend': true
-      }
+      },
+      visualizationComponents: visualizationComponents // rendering it accessible in the HTML
     }
   },
   mounted () {
     const legend = this.$el.closest('.map-legend') || this.$el
-    legend.style.setProperty('--inconclusive-color', visualizationComponents.inconclusive.color)
-    legend.style.setProperty('--notrend-color', visualizationComponents.notrend.color)
+    legend.style.setProperty('--inconclusive-color', this.visualizationComponents.inconclusive.color)
+    legend.style.setProperty('--notrend-color', this.visualizationComponents.notrend.color)
   },
   methods: {
     handleClick (type) {
@@ -98,8 +99,7 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
-  background-color: var(--inconclusive-color, #dddddd);
-  border-radius: 50%;
+  background-color: var(--inconclusive-color);
   margin-left: 3px;
 }
 
@@ -107,6 +107,7 @@ export default {
   width: 10px;
   height: 10px;
   margin-right: 10px;
+  border-radius: 50%;
   background-color: var(--notrend-color);
   margin-left: 3px;
 }
