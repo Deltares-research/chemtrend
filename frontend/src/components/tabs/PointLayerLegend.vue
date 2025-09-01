@@ -1,25 +1,48 @@
 <template>
   <div class="map-legend">
-    <div class="legend-item" @click="handleClick('locations')">
-      <span class="legend-color-data-unselected" :style="{ border: '1px solid #000000' }"></span>
-      <span :class="getLabelClass('locations')" class="legend-label">Stof niet geselecteerd / Geen data beschikbaar</span>
-    </div>
-    <div class="legend-item" @click="handleClick('filtered-locations-downwards')">
-      <img src="./img/icons/downwards_triangle.png" alt="blue downwards triangle" class="legend-triangle" />
-      <span :class="getLabelClass('filtered-locations-downwards')" class="legend-label">{{ visualizationComponents.downwards.name }}</span>
-    </div>
-    <div class="legend-item" @click="handleClick('filtered-locations-upwards')">
-      <img src="./img/icons/upwards_triangle.png" alt="red  upwards triangle" class="legend-triangle" />
-      <span :class="getLabelClass('filtered-locations-upwards')" class="legend-label">{{ visualizationComponents.upwards.name }}</span>
-    </div>
-    <div class="legend-item" @click="handleClick('filtered-locations-inconclusive')">
-      <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
-      <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >{{ visualizationComponents.inconclusive.name }}</span>
-    </div>
-    <div class="legend-item" @click="handleClick('filtered-locations-notrend')">
-      <span class="legend-color-notrend" :style="{ border: '1px solid #000000' }"></span>
-      <span :class="getLabelClass('filtered-locations-notrend')" class="legend-label" >{{ visualizationComponents.notrend.name }}</span>
-    </div>
+    <v-tooltip width="400" text="Toont alle meetlocaties. Als een stof is geselecteerd en de cirkel wit blijft, betekent dit dat er geen meetgegevens beschikbaar zijn." location="top">
+      <template #activator="{ props }">
+        <div class="legend-item" v-bind="props" @click="handleClick('locations')">
+          <span class="legend-color-data-unselected" :style="{ border: '1px solid #000000' }"></span>
+          <span :class="getLabelClass('locations')" class="legend-label">Stof niet geselecteerd / Geen data beschikbaar</span>
+        </div>
+      </template>
+    </v-tooltip>
+    <v-tooltip text="Meetlocaties met een dalende trend." location="top">
+      <template #activator="{ props }">
+        <div class="legend-item" v-bind="props" @click="handleClick('filtered-locations-downwards')">
+          <img src="./img/icons/downwards_triangle.png" alt="blue downwards triangle" class="legend-triangle" />
+          <span :class="getLabelClass('filtered-locations-downwards')" class="legend-label">{{ visualizationComponents.downwards.name }}</span>
+        </div>
+      </template>
+    </v-tooltip>
+    <v-tooltip text="Meetlocaties met een stijgende trend." location="top">
+      <template #activator="{ props }">
+        <div class="legend-item" v-bind="props" @click="handleClick('filtered-locations-upwards')">
+          <img src="./img/icons/upwards_triangle.png" alt="red upwards triangle" class="legend-triangle" />
+          <span :class="getLabelClass('filtered-locations-upwards')" class="legend-label">{{ visualizationComponents.upwards.name }}</span>
+        </div>
+      </template>
+    </v-tooltip>
+    <v-tooltip text="Meetlocaties waarbij de trend niet significant is." location="bottom">
+      <template #activator="{ props }">
+        <div class="legend-item" v-bind="props" @click="handleClick('filtered-locations-inconclusive')">
+          <span class="legend-color-data-neutral" :style="{ border: '1px solid #000000' }"></span>
+          <span :class="getLabelClass('filtered-locations-inconclusive')" class="legend-label" >{{ visualizationComponents.inconclusive.name }}</span>
+        </div>
+      </template>
+    </v-tooltip>
+    <v-tooltip width="400" location="bottom">
+      <template #activator="{ props }">
+        <div class="legend-item" v-bind="props" @click="handleClick('filtered-locations-notrend')">
+          <span class="legend-color-notrend" :style="{ border: '1px solid #000000' }"></span>
+          <span :class="getLabelClass('filtered-locations-notrend')" class="legend-label" >{{ visualizationComponents.notrend.name }}</span>
+        </div>
+      </template>
+      <div>
+        <span> Meetlocaties waarbij er te weinig metingen zijn om een trend te berekenen. Raadpleeg het tabblad Informatie <v-icon>mdi-information</v-icon> voor de vereisten voor het berekenen van een trend.</span>
+      </div>
+    </v-tooltip>
   </div>
 </template>
 
