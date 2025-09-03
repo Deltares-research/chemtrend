@@ -19,7 +19,7 @@
             </v-row>
             <v-row class="pb-10 pt-0" justify="center">
               <v-img
-                src="../../assets/graph_explanation.png"
+                src="../../assets/graph_explanation_2.png"
                 aspect-ratio="16/9"
                 max-width="85%"
               ></v-img>
@@ -92,7 +92,7 @@ export default {
               imageName: 'location_circles'
             },
             {
-              text: 'Trendlijnen voor gekozen trendperiode: Lowess methode (doorgetrokken lijn) en Theil Sen methode (gestippelde lijn).',
+              text: 'Trendlijnen voor gekozen trendperiode: Lowess methode (doorgetrokken lijn) en Theil Sen methode (gestippelde lijn). Als er onvoldoende metingen zijn om een trend te berekenen (de locatiepunten zijn grijze cirkels op de kaart), dan zijn die twee lijnen niet beschikbaar.',
               imageName: 'trendlines'
             },
             { text: 'Lijnen zijn aan/uit te zetten door er op te klikken.' },
@@ -137,7 +137,7 @@ export default {
           description: [
             { text: 'Trend van andere locaties binnen regio.' },
             {
-              text: 'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: grijs.',
+              text: 'Kleur afgestemd op trendrichting: Stijgend: roodbruin; Dalend: lichtblauw; Niet significant: lichtgeel.',
               imageName: 'trends'
             },
             {

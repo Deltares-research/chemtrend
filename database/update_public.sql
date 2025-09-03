@@ -171,8 +171,43 @@ create table public.trend_locatie (
     trend_period int
 );
 
+-- toevoegingen t.b.v. meetdata
+alter table public.metingen add meting_id serial;
+
+-- determine measurement data without trend
+-- all measurement data without trends for the combination location&parameter
+select met.meting_id
+into public._metingen_zonder_trend
+from public.metingen met
+         join (
+    -- used parameters
+    select distinct parameter_id from public.trend_locatie
+) as tp on tp.parameter_id=met.parameter_id -- parameter must occur (=scope of trend calculations)
+         left join (
+    -- all trend data: locations & parameters
+    select meetpunt_id, parameter_id, count(*) aantal
+    from public.trend_locatie tl
+    group by meetpunt_id, parameter_id
+) td on td.parameter_id=met.parameter_id and td.meetpunt_id=met.meetpunt_id
+where td.meetpunt_id is null  -- no trends for combination of location&parameter
+;
+
+-- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie)
+alter table public.metingen add trend bool;
+update public.metingen set trend = False where meting_id in (select meting_id from public._metingen_zonder_trend);
+
+-- tbv performance: extra indicatie om aan te geven of de locatie tenminste een trend of een meting-zonder-trend heeft
+alter table public.locatie add trend_of_meting bool;
+update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.trend_locatie);
+update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.metingen where trend=false);
+
+-- indexes tbv meetdata
+create index ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
+create index ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
+
 -- add index to locatie table
-create index if not exists ix_locatie3 on public.locatie(meetpunt_id, meetpunt_code_nieuw) include (geometry);
+create index ix_locatie_geom on public.locatie using gist(geometry);
+create index if not exists ix_locatie_meetpunt on public.locatie(meetpunt_id, meetpunt_code_nieuw, trend_of_meting) include (geometry);
 
 -- extra indexes:
 create index if not exists ix_locatie_regio on public.locatie_regio(meetpunt_id, regio_id);

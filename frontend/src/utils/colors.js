@@ -1,9 +1,14 @@
 // order is important, because the last object will show on top of the map
 export const visualizationComponents = {
-  inconclusive: {
+  notrend: {
     color: '#dddddd',
-    shape: 'inconclusive_circle',
-    name: 'Geen Trend'
+    shape: 'notrend_circle',
+    name: 'Te weinig metingen voor een trend'
+  },
+  inconclusive: {
+    color: '#E7DD87',
+    shape: 'inconclusive_square',
+    name: 'Geen significante trend'
   },
   upwards: {
     color: '#c26a77',
