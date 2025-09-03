@@ -104,12 +104,12 @@ export default {
 }
 
 .legend-color-data-unselected {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin-right: 10px;
   background-color: white;
   border-radius: 50%;
-  margin-left: 3px;
+  margin-left: 5px;
 }
 
 .legend-triangle {

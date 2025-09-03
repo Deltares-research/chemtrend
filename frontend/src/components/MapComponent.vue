@@ -297,7 +297,9 @@ export default {
       const lng = _.get(this.$route, 'query.longitude')
       if (lat && lng) {
         this.map.fire('click', {
-          lngLat: { lat, lng }, originalEvent: { target: this.map }
+          lngLat: { lat, lng },
+          point: this.map.project([lng, lat]),
+          originalEvent: { target: this.map }
         })
       }
     },
