@@ -52,8 +52,10 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       axisLabel: {
         formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
-        showMaxLabel: true
-      }
+        showMaxLabel: true,
+        hideOverlap: true
+      },
+      minInterval: 60 * 60 * 24 * 30 * 1000 // one month in milliseconds
      },
     series: trendData.locations.map(loc => {
       const color = _.get(visualizationComponents[loc.trend_direction], 'color', visualizationComponents.downwards.color)
