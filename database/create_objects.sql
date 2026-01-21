@@ -39,6 +39,7 @@ select
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geometry, 4326) as geom
+    , zoutwatergebied
 -- into chemtrend.location
 from public.locatie l
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
@@ -64,10 +65,12 @@ select tr.meetpunt_id,l.location_code
      , tr.waarden as y_value_meting
      , null::decimal as y_value_lowess
      , null::decimal y_value_theil_sen
-     , 'MKN' as h1_label
-     , null::numeric as h1_value -- TO DO
-     , 'MAC' as h2_label
-     , null::numeric as h2_value -- TO DO
+     , np1.norm_type as h1_label
+     , np1.norm as h1_label_detail
+     , np1.waarde::numeric as h1_value
+     , np2.norm_type as h2_label
+     , np2.norm as h2_label_detail
+     , np2.waarde::numeric as h2_value
      , null as color
      , 'notrend' as trend_direction
      , tp.id as trend_period
@@ -82,6 +85,8 @@ join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
 join public.eenheid e on e.eenheid_id=tr.eenheid_id
 join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
 join chemtrend.trend_period tp on tp.start <= tr.datum
+left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zoutwatergebied and np1.norm_type='JG-MKN'
+left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zoutwatergebied and np2.norm_type='MAC-MKN'
 ;
 
 -- view with locations as geojson
@@ -152,7 +157,7 @@ $ff$ language plpgsql;
 -- from chemtrend.location_substance;
 
 -- view with trend data (to plot the measurements and trends)
-drop view if exists chemtrend.trend;
+drop view if exists chemtrend.trend cascade;
 create or replace view chemtrend.trend as
 select *
 from (
@@ -171,10 +176,12 @@ from (
     , tr.waarde_meting as y_value_meting
     , tr.lowline_y as y_value_lowess
     , tr.ats_y y_value_theil_sen
-    , 'MKN' as h1_label
-    , null::numeric as h1_value -- TO DO
-    , 'MAC' as h2_label
-    , null::numeric as h2_value -- TO DO
+     , np1.norm_type as h1_label
+     , np1.norm as h1_label_detail
+     , np1.waarde::numeric as h1_value
+     , np2.norm_type as h2_label
+     , np2.norm as h2_label_detail
+     , np2.waarde::numeric as h2_value
     , case tr.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
@@ -194,6 +201,8 @@ from (
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
     join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+    left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zoutwatergebied and np1.norm_type='JG-MKN'
+    left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zoutwatergebied and np2.norm_type='MAC-MKN'
 ) x
 ;
 

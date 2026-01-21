@@ -201,6 +201,52 @@ alter table public.locatie add trend_of_meting bool;
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.trend_locatie);
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.metingen where trend=false);
 
+-- corrigeer normwaarde
+update public.norm set waarde=replace(waarde, ',','.');
+
+-- relatie tussen normen en stoffen (parameter)
+drop view if exists public.norm_parameter cascade;
+create or replace view public.norm_parameter as
+select n.*, par.parameter_id
+    , row_number() over (partition by n.stofnaam, n.zoet, norm_type order by    -- NB desc sorteren, want false < true
+--         case when wt.saltwater=true then n.saltwater else n.freshwater end desc,
+         opgelost desc
+        , totaal desc
+        , mtr desc
+        , indicatief desc
+        , waterbeheerder desc, drinkwaterbedrijf desc, drinkwaterkwaliteitseis desc
+        )::int as norm_volgorde
+from (
+    select *
+    , case when compartiment like '%zoet%' then true else false end as zoet
+    , case when compartiment like '%zout%' then true else false end as zout
+    , case when norm ilike '%drinkwater%' then true else false end ::boolean drinkwaternorm
+    , case when norm ilike '%MTR%' then true else false end ::boolean mtr
+    , case when norm ilike '%indicatief%' then true else false end ::boolean indicatief
+    , case when norm ilike '%opgelost%' then true else false end ::boolean opgelost
+    , case when norm ilike '%totaal%' then true else false end ::boolean totaal
+    , case when norm ilike '%waterbeheerder%' then true else false end ::boolean waterbeheerder
+    , case when norm ilike '%drinkwaterbedrijf%' then true else false end ::boolean drinkwaterbedrijf
+    , case when norm ilike '%drinkwaterkwaliteitseis%' then true else false end ::boolean drinkwaterkwaliteitseis
+    , case  when norm like '%MAC-MKN%' then 'MAC-MKN'
+            when norm like '%JG-MKN%' or norm like '%MTR%' then 'JG-MKN'
+            when norm ilike '%drinkwater%' then 'drinkwater'
+            else 'overig'
+        end norm_type
+    from public.norm
+    where compartimentcode='OW'
+)n
+join public.parameter par on par.parameter_code=n.aquocode and par."CAS"=n.casnummer
+;
+
+-- gebruik zoutwatergebied-polygoon (obv immissietoets) om locaties te kenmerken als zoutwatergebied tbv norm
+create index if not exists ix_zoutwatergebied on public.zoutwatergebied using gist(geom);
+alter table public.locatie add column if not exists zoutwatergebied boolean;
+update public.locatie loc set zoutwatergebied=true
+from public.zoutwatergebied zwg
+where st_within(loc.geometry, st_transform(zwg.geom, 28992));
+update public.locatie set zoutwatergebied=false where zoutwatergebied is null;
+
 -- indexes tbv meetdata
 create index ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
 create index ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
@@ -216,7 +262,6 @@ create index if not exists ix_regio on public.regio(regio_type_id,regio_id, regi
 create index if not exists ix_trend_locatie on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id);
 create index if not exists ix_trend_regio on public.trend_regio(regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id);
 
-
 -- grant access
 GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
 alter table public.trend_locatie owner to waterkwaliteit_readonly;
@@ -224,4 +269,5 @@ alter table public.trend_regio owner to waterkwaliteit_readonly;
 alter table public.regio_type owner to waterkwaliteit_readonly;
 alter table public.regio owner to waterkwaliteit_readonly;
 alter table public.locatie_regio owner to waterkwaliteit_readonly;
+alter table public.norm owner to waterkwaliteit_readonly;
 
