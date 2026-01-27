@@ -89,7 +89,10 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
           endLabel: {
             show: true, // Show label on hover only
             formatter: loc.trend_label,
-            rotate: 75
+            position: 'inside'
+          },
+          lineStyle: {
+            color: '#575757'
           }
         },
         data: _.zip(loc.x_value, loc.y_value_lowess).map(([x, y]) => ({
