@@ -10,7 +10,8 @@ export function LocationTemplate (trendData, selectedColor) {
       yAxis: trendData.h1_value,
       name: trendData.h1_label,
       label: {
-        formatter: params => params.data.name
+        formatter: params => params.data.name,
+        position: 'insideEndTop'
       }
     })
   }
@@ -19,7 +20,8 @@ export function LocationTemplate (trendData, selectedColor) {
       yAxis: trendData.h2_value,
       name: trendData.h2_label,
       label: {
-        formatter: params => params.data.name
+        formatter: params => params.data.name,
+        position: 'insideEndTop'
       }
     })
   }
