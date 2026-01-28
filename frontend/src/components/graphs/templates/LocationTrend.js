@@ -12,6 +12,10 @@ export function LocationTemplate (trendData, selectedColor) {
       label: {
         formatter: params => params.data.name,
         position: 'insideEndTop'
+      },
+      tooltip: {
+        show: true,
+        formatter: _ => `${trendData.h1_label_detail}: ${trendData.h1_value} ${trendData.unit}`
       }
     })
   }
@@ -22,6 +26,10 @@ export function LocationTemplate (trendData, selectedColor) {
       label: {
         formatter: params => params.data.name,
         position: 'insideEndTop'
+      },
+      tooltip: {
+        show: true,
+        formatter: _ => `${trendData.h2_label_detail}: ${trendData.h2_value} ${trendData.unit}`
       }
     })
   }
@@ -107,11 +115,7 @@ export function LocationTemplate (trendData, selectedColor) {
           lineStyle: {
             color: '#373737'
           },
-          symbol: ['none', 'none'],
-          tooltip: {
-            show: true,
-            formatter: params => `${params.data.xAxis}  ${params.data.yAxis}`
-          }
+          symbol: ['none', 'none']
         }
       },
       createLagerDanRapportagegrens(zippedMetingData, selectedColor, trendData),
