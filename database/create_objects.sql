@@ -359,14 +359,14 @@ select ($$
         and trend_period = '%4$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction, unit
+        select title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         , json_agg(point_filled order by x_value) point_filled
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction, unit
+        group by title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
