@@ -240,13 +240,26 @@ join public.parameter par on par.parameter_code=n.aquocode and par."CAS"=n.casnu
 left join public.eenheid e on e.eenheid_code=replace(n.eenheid, 'µg/l', 'ug/l')
 ;
 
--- gebruik zoutwatergebied-polygoon (obv immissietoets) om locaties te kenmerken als zoutwatergebied tbv norm
-create index if not exists ix_zoutwatergebied on public.zoutwatergebied using gist(geom);
-alter table public.locatie add column if not exists zoutwatergebied boolean;
-update public.locatie loc set zoutwatergebied=true
-from public.zoutwatergebied zwg
-where st_within(loc.geometry, st_transform(zwg.geom, 28992));
-update public.locatie set zoutwatergebied=false where zoutwatergebied is null;
+drop table if exists public.norm_aquokit;
+select *
+into public.norm_aquokit
+from (
+    select 'ps_zoet' as bron, * from import.normen_ps_zoet
+    union all
+    select 'ps_zout' as bron, * from import.normen_ps_zout
+    union all
+    select 'svs_zoet' as bron, * from import.normen_svs_zoet
+    union all
+    select 'svs_zout' as bron, * from import.normen_svs_zout
+) q;
+
+-- gebruik krw_watertype om locaties te typeren als zoet/zout
+alter table public.locatie add column if not exists krw_watertype_id int references public.krw_watertype(id);
+create index if not exists ix_krw_wl on public."KRW_waterlichaam" using gist(geometry);
+update public.locatie loc set krw_watertype_id=kwt.id
+from public.krw_watertype kwt
+join public."KRW_waterlichaam" kwl on kwl."waterlichaam_KRWtype_code"=kwt.code
+where st_within(loc.geometry, kwl.geometry);
 
 -- indexes tbv meetdata
 create index ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
