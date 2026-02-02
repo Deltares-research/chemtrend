@@ -207,7 +207,7 @@ update public.norm set waarde=replace(waarde, ',','.');
 -- relatie tussen normen en stoffen (parameter)
 drop view if exists public.norm_parameter cascade;
 create or replace view public.norm_parameter as
-select n.*, par.parameter_id
+select n.*, par.parameter_id, e.eenheid_id
     , row_number() over (partition by n.stofnaam, n.zoet, norm_type order by    -- NB desc sorteren, want false < true
 --         case when wt.saltwater=true then n.saltwater else n.freshwater end desc,
          opgelost desc
@@ -237,6 +237,7 @@ from (
     where compartimentcode='OW'
 )n
 join public.parameter par on par.parameter_code=n.aquocode and par."CAS"=n.casnummer
+left join public.eenheid e on e.eenheid_code=replace(n.eenheid, 'µg/l', 'ug/l')
 ;
 
 -- gebruik zoutwatergebied-polygoon (obv immissietoets) om locaties te kenmerken als zoutwatergebied tbv norm
