@@ -41,6 +41,7 @@ select
     st_transform(l.geometry, 4326) as geom
     , kwt.groep as zoet_zout
     , case when kwt.groep='zout' then true when kwt.groep='zoet' then false end zout
+    , kwt.code krw_watertype
 -- into chemtrend.location
 from public.locatie l
 left join public.krw_watertype kwt on kwt.id=l.krw_watertype_id
@@ -87,8 +88,12 @@ join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
 join public.eenheid e on e.eenheid_id=tr.eenheid_id
 join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
 join chemtrend.trend_period tp on tp.start <= tr.datum
-left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
-left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout
+    and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
+    and np1.bijzondere_norm=false and NOT (l.krw_watertype = any(np1.verberg_jg_voor_krwtype))
+left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout
+    and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+    and np2.bijzondere_norm=false and NOT (l.krw_watertype = any(np2.verberg_mac_voor_krwtype))
 ;
 
 -- view with locations as geojson
@@ -203,8 +208,12 @@ from (
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
     join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
-    left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
-    left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+    left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout
+        and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
+        and np1.bijzondere_norm=false and NOT (l.krw_watertype = any(np1.verberg_jg_voor_krwtype))
+    left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout
+        and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+        and np2.bijzondere_norm=false and NOT (l.krw_watertype = any(np2.verberg_mac_voor_krwtype))
 ) x
 ;
 

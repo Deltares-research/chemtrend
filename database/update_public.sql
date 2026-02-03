@@ -216,6 +216,12 @@ select n.*, par.parameter_id, e.eenheid_id
         , indicatief desc
         , waterbeheerder desc, drinkwaterbedrijf desc, drinkwaterkwaliteitseis desc
         )::int as norm_volgorde
+    -- o.b.v. normen Aquokit, deze uitzonderingen kenmerken:
+    -- Voor 6 stoffen: altijd norm weglaten: Cd,Cu,NH4,Ni,Pb,Zn
+    -- Voor 5 stoffen: norm weglaten igv M30/M31: As,B,Sn,U,V
+    , case when par.parameter_code in ('Cd','Cu','NH4','Ni','Pb','Zn') then true else false end bijzondere_norm
+    , case when par.parameter_code in ('As','B','Sn','U','V') then array['M30','M31'] end verberg_JG_voor_krwtype
+    , case when par.parameter_code in ('As','B','Ba','Co','Hg','Mo','Ni','Pb','Sb','Se','Sn','U','Zn') then array['M30','M31'] end verberg_MAC_voor_krwtype
 from (
     select *
     , case when compartiment like '%zoet%' then true else false end as zoet
