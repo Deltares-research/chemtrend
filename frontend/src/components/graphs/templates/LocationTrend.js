@@ -71,7 +71,7 @@ export function LocationTemplate (trendData, selectedColor) {
     },
     legend: {
       show: true,
-      bottom: 0,
+      bottom: 5,
       lineStyle: {
         symbol: 'none'
       },
@@ -82,8 +82,7 @@ export function LocationTemplate (trendData, selectedColor) {
       axisLabel: {
         formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
-        showMaxLabel: true,
-        rotate: 30
+        showMaxLabel: true
       }
     },
     yAxis: {
