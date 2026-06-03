@@ -61,7 +61,8 @@
               <p>
                 In de grafiek per locatie worden normlijnen getoond voor JG-MKN en MAC-MKN. Deze normen zijn afkomstig van RIVM.
                 Normlijnen zijn weggelaten wanneer sprake kan zijn van uitzonderingen waarbij meer parameters (zoals pH, saliniteit) tot een afwijkende norn kunnen leiden.
-              <h4 class="mt-4 font-italic">Nuttige links naar andere webviewers</h4>
+              </p>
+                <h4 class="mt-4 font-italic">Nuttige links naar andere webviewers</h4>
               <ul>
                 <li><a href="https://krw-nutrend.netlify.app" target="_blank">krw-nutrend.netlify.app</a>: Voor nutriënten (stikstof, fosfor en DIN) wordt voor verschillende toetsjaren de toestand, trends, concentraties, en afstand tot de norm(doelgat) getoond voor de KRW-waterlichamen in Nederland.</li>
                 <li><a href="https://www.bestrijdingsmiddelenatlas.nl" target="_blank">www.bestrijdingsmiddelenatlas.nl</a>: Voor een uitgebreide lijst van bestrijdingsmiddelen is in diverse kaartlagen de mate van overschrijding per stof, landgebruik en jaar weergegeven.</li>
