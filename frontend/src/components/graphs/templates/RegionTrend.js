@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { visualizationComponents } from '@/utils/colors'
 
-/* eslint-disable */
 export function RegionTemplate (trendData, titleColor, selectedColor, currentLocation) {
   return {
     title: {
@@ -28,10 +27,6 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       left: 40,
       top: 30
     },
-    tooltip: {
-      show: true,
-      trigger: 'item',
-    },
     toolbox: {
       right: 10,
       feature: {
@@ -47,14 +42,14 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       type: 'value',
       name: `[${trendData.unit}]`
     },
-    xAxis: { 
+    xAxis: {
       type: 'time',
       axisLabel: {
         formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
         showMaxLabel: true
       }
-     },
+    },
     series: trendData.locations.map(loc => {
       const color = _.get(visualizationComponents[loc.trend_direction], 'color', visualizationComponents.downwards.color)
       let lineStyle = {
@@ -87,7 +82,22 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       return {
         name: name,
         type: 'line',
-        data: _.zip.apply(_, [loc.x_value, loc.y_value_lowess]),
+        endLabel: {
+          show: false
+        },
+        emphasis: {
+          endLabel: {
+            show: true, // Show label on hover only
+            formatter: loc.trend_label,
+            position: 'inside'
+          },
+          lineStyle: {
+            color: '#575757'
+          }
+        },
+        data: _.zip(loc.x_value, loc.y_value_lowess).map(([x, y]) => ({
+          value: [x, y]
+        })),
         symbol: 'none',
         lineStyle
       }

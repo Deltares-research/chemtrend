@@ -72,8 +72,10 @@ export function LocationTemplate (trendData, selectedColor) {
       axisLabel: {
         formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
-        showMaxLabel: true
-      }
+        showMaxLabel: true,
+        hideOverlap: true
+      },
+      minInterval: 60 * 60 * 24 * 30 * 1000 // one month in milliseconds
     },
     yAxis: {
       type: 'value',
