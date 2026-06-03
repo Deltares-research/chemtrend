@@ -52,7 +52,8 @@ export function RegionTemplate (trendData, titleColor, selectedColor, currentLoc
       axisLabel: {
         formatter: '{MMM}-{yyyy}',
         showMinLabel: true,
-        showMaxLabel: true
+        showMaxLabel: true,
+        rotate: 30
       }
      },
     series: trendData.locations.map(loc => {
