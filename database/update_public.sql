@@ -171,6 +171,9 @@ create table public.trend_locatie (
     trend_period int
 );
 
+------------------------ HIER: TREND-DATA IMPORTEREN -----------------------------
+------------------------ draai hiervoor "import_trend_data.sql" ------------------
+
 -- toevoegingen t.b.v. meetdata
 alter table public.metingen add meting_id serial;
 

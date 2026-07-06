@@ -57,7 +57,7 @@ from (
     -- select count(*) --969857 --> 966941
     select *, 1::int as trend_period from import."03B_data_trend_ats_info_vanaf_2009"
 )imp
-join public.locatie l on l.meetpunt_code_nieuw=imp.meetpunt_code_2023
+join public.locatie l on l.meetpunt_code_nieuw=imp.meetpunt_code_nieuw
 join public.parameter p on p.parameter_code=imp.parameter_code
 join public.eenheid e on e.eenheid_code=imp.eenheid_code
 join public.hoedanigheid h on h.hoedanigheid_code=imp.hoedanigheid_code
