@@ -176,6 +176,7 @@ alter table public.metingen add meting_id serial;
 
 -- determine measurement data without trend
 -- all measurement data without trends for the combination location&parameter
+drop table if exists public._metingen_zonder_trend;
 select met.meting_id
 into public._metingen_zonder_trend
 from public.metingen met
@@ -268,11 +269,11 @@ join public."KRW_waterlichaam" kwl on kwl."waterlichaam_KRWtype_code"=kwt.code
 where st_within(loc.geometry, kwl.geometry);
 
 -- indexes tbv meetdata
-create index ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
-create index ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
+create index if not exists ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
+create index if not exists ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
 
 -- add index to locatie table
-create index ix_locatie_geom on public.locatie using gist(geometry);
+create index if not exists ix_locatie_geom on public.locatie using gist(geometry);
 create index if not exists ix_locatie_meetpunt on public.locatie(meetpunt_id, meetpunt_code_nieuw, trend_of_meting) include (geometry);
 
 -- extra indexes:
