@@ -198,10 +198,12 @@ where td.meetpunt_id is null  -- no trends for combination of location&parameter
 
 -- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie)
 alter table public.metingen add trend bool;
+update public.metingen set trend = Null;    -- reset
 update public.metingen set trend = False where meting_id in (select meting_id from public._metingen_zonder_trend);
 
 -- tbv performance: extra indicatie om aan te geven of de locatie tenminste een trend of een meting-zonder-trend heeft
 alter table public.locatie add trend_of_meting bool;
+update public.locatie set trend_of_meting = null;   -- reset
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.trend_locatie);
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.metingen where trend=false);
 
