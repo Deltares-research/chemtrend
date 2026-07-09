@@ -258,11 +258,11 @@ drop table if exists public._metingen_zonder_trend;
 select met.meting_id
 into public._metingen_zonder_trend
 from public.metingen met
-         join (
+join (
     -- used parameters
-    select distinct parameter_id from public.trend_locatie
+    select parameter_id from public.parameter where chemtrend=true
 ) as tp on tp.parameter_id=met.parameter_id -- parameter must occur (=scope of trend calculations)
-         left join (
+left join (
     -- all trend data: locations & parameters
     select meetpunt_id, parameter_id, count(*) aantal
     from public.trend_locatie tl
@@ -271,9 +271,11 @@ from public.metingen met
 where td.meetpunt_id is null  -- no trends for combination of location&parameter
 ;
 
--- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie)
+-- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie):
+-- NB: parameter nvt? -> trend=null
 alter table public.metingen add if not exists trend bool;
-update public.metingen set trend = Null;    -- reset
+-- update public.metingen set trend=null;   --repair
+update public.metingen set trend = true where parameter_id in (select parameter_id from public.parameter where chemtrend=true);    -- reset
 update public.metingen set trend = False where meting_id in (select meting_id from public._metingen_zonder_trend);
 
 -- tbv performance: extra indicatie om aan te geven of de locatie tenminste een trend of een meting-zonder-trend heeft
