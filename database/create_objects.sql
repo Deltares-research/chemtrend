@@ -25,9 +25,8 @@ SELECT p.parameter_id           AS substance_id,
        p.parameter_omschrijving AS substance_description,
        p."CAS" as cas
 FROM public.parameter p
-         join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
--- TO DO: ook parameters toevoegen voor meetdata waarvoor uberhaupt geen trends zijn? (voorlopig niet)
-where p."CAS" <> 'NVT'
+where p.chemtrend=true
+-- and p."CAS" <> 'NVT'
 ;
 
 -- locations:
