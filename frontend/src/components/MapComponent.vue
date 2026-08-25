@@ -2,10 +2,10 @@
   <div class='map'>
     <div class='location-select-overlay'>
       <v-autocomplete
-        :items="Object.keys(locationsMapping)"
+        :items="autocompleteItems"
         label="Selecteer een meetpuntcode om naar te zoomen"
         v-model="selectedLocation"
-        :disabled="!Object.keys(locationsMapping).length"
+        :disabled="!hasLocations"
         compact
         bg-color="white"
       ></v-autocomplete>
@@ -78,6 +78,8 @@ export default {
       regionsGeojson: {},
       locationsLayerIds: [],
       locationsMapping: {},
+      // locations with data for the currently selected substance/period
+      activeLocationCodes: new Set(),
       selectedLocation: null
     }
   },
@@ -146,7 +148,18 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor'])
+    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor']),
+    hasLocations () {
+      return Object.keys(this.locationsMapping).length > 0
+    },
+    autocompleteItems () {
+      return Object.keys(this.locationsMapping).map(code => ({
+        title: code,
+        value: code,
+        // Vuetify only honors item-level disabled state via the item-props 'props' object
+        props: { disabled: !this.activeLocationCodes.has(code) }
+      }))
+    }
   },
   methods: {
     ...mapActions(['addTrend']),
@@ -319,6 +332,8 @@ export default {
           return res.json()
         })
         .then(response => {
+          // the two endpoints use different property names (meetpuntcode vs location_code) for the same code
+          this.activeLocationCodes = new Set((response.features || []).map(f => f.properties.location_code || f.properties.meetpuntcode))
           this.locationsLayerIds.forEach(layerId => {
             if (_.get(this.$route, 'query.substance') && this.map.getSource(layerId)) {
               this.map.getSource(layerId)
