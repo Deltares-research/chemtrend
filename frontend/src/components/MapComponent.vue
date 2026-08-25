@@ -138,6 +138,7 @@ export default {
           features: [feature]
         })
       this.showTrend(lng, lat, val)
+      this.updateRegion(lat, lng)
     }
   },
   mounted () {
