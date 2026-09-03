@@ -82,6 +82,7 @@ from (
          -- all measurement data without trends for the combination location&parameter
         select * from public.metingen where trend=false
      ) tr
+join public.kwaliteitsoordeel k on k.kwaliteitsoordeel_id=tr.kwaliteitsoordeel_id
 join chemtrend.substance s on s.substance_id=tr.parameter_id
 join public.parameter p on p.parameter_id=tr.parameter_id
 join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
@@ -96,6 +97,7 @@ left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.n
 left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout
     and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
     and np2.bijzondere_norm=false and NOT (l.krw_watertype = any(np2.verberg_mac_voor_krwtype))
+where (kwaliteitsoordeel_code::int <= 50 or kwaliteitsoordeel_code::int=91)
 ;
 
 -- view with locations as geojson
