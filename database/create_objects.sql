@@ -83,9 +83,12 @@ from (
         select * from public.metingen where trend=false
      ) tr
 join chemtrend.substance s on s.substance_id=tr.parameter_id
+join public.parameter p on p.parameter_id=tr.parameter_id
 join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
 join public.eenheid e on e.eenheid_id=tr.eenheid_id
 join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+--     gebruik alleen de 'standaard' hoedanigheid van een parameter
+    and h.hoedanigheid_id=p.hoedanigheid_id
 join chemtrend.trend_period tp on tp.start <= tr.datum
 left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout
     and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
