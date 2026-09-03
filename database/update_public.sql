@@ -1,5 +1,6 @@
 -- voeg kenmerk toe aan parametertabel voor stoffen die getoond moeten worden in chemtrend:
 alter table public.parameter add column if not exists chemtrend bool;
+alter table public.parameter add column if not exists hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id);
 update public.parameter set chemtrend = false; -- reset
 update public.parameter p
 set chemtrend=true, hoedanigheid_id=h.hoedanigheid_id
