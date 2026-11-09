@@ -1,3 +1,14 @@
+-- voeg kenmerk toe aan parametertabel voor stoffen die getoond moeten worden in chemtrend:
+alter table public.parameter add column if not exists chemtrend bool;
+alter table public.parameter add column if not exists hoedanigheid_id int references public.hoedanigheid(hoedanigheid_id);
+update public.parameter set chemtrend = false; -- reset
+update public.parameter p
+set chemtrend=true, hoedanigheid_id=h.hoedanigheid_id
+from import.stof_hoedanigheid sh
+join public.hoedanigheid h on h.hoedanigheid_code=sh.hoedanigheid_code
+where sh.parameter_code=p.parameter_code
+;
+
 -- regio type (tbv tabel regio)
 drop table if exists public.regio_type cascade;
 create table if not exists public.regio_type(
@@ -171,19 +182,23 @@ create table public.trend_locatie (
     trend_period int
 );
 
+------------------------ HIER: TREND-DATA IMPORTEREN -----------------------------
+------------------------ draai hiervoor "import_trend_data.sql" ------------------
+
 -- toevoegingen t.b.v. meetdata
-alter table public.metingen add meting_id serial;
+alter table public.metingen add if not exists meting_id serial;
 
 -- determine measurement data without trend
 -- all measurement data without trends for the combination location&parameter
+drop table if exists public._metingen_zonder_trend;
 select met.meting_id
 into public._metingen_zonder_trend
 from public.metingen met
-         join (
+join (
     -- used parameters
-    select distinct parameter_id from public.trend_locatie
+    select parameter_id from public.parameter where chemtrend=true
 ) as tp on tp.parameter_id=met.parameter_id -- parameter must occur (=scope of trend calculations)
-         left join (
+left join (
     -- all trend data: locations & parameters
     select meetpunt_id, parameter_id, count(*) aantal
     from public.trend_locatie tl
@@ -192,21 +207,91 @@ from public.metingen met
 where td.meetpunt_id is null  -- no trends for combination of location&parameter
 ;
 
--- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie)
-alter table public.metingen add trend bool;
+-- tbv performance: extra indicatie om aan te geven of er metingen zonder trends zijn (voor dezelfde combinaties van parameter en locatie):
+-- NB: parameter nvt? -> trend=null
+alter table public.metingen add if not exists trend bool;
+-- update public.metingen set trend=null;   --repair
+update public.metingen set trend = true where parameter_id in (select parameter_id from public.parameter where chemtrend=true);    -- reset
 update public.metingen set trend = False where meting_id in (select meting_id from public._metingen_zonder_trend);
 
 -- tbv performance: extra indicatie om aan te geven of de locatie tenminste een trend of een meting-zonder-trend heeft
-alter table public.locatie add trend_of_meting bool;
+alter table public.locatie add if not exists trend_of_meting bool;
+update public.locatie set trend_of_meting = null;   -- reset
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.trend_locatie);
 update public.locatie set trend_of_meting = true where meetpunt_id in (select distinct meetpunt_id from public.metingen where trend=false);
 
+-- corrigeer normwaarde
+update public.norm set waarde=replace(waarde, ',','.');
+
+-- relatie tussen normen en stoffen (parameter)
+drop view if exists public.norm_parameter cascade;
+create or replace view public.norm_parameter as
+select n.*, par.parameter_id, e.eenheid_id
+    , row_number() over (partition by n.stofnaam, n.zoet, norm_type order by    -- NB desc sorteren, want false < true
+--         case when wt.saltwater=true then n.saltwater else n.freshwater end desc,
+         opgelost desc
+        , totaal desc
+        , mtr desc
+        , indicatief desc
+        , waterbeheerder desc, drinkwaterbedrijf desc, drinkwaterkwaliteitseis desc
+        )::int as norm_volgorde
+    -- o.b.v. normen Aquokit, deze uitzonderingen kenmerken:
+    -- Voor 6 stoffen: altijd norm weglaten: Cd,Cu,NH4,Ni,Pb,Zn
+    -- Voor 5 stoffen: norm weglaten igv M30/M31: As,B,Sn,U,V
+    , case when par.parameter_code in ('Cd','Cu','NH4','Ni','Pb','Zn') then true else false end bijzondere_norm
+    , case when par.parameter_code in ('As','B','Sn','U','V') then array['M30','M31'] end verberg_JG_voor_krwtype
+    , case when par.parameter_code in ('As','B','Ba','Co','Hg','Mo','Ni','Pb','Sb','Se','Sn','U','Zn') then array['M30','M31'] end verberg_MAC_voor_krwtype
+from (
+    select *
+    , case when compartiment like '%zoet%' then true else false end as zoet
+    , case when compartiment like '%zout%' then true else false end as zout
+    , case when norm ilike '%drinkwater%' then true else false end ::boolean drinkwaternorm
+    , case when norm ilike '%MTR%' then true else false end ::boolean mtr
+    , case when norm ilike '%indicatief%' then true else false end ::boolean indicatief
+    , case when norm ilike '%opgelost%' then true else false end ::boolean opgelost
+    , case when norm ilike '%totaal%' then true else false end ::boolean totaal
+    , case when norm ilike '%waterbeheerder%' then true else false end ::boolean waterbeheerder
+    , case when norm ilike '%drinkwaterbedrijf%' then true else false end ::boolean drinkwaterbedrijf
+    , case when norm ilike '%drinkwaterkwaliteitseis%' then true else false end ::boolean drinkwaterkwaliteitseis
+    , case  when norm like '%MAC-MKN%' then 'MAC-MKN'
+            when norm like '%JG-MKN%' or norm like '%MTR%' then 'JG-MKN'
+            when norm ilike '%drinkwater%' then 'drinkwater'
+            else 'overig'
+        end norm_type
+    from public.norm
+    where compartimentcode='OW'
+)n
+join public.parameter par on par.parameter_code=n.aquocode and par."CAS"=n.casnummer
+left join public.eenheid e on e.eenheid_code=replace(n.eenheid, 'µg/l', 'ug/l')
+;
+
+drop table if exists public.norm_aquokit;
+select *
+into public.norm_aquokit
+from (
+    select 'ps_zoet' as bron, * from import.normen_ps_zoet
+    union all
+    select 'ps_zout' as bron, * from import.normen_ps_zout
+    union all
+    select 'svs_zoet' as bron, * from import.normen_svs_zoet
+    union all
+    select 'svs_zout' as bron, * from import.normen_svs_zout
+) q;
+
+-- gebruik krw_watertype om locaties te typeren als zoet/zout
+alter table public.locatie add column if not exists krw_watertype_id int references public.krw_watertype(id);
+create index if not exists ix_krw_wl on public."KRW_waterlichaam" using gist(geometry);
+update public.locatie loc set krw_watertype_id=kwt.id
+from public.krw_watertype kwt
+join public."KRW_waterlichaam" kwl on kwl."waterlichaam_KRWtype_code"=kwt.code
+where st_within(loc.geometry, kwl.geometry);
+
 -- indexes tbv meetdata
-create index ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
-create index ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
+create index if not exists ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
+create index if not exists ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
 
 -- add index to locatie table
-create index ix_locatie_geom on public.locatie using gist(geometry);
+create index if not exists ix_locatie_geom on public.locatie using gist(geometry);
 create index if not exists ix_locatie_meetpunt on public.locatie(meetpunt_id, meetpunt_code_nieuw, trend_of_meting) include (geometry);
 
 -- extra indexes:
@@ -216,7 +301,6 @@ create index if not exists ix_regio on public.regio(regio_type_id,regio_id, regi
 create index if not exists ix_trend_locatie on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id);
 create index if not exists ix_trend_regio on public.trend_regio(regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id);
 
-
 -- grant access
 GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
 alter table public.trend_locatie owner to waterkwaliteit_readonly;
@@ -224,4 +308,5 @@ alter table public.trend_regio owner to waterkwaliteit_readonly;
 alter table public.regio_type owner to waterkwaliteit_readonly;
 alter table public.regio owner to waterkwaliteit_readonly;
 alter table public.locatie_regio owner to waterkwaliteit_readonly;
+alter table public.norm owner to waterkwaliteit_readonly;
 

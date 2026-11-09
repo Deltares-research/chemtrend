@@ -25,9 +25,8 @@ SELECT p.parameter_id           AS substance_id,
        p.parameter_omschrijving AS substance_description,
        p."CAS" as cas
 FROM public.parameter p
-         join (select distinct parameter_id from public.trend_locatie) tlp on tlp.parameter_id=p.parameter_id
--- TO DO: ook parameters toevoegen voor meetdata waarvoor uberhaupt geen trends zijn? (voorlopig niet)
-where p."CAS" <> 'NVT'
+where p.chemtrend=true
+-- and p."CAS" <> 'NVT'
 ;
 
 -- locations:
@@ -39,8 +38,12 @@ select
     l.meetpunt_omschrijving as omschrijving,
     w.waterbeheerder_omschrijving as waterbeheerder,
     st_transform(l.geometry, 4326) as geom
+    , kwt.groep as zoet_zout
+    , case when kwt.groep='zout' then true when kwt.groep='zoet' then false end zout
+    , kwt.code krw_watertype
 -- into chemtrend.location
 from public.locatie l
+left join public.krw_watertype kwt on kwt.id=l.krw_watertype_id
 left join public.waterbeheerder w on w.waterbeheerder_id=l.waterbeheerder_id
 where st_isempty(l.geometry)=false
 -- gebruik alleen locaties waarbij tenminste een trend of meting (zonder trend) bij is
@@ -64,10 +67,12 @@ select tr.meetpunt_id,l.location_code
      , tr.waarden as y_value_meting
      , null::decimal as y_value_lowess
      , null::decimal y_value_theil_sen
-     , 'MKN' as h1_label
-     , null::numeric as h1_value -- TO DO
-     , 'MAC' as h2_label
-     , null::numeric as h2_value -- TO DO
+     , np1.norm_type as h1_label
+     , np1.norm as h1_label_detail
+     , np1.waarde::numeric as h1_value
+     , np2.norm_type as h2_label
+     , np2.norm as h2_label_detail
+     , np2.waarde::numeric as h2_value
      , null as color
      , 'notrend' as trend_direction
      , tp.id as trend_period
@@ -77,11 +82,22 @@ from (
          -- all measurement data without trends for the combination location&parameter
         select * from public.metingen where trend=false
      ) tr
+join public.kwaliteitsoordeel k on k.kwaliteitsoordeel_id=tr.kwaliteitsoordeel_id
 join chemtrend.substance s on s.substance_id=tr.parameter_id
+join public.parameter p on p.parameter_id=tr.parameter_id
 join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
 join public.eenheid e on e.eenheid_id=tr.eenheid_id
 join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+--     gebruik alleen de 'standaard' hoedanigheid van een parameter
+    and h.hoedanigheid_id=p.hoedanigheid_id
 join chemtrend.trend_period tp on tp.start <= tr.datum
+left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout
+    and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
+    and np1.bijzondere_norm=false and NOT (l.krw_watertype = any(np1.verberg_jg_voor_krwtype))
+left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout
+    and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+    and np2.bijzondere_norm=false and NOT (l.krw_watertype = any(np2.verberg_mac_voor_krwtype))
+where (k.kwaliteitsoordeel_code::int <= 50 or k.kwaliteitsoordeel_code::int=91)
 ;
 
 -- view with locations as geojson
@@ -152,7 +168,7 @@ $ff$ language plpgsql;
 -- from chemtrend.location_substance;
 
 -- view with trend data (to plot the measurements and trends)
-drop view if exists chemtrend.trend;
+drop view if exists chemtrend.trend cascade;
 create or replace view chemtrend.trend as
 select *
 from (
@@ -171,10 +187,12 @@ from (
     , tr.waarde_meting as y_value_meting
     , tr.lowline_y as y_value_lowess
     , tr.ats_y y_value_theil_sen
-    , 'MKN' as h1_label
-    , null::numeric as h1_value -- TO DO
-    , 'MAC' as h2_label
-    , null::numeric as h2_value -- TO DO
+     , np1.norm_type as h1_label
+     , np1.norm as h1_label_detail
+     , np1.waarde::numeric as h1_value
+     , np2.norm_type as h2_label
+     , np2.norm as h2_label_detail
+     , np2.waarde::numeric as h2_value
     , case tr.trend_conclusie
         when 1 then 'red'
         when 0 then 'grey'
@@ -194,6 +212,14 @@ from (
     join chemtrend.location l on l.meetpunt_id=tr.meetpunt_id
     join public.eenheid e on e.eenheid_id=tr.eenheid_id
     join public.hoedanigheid h on h.hoedanigheid_id=tr.hoedanigheid_id
+    join public.kwaliteitsoordeel k on k.kwaliteitsoordeel_id=tr.kwaliteitsoordeel_id
+    left join public.norm_parameter np1 on np1.parameter_id=s.substance_id and np1.norm_volgorde=1 and np1.zout=l.zout
+        and np1.norm_type='JG-MKN' and np1.eenheid_id=e.eenheid_id
+        and np1.bijzondere_norm=false and NOT (l.krw_watertype = any(np1.verberg_jg_voor_krwtype))
+    left join public.norm_parameter np2 on np2.parameter_id=s.substance_id and np2.norm_volgorde=1 and np2.zout=l.zout
+        and np2.norm_type='MAC-MKN' and np2.eenheid_id=e.eenheid_id
+        and np2.bijzondere_norm=false and NOT (l.krw_watertype = any(np2.verberg_mac_voor_krwtype))
+    where (k.kwaliteitsoordeel_code::int <= 50 or k.kwaliteitsoordeel_code::int=91)
 ) x
 ;
 
@@ -350,14 +376,14 @@ select ($$
         and trend_period = '%4$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction, unit
+        select title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         , json_agg(point_filled order by x_value) point_filled
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_value, h2_label, h2_value, color, trend_direction, unit
+        group by title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
     )
     select json_agg(trg.*) as graph
     from tr_graph trg
