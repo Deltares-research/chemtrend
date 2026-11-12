@@ -286,6 +286,95 @@ from public.krw_watertype kwt
 join public."KRW_waterlichaam" kwl on kwl."waterlichaam_KRWtype_code"=kwt.code
 where st_within(loc.geometry, kwl.geometry);
 
+-- maak tabel krw_toetsresultaten en vul deze
+drop table if exists public.krw_toetsresultaten;
+create table if not exists public.krw_toetsresultaten (
+	rapportagejaar integer,
+	meetjaar integer,
+	waterbeheerdercode text,
+	waterbeheerdernaam text,
+	meetobjectnamespace text,
+	meetobjectlokaalid text,
+	meetobjectcode text,
+	monsteridentificatie text,
+	monsterlokaalid text,
+	begindatum text,
+	begintijd text,
+	einddatum text,
+	eindtijd text,
+	typeringcode text,
+	typeringomschrijving text,
+	grootheidcode text,
+	grootheidomschrijving text,
+	parametercode text,
+	parameteromschrijving text,
+	parametercasnummer text,
+	biotaxonnaam text,
+	biotaxonnaam_nederlands text,
+	eenheidcode text,
+	eenheidomschrijving text,
+	hoedanigheidcode text,
+	hoedanigheidomschrijving text,
+	levensstadiumcode text,
+	levensstadiumomschrijving text,
+	lengteklassecode text,
+	lengteklasseomschrijving text,
+	geslachtcode text,
+	geslachtomschrijving text,
+	verschijningsvormcode text,
+	verschijningsvormomschrijving text,
+	levensvormcode text,
+	levensvormomschrijving text,
+	gedragcode text,
+	gedragomschrijving text,
+	analysecompartimentcode text,
+	analysecompartimentomschrijving text,
+	waardebewerkingsmethodecode text,
+	waardebewerkingsmethodeomschrijving text,
+	waardebepalingsmethodecode text,
+	waardebepalingsmethodeomschrijving text,
+	limietsymbool text,
+	numeriekewaarde text,
+	classificatiecode text,
+	classificatieomschrijving text,
+	kwaliteitsoordeelcode text,
+	kwaliteitsoordeelomschrijving text,
+	normgroepid text,
+	normgroepomschrijving text,
+	normwaarde text,
+	norm_krwwatertypecode text,
+	norm_geoobjectcode text,
+	aantalmeetwaarden_gebruikt text,
+	aantalmeetwaarden_onderdetectiegrens text,
+	krwkwaliteitselementcode text
+);
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2015_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2016_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2017_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2018_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2019_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2020_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2021_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2022_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2023_20261109153612;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2024_20260128153206;
+insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2025_20261109115029;
+alter table public.krw_toetsresultaten alter column waterbeheerdercode type int using (waterbeheerdercode::int);
+alter table public.krw_toetsresultaten alter column numeriekewaarde type numeric using (numeriekewaarde::numeric);
+
+-- voor de meest recente rapportage per meetjaar
+create or replace view public.krw_toetsresultaten_laatste_rapportage_jgm as
+with all_results as (
+    select *
+    , max(rapportagejaar) over (partition by meetjaar, meetobjectcode, parametercasnummer, parametercode, parameteromschrijving, grootheidcode) as max_rapportagejaar
+    from krw_toetsresultaten
+    where waardebewerkingsmethodecode='JGM'
+)
+select *
+-- meetjaar, rapportagejaar, meetobjectcode, parametercasnummer, parametercode, parameteromschrijving, grootheidcode
+from all_results where rapportagejaar=max_rapportagejaar
+;
+
 -- indexes tbv meetdata
 create index if not exists ix_metingen_meetpunt_parameter on public.metingen(trend, parameter_id, meetpunt_id);
 create index if not exists ix_trend_locatie_parameter on public.trend_locatie(parameter_id) include (trend_period, trend_conclusie, meetpunt_id);
