@@ -1,21 +1,33 @@
-[tool.poetry]
+[project]
 name = "chemtrend"
 version = "0.1.0"
 description = ""
-authors = ["CindyvdVries <cindyvdvries@gmail.com>"]
+authors = [{ name = "CindyvdVries", email = "cindyvdvries@gmail.com" }]
+requires-python = ">=3.14,<3.15"
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "fastapi[standard]>=0.112.0,<0.113",
+    "sqlalchemy>=2.0.32,<3",
+    "psycopg[binary]>=3.2.0,<4",
+    "databases>=0.9.0,<0.10",
+    "asyncpg>=0.31.0,<0.32",
+    "configparser>=7.0.0,<8",
+    "geoalchemy2>=0.15.2,<0.16",
+    "certifi>=2026.10.19,<2027",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-fastapi = {extras = ["standard"], version = "^0.112.0"}
-sqlalchemy = "^2.0.32"
-psycopg2 = "^2.9.9"
-databases = "^0.9.0"
-asyncpg = "^0.29.0"
-configparser = "^7.0.0"
-geoalchemy2 = "^0.15.2"
+[tool.uv]
 
+[tool.uv.build-backend]
+module-root = ""
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"

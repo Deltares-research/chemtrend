@@ -1,5 +1,15 @@
 <template>
   <div class='map'>
+    <div class='location-select-overlay'>
+      <v-autocomplete
+        :items="autocompleteItems"
+        label="Selecteer een meetpuntcode om naar te zoomen"
+        v-model="selectedLocation"
+        :disabled="!hasLocations"
+        compact
+        bg-color="white"
+      ></v-autocomplete>
+    </div>
     <mapbox-map
       ref='mapboxmap'
       class='map'
@@ -66,7 +76,11 @@ export default {
       map: null,
       mapLocation: null,
       regionsGeojson: {},
-      locationsLayerIds: []
+      locationsLayerIds: [],
+      locationsMapping: {},
+      // locations with data for the currently selected substance/period
+      activeLocationCodes: new Set(),
+      selectedLocation: null
     }
   },
   components: {
@@ -78,11 +92,9 @@ export default {
   watch: {
     '$route.query.period' (val, oldVal) {
       this.updateFilteredLocations()
-      this.checkSelection('locations')
     },
     '$route.query.substance' (val, oldVal) {
       this.updateFilteredLocations()
-      this.checkSelection('locations')
     },
     '$route.query.region' (val, oldVal) {
       this.filterRegions()
@@ -98,6 +110,37 @@ export default {
         this.map.setLayoutProperty(layer, 'visibility', (visibility === 'visible' || !visibility) ? 'none' : 'visible')
       },
       deep: true
+    },
+    selectedLocation (val) {
+      if (!val) {
+        return
+      }
+      const feature = this.locationsMapping[val]
+      const coordinates = this.locationsMapping[val].geometry.coordinates
+      if (!coordinates) {
+        return
+      }
+
+      const [lng, lat] = coordinates
+      this.mapLocation = {
+        lngLat: { lat, lng },
+        point: this.map.project([lng, lat])
+      }
+
+      this.map.easeTo({
+        center: coordinates,
+        zoom: 10,
+        duration: 800
+      })
+      this.updateQuery(lat, lng)
+
+      this.map.getSource('selected-locations')
+        .setData({
+          type: 'FeatureCollection',
+          features: [feature]
+        })
+      this.showTrend(lng, lat, val)
+      this.updateRegion(lat, lng)
     }
   },
   mounted () {
@@ -105,7 +148,18 @@ export default {
     this.map.on('load', this.initializeData)
   },
   computed: {
-    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor'])
+    ...mapGetters(['selectedSubstanceName', 'regions', 'selectedColor']),
+    hasLocations () {
+      return Object.keys(this.locationsMapping).length > 0
+    },
+    autocompleteItems () {
+      return Object.keys(this.locationsMapping).map(code => ({
+        title: code,
+        value: code,
+        // Vuetify only honors item-level disabled state via the item-props 'props' object
+        props: { disabled: !this.activeLocationCodes.has(code) }
+      }))
+    }
   },
   methods: {
     ...mapActions(['addTrend']),
@@ -147,7 +201,7 @@ export default {
         type: 'circle',
         source: {
           type: 'geojson',
-          data: `${process.env.VUE_APP_SERVER_URL}/locations/`
+          data: initialData
         },
         paint: {
           'circle-color': 'white',
@@ -158,6 +212,18 @@ export default {
       }).on('load', () => {
         this.checkSelection(name)
       })
+
+      fetch(`${process.env.VUE_APP_SERVER_URL}/locations/`)
+        .then(res => {
+          return res.json()
+        })
+        .then(response => {
+          this.map.getSource(name)
+            .setData(response)
+          response.features.forEach(f => {
+            this.locationsMapping[f.properties.meetpuntcode] = f
+          })
+        })
 
       this.map.on('mouseenter', name, (e) => {
         // Change the cursor style as a UI indicator.
@@ -266,12 +332,18 @@ export default {
           return res.json()
         })
         .then(response => {
+          // the two endpoints use different property names (meetpuntcode vs location_code) for the same code
+          this.activeLocationCodes = new Set((response.features || []).map(f => f.properties.location_code || f.properties.meetpuntcode))
           this.locationsLayerIds.forEach(layerId => {
             if (_.get(this.$route, 'query.substance') && this.map.getSource(layerId)) {
               this.map.getSource(layerId)
                 .setData(response)
             }
           })
+          // Gives a little time for the map to update before checking the selection, otherwise it will not find the features
+          setTimeout(() => {
+            this.checkSelection('locations')
+          }, 1000)
         })
     },
     updateRegion (lat, lng) {
@@ -305,6 +377,7 @@ export default {
     },
     interactionMap () {
       this.map.on('click', e => {
+        this.selectedLocation = null
         this.mapLocation = e
         // If zoomed in further than 10, don't zoom out on click
         let zoom = this.map.getZoom()
@@ -318,15 +391,7 @@ export default {
         })
         this.map.once('moveend', () => {
           e.point = this.map.project([e.lngLat.lng, e.lngLat.lat])
-          const newQuery = {
-            ...this.$route.query, // Keep all existing query parameters, including 'substance'
-            longitude: e.lngLat.lng,
-            latitude: e.lngLat.lat
-          }
-          this.$router.push({
-            path: '/trends',
-            query: newQuery
-          })
+          this.updateQuery(e.lngLat.lat, e.lngLat.lng)
           this.checkSelection('locations')
           this.updateRegion(e.lngLat.lat, e.lngLat.lng)
         })
@@ -357,16 +422,8 @@ export default {
       features.forEach(feature => {
         const x = feature._geometry.coordinates[0]
         const y = feature._geometry.coordinates[1]
-        const substanceId = parseInt(_.get(this.$route, 'query.substance'))
         const location = _.get(feature, 'properties.location_code', `longitude: ${x} & latitude: ${y}`)
-        const periodId = parseInt(_.get(this.$route, 'query.period', 0))
-        const periodName = _.get(this.$store.state, 'periods', []).find(p => p.id === periodId).name
-        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location} (${periodName})`
-
-        if (substanceId) {
-          this.addTrend({ x, y, substanceId, name, currentLocation: location, periodId })
-          this.$emit('update:bottomPanel', true)
-        }
+        this.showTrend(x, y, location)
       })
     },
     zoomToRegion (name) {
@@ -398,6 +455,27 @@ export default {
       ]]
       this.map.fitBounds(bounds, { padding: { top: 10, bottom: 10, left: 40, right: 10 } })
       this.$store.state.zoomTo = null
+    },
+    updateQuery (lat, lng) {
+      const newQuery = {
+        ...this.$route.query, // Keep all existing query parameters, including 'substance'
+        longitude: lng,
+        latitude: lat
+      }
+      this.$router.push({
+        path: '/trends',
+        query: newQuery
+      })
+    },
+    showTrend (x, y, location) {
+      const substanceId = parseInt(_.get(this.$route, 'query.substance'))
+      if (substanceId) {
+        const periodId = parseInt(_.get(this.$route, 'query.period', 0))
+        const periodName = _.get(this.$store.state, 'periods', []).find(p => p.id === periodId).name
+        const name = `${this.selectedSubstanceName(substanceId)} op locatie ${location} (${periodName})`
+        this.addTrend({ x, y, substanceId, name, currentLocation: location, periodId })
+        this.$emit('update:bottomPanel', true)
+      }
     }
   }
 }
@@ -410,9 +488,13 @@ export default {
   height: 100%;
 }
 
-.point-layer-legend-container {
+.location-select-overlay {
   position: absolute;
   top: 59px;
-  right: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30%;
+  z-index: 10;
+  padding: 0 8px;
 }
 </style>
