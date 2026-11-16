@@ -307,6 +307,36 @@ join public.regio r on r.regio_id=tr.regio_id
 join public.regio_type rt on rt.regio_type_id=r.regio_type_id
 ;
 
+-- view for yearly averages (both calculated jgm as krw-toetsresulaten)
+drop view if exists chemtrend.yearly_average cascade;
+create or replace view chemtrend.yearly_average as
+select *
+from (
+    select ya.meetpunt_id, l.location_code
+    , s.substance_id, s.substance_code, s.substance_description
+    , 'jaargemiddelde' as category
+--     , s.substance_description || ' ' || l.location_code as title
+--     , 'Jaargemiddelde' as subtitle_1
+--     , '' as subtitle_2
+    , 'jaar' as x_label
+    , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
+    , ya.jaar as x_value_step
+    , ya.jgm as y_value_step_jgm
+    , null::numeric as y_value_step_krw
+    , tp.id as trend_period
+    , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit
+    -- select *
+    from (select * from public.jaargemiddelde jgm
+--          TO DO: krw_toetsresultaten toevoegen dmv join
+    ) ya
+    join chemtrend.substance s on s.substance_id=ya.parameter_id
+    join chemtrend.location l on l.meetpunt_id=ya.meetpunt_id
+    join public.eenheid e on e.eenheid_id=ya.eenheid_id
+    join public.hoedanigheid h on h.hoedanigheid_id=ya.hoedanigheid_id
+    join chemtrend.trend_period tp on extract(year from tp.start) <= ya.jaar
+) x
+;
+
 -- function to return regional polygons based on given coordinates as geojson
 drop function if exists chemtrend.region_geojson(x decimal, y decimal);
 create or replace function chemtrend.region_geojson(x decimal, y decimal)
@@ -376,17 +406,40 @@ select ($$
         and trend_period = '%4$s'
     )
     , tr_graph as (
-        select title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
+        select title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit, meetpunt_id
         , json_agg(x_value order by x_value) x_value
         , json_agg(y_value_meting order by x_value) y_value_meting
         , json_agg(y_value_lowess order by x_value) y_value_lowess
         , json_agg(y_value_theil_sen order by x_value) y_value_theil_sen
         , json_agg(point_filled order by x_value) point_filled
         from tr_detail
-        group by title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit
+        group by title, subtitle_1, subtitle_2, h1_label, h1_label_detail, h1_value, h2_label, h2_label_detail, h2_value, color, trend_direction, unit, meetpunt_id
     )
-    select json_agg(trg.*) as graph
+    , tr_detail_ya as (
+        select *
+        from chemtrend.yearly_average
+        where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
+        and substance_id = '%3$s'
+        and trend_period = '%4$s'
+    )
+    , tr_graph_ya as (
+        select location_code, substance_code, unit, meetpunt_id
+        , json_agg(x_value_step order by x_value_step) x_value
+        , json_agg(y_value_step_jgm order by x_value_step) y_value_step_jgm
+        , json_agg(y_value_step_krw order by x_value_step) y_value_step_krw
+        from tr_detail_ya
+        group by location_code, substance_code, unit, meetpunt_id
+    )
+    select json_agg(
+        to_jsonb(trg)
+        || jsonb_build_object(
+               'x_step_value', ya.x_value,
+               'y_step_value_jgm', ya.y_value_step_jgm,
+               'y_step_value_krw', ya.y_value_step_krw
+           )
+    ) as graph
     from tr_graph trg
+    left join tr_graph_ya ya on trg.meetpunt_id=ya.meetpunt_id
     $$) into q;
 q := format(q, x, y, sid, tp);
 return query execute q;
@@ -438,6 +491,46 @@ end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.trend_region(5.019, 52.325,517);
 -- example: select * from chemtrend.trend_region(5.113007176643064,52.02272937705282,333,0);
+
+
+-- function that returns trend data based on a given location
+-- drop function if exists chemtrend.trend(x decimal, y decimal, substance_id int);
+drop function if exists chemtrend.yearly_average(x decimal, y decimal, substance_id int, trend_period int);
+create or replace function chemtrend.yearly_average(x decimal, y decimal, substance_id int, trend_period int)
+    returns table (geojson json) as
+$ff$
+declare q text;
+declare sid text = substance_id;
+declare tp text = case trend_period when null then 0 else trend_period end;
+begin
+select ($$
+    with tr_base as (
+        select * from chemtrend.yearly_average
+    )
+    , tr_detail as (
+        select *
+        from tr_base
+        where meetpunt_id = (select meetpunt_id from chemtrend.location(%1$s,%2$s))
+        and substance_id = '%3$s'
+        and trend_period = '%4$s'
+    )
+    , tr_graph as (
+        select location_code, substance_code, unit
+        , json_agg(x_value_step order by x_value_step) x_value
+        , json_agg(y_value_step_jgm order by x_value_step) y_value_step_jgm
+        , json_agg(y_value_step_krw order by x_value_step) y_value_step_krw
+        from tr_detail
+        group by location_code, substance_code, unit
+    )
+    select json_agg(trg.*) as graph
+    from tr_graph trg
+    $$) into q;
+q := format(q, x, y, sid, tp);
+return query execute q;
+end
+$ff$ language plpgsql;
+-- example: select * from chemtrend.yearly_average(5.113007176643064,52.02272937705282,333);
+-- example: select * from chemtrend.yearly_average(5.431838035583496,52.486543564119955,333,1);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
