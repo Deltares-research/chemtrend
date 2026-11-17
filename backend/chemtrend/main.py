@@ -86,6 +86,15 @@ async def get_trend_data(x: float, y: float, substance_id: int, trend_period: in
     return Response(content=dict(result).get("geojson"), media_type="application/json")
 
 
+@app.get("/yearly_averages/", tags=["Yearlyaverages"])
+async def get_yearly_average_data(x: float, y: float, substance_id: int, trend_period: int):
+    """Retrieve all yearly average data for a given location (lon, lat), substance_id and trend period"""
+    query = f"select * from chemtrend.yearly_average({x},{y},{substance_id},{trend_period});"
+    await database.connect()
+    result = await database.fetch_one(query)
+    return Response(content=dict(result).get("geojson"), media_type="application/json")
+
+
 @app.get("/trends_regions/", tags=["Trends_regions"])
 async def get_trend_region_data(x: float, y: float, substance_id: int, trend_period: int):
     """Retrieve all trend data on regional level for a given location (lon, lat), substance_id and trend period"""
