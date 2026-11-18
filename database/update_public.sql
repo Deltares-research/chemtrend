@@ -286,6 +286,14 @@ from public.krw_watertype kwt
 join public."KRW_waterlichaam" kwl on kwl."waterlichaam_KRWtype_code"=kwt.code
 where st_within(loc.geometry, kwl.geometry);
 
+alter table public."KRW_monitoringslocaties" add column if not exists krw_monitoringslocatie_id serial primary key;
+
+-- koppel krw-monitoringslocaties aan meetpunten:
+update public."KRW_monitoringslocaties" set meetpunt_id=l.meetpunt_id
+from public.locatie l
+where l.meetpunt_code_nieuw = case when split_part("localId", '_', 1)>='NL80' --or split_part("localId", '_', 1)>='80'
+        then '80_'||split_part("localId", '_', 2) else replace("localId", 'NL', '') end;
+
 -- maak tabel krw_toetsresultaten en vul deze
 drop table if exists public.krw_toetsresultaten;
 create table if not exists public.krw_toetsresultaten (
@@ -361,18 +369,32 @@ insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresulta
 insert into public.krw_toetsresultaten select * From import.wkp_krw_toetsresultaten_nederland_2025_20261109115029;
 alter table public.krw_toetsresultaten alter column waterbeheerdercode type int using (waterbeheerdercode::int);
 alter table public.krw_toetsresultaten alter column numeriekewaarde type numeric using (numeriekewaarde::numeric);
+alter table public.krw_toetsresultaten add column krw_monitoringslocatie_id int references public."KRW_monitoringslocaties"(krw_monitoringslocatie_id);
+update public.krw_toetsresultaten ktr set krw_monitoringslocatie_id=kml.krw_monitoringslocatie_id
+    from public."KRW_monitoringslocaties" kml
+    where kml."localId"=ktr.meetobjectcode;
+alter table public.krw_toetsresultaten add parameter_id int references public.parameter(parameter_id);
+update public.krw_toetsresultaten ktr set parameter_id=p.parameter_id from public.parameter p where p.parameter_code=ktr.parametercode;
+
 
 -- voor de meest recente rapportage per meetjaar
+drop view if exists public.krw_toetsresultaten_laatste_rapportage_jgm;
 create or replace view public.krw_toetsresultaten_laatste_rapportage_jgm as
 with all_results as (
-    select *
-    , max(rapportagejaar) over (partition by meetjaar, meetobjectcode, parametercasnummer, parametercode, parameteromschrijving, grootheidcode) as max_rapportagejaar
-    from krw_toetsresultaten
-    where waardebewerkingsmethodecode='JGM'
+    select ktr.*, kml.meetpunt_id
+    , max(rapportagejaar) over (partition by meetjaar, ktr.krw_monitoringslocatie_id, parameter_id, grootheidcode, hoedanigheidcode) as max_rapportagejaar
+    , min(normgroepid) over (partition by meetjaar, ktr.krw_monitoringslocatie_id, parameter_id, grootheidcode, hoedanigheidcode) as min_normgroep_id
+    , max(waterbeheerdercode) over (partition by meetjaar, ktr.krw_monitoringslocatie_id, parameter_id, grootheidcode, hoedanigheidcode) max_waterbeheerdercode
+    from krw_toetsresultaten ktr
+    left join public."KRW_monitoringslocaties" kml on kml.krw_monitoringslocatie_id=ktr.krw_monitoringslocatie_id
+    where waardebewerkingsmethodecode='JGM' and grootheidcode='CONCTTE'
 )
-select *
--- meetjaar, rapportagejaar, meetobjectcode, parametercasnummer, parametercode, parameteromschrijving, grootheidcode
-from all_results where rapportagejaar=max_rapportagejaar
+select meetpunt_id, meetjaar, parameter_id, grootheidcode, hoedanigheidcode, parametercode--, krw_monitoringslocatie_id, rapportagejaar
+, numeriekewaarde
+from all_results
+where rapportagejaar=max_rapportagejaar
+and normgroepid=min_normgroep_id
+and waterbeheerdercode=max_waterbeheerdercode
 ;
 
 -- indexes tbv meetdata
@@ -389,13 +411,17 @@ create index if not exists ix_regio_type on public.regio_type(regio_type, regio_
 create index if not exists ix_regio on public.regio(regio_type_id,regio_id, regio_omschrijving);
 create index if not exists ix_trend_locatie on public.trend_locatie(meetpunt_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id, kwaliteitsoordeel_id);
 create index if not exists ix_trend_regio on public.trend_regio(regio_id, parameter_id, eenheid_id, hoedanigheid_id, compartiment_id);
+create index if not exists ix_krw_toetsresultaten on public.krw_toetsresultaten(meetjaar, krw_monitoringslocatie_id, parameter_id, rapportagejaar, normgroepid, waterbeheerdercode, grootheidcode, hoedanigheidcode) include (numeriekewaarde);
 
 -- grant access
-GRANT ALL ON all tables in schema public TO waterkwaliteit_readonly;
-alter table public.trend_locatie owner to waterkwaliteit_readonly;
-alter table public.trend_regio owner to waterkwaliteit_readonly;
-alter table public.regio_type owner to waterkwaliteit_readonly;
-alter table public.regio owner to waterkwaliteit_readonly;
-alter table public.locatie_regio owner to waterkwaliteit_readonly;
-alter table public.norm owner to waterkwaliteit_readonly;
+GRANT USAGE ON SCHEMA public TO waterkwaliteit_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO waterkwaliteit_readonly;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO waterkwaliteit_readonly;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO waterkwaliteit_readonly;
+-- alter table public.trend_locatie owner to waterkwaliteit_readonly;
+-- alter table public.trend_regio owner to waterkwaliteit_readonly;
+-- alter table public.regio_type owner to waterkwaliteit_readonly;
+-- alter table public.regio owner to waterkwaliteit_readonly;
+-- alter table public.locatie_regio owner to waterkwaliteit_readonly;
+-- alter table public.norm owner to waterkwaliteit_readonly;
 

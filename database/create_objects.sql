@@ -315,19 +315,20 @@ from (
     select ya.meetpunt_id, l.location_code
     , s.substance_id, s.substance_code, s.substance_description
     , 'jaargemiddelde' as category
---     , s.substance_description || ' ' || l.location_code as title
---     , 'Jaargemiddelde' as subtitle_1
---     , '' as subtitle_2
     , 'jaar' as x_label
     , s.substance_code || ' [' || e.eenheid_code || ' ' || h.hoedanigheid_code || ']' as y_label
     , ya.jaar as x_value_step
     , ya.jgm as y_value_step_jgm
-    , null::numeric as y_value_step_krw
+    , ya.krw_gemiddelde::numeric as y_value_step_krw
     , tp.id as trend_period
     , replace(e.eenheid_code, 'ug/l', 'μg/l') as unit
     -- select *
-    from (select * from public.jaargemiddelde jgm
---          TO DO: krw_toetsresultaten toevoegen dmv join
+    from (
+        select jgm.*
+        , krw.numeriekewaarde as krw_gemiddelde
+        from public.jaargemiddelde jgm
+        left join public.krw_toetsresultaten_laatste_rapportage_jgm krw
+            on krw.meetpunt_id=jgm.meetpunt_id and krw.meetjaar=jgm.jaar and krw.parameter_id=jgm.parameter_id
     ) ya
     join chemtrend.substance s on s.substance_id=ya.parameter_id
     join chemtrend.location l on l.meetpunt_id=ya.meetpunt_id
@@ -530,7 +531,7 @@ return query execute q;
 end
 $ff$ language plpgsql;
 -- example: select * from chemtrend.yearly_average(5.113007176643064,52.02272937705282,333);
--- example: select * from chemtrend.yearly_average(5.431838035583496,52.486543564119955,333,1);
+-- example: select * from chemtrend.yearly_average(4.894452095031738,51.72019603080969, 971, 1);
 
 -- grant access
 GRANT ALL ON all tables in schema chemtrend TO waterkwaliteit_readonly;
